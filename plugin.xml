@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="edu.csus.plugin.securecodingassistant.SecureCompilationParticipants"
+         name="Secure Compilation Participants"
+         point="org.eclipse.jdt.core.compilationParticipant">
+      <compilationParticipant
+            class="edu.csus.plugin.securecodingassistant.compilation.SecureCompilationParticipant"
+            createsProblems="true"
+            id="edu.csus.plugin.securecodingassistant.compilationParticipant"
+            modifiesEnvironment="true">
+      </compilationParticipant>
+   </extension>
+
+</plugin>
