@@ -1,19 +1,27 @@
 package edu.csus.plugin.securecodingassistant.compilation;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 
 public class SecureCompilationParticipant extends CompilationParticipant {
-
+	private ArrayList<IMarker> m_markers;
+	
+	public SecureCompilationParticipant() {
+		super();
+		
+		m_markers = new ArrayList<IMarker>();
+	}
+	
 	public boolean isActive(IJavaProject project) {
 		return true;
 	}
@@ -44,18 +52,25 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 					line = compilation.getLineNumber(start - 1);
 					System.out.printf("Expression: %s%n", expressionStatement.getExpression().toString());
 					
-					IResource resource = element.getUnderlyingResource();
-					IMarker marker = resource.createMarker(IMarker.PROBLEM);
-					marker.setAttribute(IMarker.MESSAGE, "This is a test marker");
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-					marker.setAttribute(IMarker.LINE_NUMBER, line);
-					marker.setAttribute(IMarker.CHAR_START, start);
-					marker.setAttribute(IMarker.CHAR_END, end);
-					marker.setAttribute(IMarker.LOCATION, String.format("line %d", line));
+					// Iterate through existing markers
+					boolean newMarker = true;
+					for (IMarker marker : m_markers) {
+						if (line == marker.getAttribute(IMarker.LINE_NUMBER, -1))
+							newMarker = false;
+					}
+					
+					if(newMarker){
+						IResource resource = element.getUnderlyingResource();
+						IMarker marker = resource.createMarker(IMarker.PROBLEM);
+						marker.setAttribute(IMarker.MESSAGE, "This is a test marker");
+						marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+						marker.setAttribute(IMarker.LINE_NUMBER, line);
+						marker.setAttribute(IMarker.CHAR_START, start);
+						marker.setAttribute(IMarker.CHAR_END, end);
+						marker.setAttribute(IMarker.LOCATION, String.format("line %d", line));
+						m_markers.add(marker);
+					}
 				}
-			} catch (JavaModelException e) {
-				// From CompilationUnit compilation = context.getAST8();
-				e.printStackTrace();
 			} catch (CoreException e) {
 				// From createMarker()
 				e.printStackTrace();
