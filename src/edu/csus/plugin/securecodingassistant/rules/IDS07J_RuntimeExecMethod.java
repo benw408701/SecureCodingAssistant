@@ -11,8 +11,10 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 		
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			if (method.getExpression().resolveTypeBinding().getName() == "Runtime" &&
-					method.getName().toString() == "exec")
+			String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
+			String methodName = method.getName().toString();
+			System.out.printf("Found method %s for class %s%n", methodName, className);
+			if (className.equals("Runtime") && methodName.equals("exec"))
 				ruleViolated = true;
 		}
 		
