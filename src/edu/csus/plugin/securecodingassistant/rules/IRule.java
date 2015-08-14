@@ -15,4 +15,17 @@ public interface IRule {
 	 * @return true if the rule was violated, false otherwise
 	 */
 	public boolean violated(ASTNode node);
+	
+	/**
+	 * The description of the rule being violated
+	 * @return Text string describing the rule violated
+	 */
+	public String getRuleDescription();
+	
+	/**
+	 * The recommendation for resolving the rule violation
+	 * @return Text string with recommendation for resolving the
+	 * 		rule violation
+	 */
+	public String getRuleRecommendation();
 }

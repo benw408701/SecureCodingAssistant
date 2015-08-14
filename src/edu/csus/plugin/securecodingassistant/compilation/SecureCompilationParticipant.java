@@ -46,13 +46,14 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			try {
 				CompilationUnit compilation = context.getAST8();
 				
+				// Anonymous class used to avoid storing all nodes in memory and then processing
 				compilation.accept(new ASTVisitor() {
 					public void preVisit(ASTNode node) {
 						// Iterate through rules
 						for (IRule rule : m_rules) {
 							if(rule.violated(node)) {
 								System.out.printf("Rule violated at node %s%n", node.toString());
-								boolean capturedCode = false;
+								boolean capturedCode = false; // True if already found
 								for (InsecureCodeSegment cs : m_insecureCodeSegments)
 									if (cs.getNode() == node && cs.getRule() == rule)
 										capturedCode = true;
