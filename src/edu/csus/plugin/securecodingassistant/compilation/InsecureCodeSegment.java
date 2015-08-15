@@ -57,7 +57,7 @@ public class InsecureCodeSegment {
 			line = context.getAST8().getLineNumber(start - 1);
 			
 			m_marker = resource.createMarker(IMarker.PROBLEM);
-			m_marker.setAttribute(IMarker.MESSAGE, "This is a test marker");
+			m_marker.setAttribute(IMarker.MESSAGE, m_ruleViolated.getRuleText());
 			m_marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 			m_marker.setAttribute(IMarker.LINE_NUMBER, line);
 			m_marker.setAttribute(IMarker.CHAR_START, start);

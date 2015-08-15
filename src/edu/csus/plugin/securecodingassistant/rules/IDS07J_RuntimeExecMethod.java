@@ -36,18 +36,15 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 	}
 
 	@Override
-	public String getRuleDescription() {
-		return "External programs are commonly invoked to perform a function "
+	public String getRuleText() {
+		return String.format("Java Secure Coding Rule: IDS07-J. Sanitize untrusted data passed"
+				+ " to the Runtime.exec() method%n%n"
+				+ "External programs are commonly invoked to perform a function "
 				+ "required by the overall system. This practice is a form of "
 				+ "reuse and might even be considered a crude form of component"
 				+ "-based software engineering. Command and argument injection"
 				+ " vulnerabilities occur when an application fails to sanitize"
 				+ " untrusted input and uses it in the execution of external "
-				+ "programs.";
-	}
-
-	@Override
-	public String getRuleRecommendation() {
-		return null;
+				+ "programs.");
 	}
 }
