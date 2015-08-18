@@ -1,6 +1,7 @@
 package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
@@ -11,6 +12,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import edu.csus.plugin.securecodingassistant.rules.IDS01J_NormalizeStringsBeforeValidating;
 import edu.csus.plugin.securecodingassistant.rules.IDS07J_RuntimeExecMethod;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
@@ -24,6 +26,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		m_rules = new ArrayList<IRule>();
 		m_insecureCodeSegments = new ArrayList<InsecureCodeSegment>();
 		
+		m_rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		m_rules.add(new IDS07J_RuntimeExecMethod());
 	}
 	
@@ -43,6 +46,12 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			System.out.printf("The content of %s has changed%n",
 					element.getElementName());
 			
+			// Check to see if any insecure code segments have been fixed
+			for (InsecureCodeSegment cs : m_insecureCodeSegments) {
+				if (!cs.getRule().violated(cs.getNode()))
+					m_insecureCodeSegments.remove(cs);
+			}
+			
 			try {
 				CompilationUnit compilation = context.getAST8();
 				
@@ -55,7 +64,10 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 								System.out.printf("Rule violated at node %s%n", node.toString());
 								boolean capturedCode = false; // True if already found
 								for (InsecureCodeSegment cs : m_insecureCodeSegments)
-									if (cs.getNode() == node && cs.getRule() == rule)
+									// Check to see if this code segment is already captured
+									if (cs.getNode().getStartPosition() == node.getStartPosition()
+										&& cs.getNode().getLength() == node.getLength()
+										&& cs.getRule() == rule)
 										capturedCode = true;
 								if (!capturedCode)
 									m_insecureCodeSegments.add(new InsecureCodeSegment(node, rule, context));
