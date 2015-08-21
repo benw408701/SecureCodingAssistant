@@ -7,9 +7,9 @@
          point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
             class="edu.csus.plugin.securecodingassistant.compilation.SecureCompilationParticipant"
-            createsProblems="true"
+            createsProblems="false"
             id="edu.csus.plugin.securecodingassistant.compilationParticipant"
-            modifiesEnvironment="true">
+            modifiesEnvironment="false">
       </compilationParticipant>
    </extension>
 

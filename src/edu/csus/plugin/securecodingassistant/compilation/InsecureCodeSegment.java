@@ -84,4 +84,13 @@ public class InsecureCodeSegment {
 	public ASTNode getNode() {
 		return m_node;
 	}
+	
+	/**
+	 * The marker that is added that tells the developer that
+	 * a rule was violated
+	 * @return The IMarker object
+	 */
+	public IMarker getMarker() {
+		return m_marker;
+	}
 }

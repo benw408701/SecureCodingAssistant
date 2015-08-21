@@ -8,8 +8,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import edu.csus.plugin.securecodingassistant.rules.IDS01J_NormalizeStringsBeforeValidating;
@@ -35,7 +33,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	}
 	
 	@Override
-	public void reconcile(final ReconcileContext context) {
+	public void reconcile(ReconcileContext context) {
 		// Call Parent
 		super.reconcile(context);
 		
@@ -55,26 +53,14 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			try {
 				CompilationUnit compilation = context.getAST8();
 				
-				// Anonymous class used to avoid storing all nodes in memory and then processing
-				compilation.accept(new ASTVisitor() {
-					public void preVisit(ASTNode node) {
-						// Iterate through rules
-						for (IRule rule : m_rules) {
-							if(rule.violated(node)) {
-								System.out.printf("Rule violated at node %s%n", node.toString());
-								boolean capturedCode = false; // True if already found
-								for (InsecureCodeSegment cs : m_insecureCodeSegments)
-									// Check to see if this code segment is already captured
-									if (cs.getNode().getStartPosition() == node.getStartPosition()
-										&& cs.getNode().getLength() == node.getLength()
-										&& cs.getRule() == rule)
-										capturedCode = true;
-								if (!capturedCode)
-									m_insecureCodeSegments.add(new InsecureCodeSegment(node, rule, context));
-							}
-						}
-					}
-				});
+				// Create a new NodeVisitor to go through the AST and look for violated rules
+				NodeVisitor visitor = new NodeVisitor(m_rules, m_insecureCodeSegments, context);
+				compilation.accept(visitor);
+				
+				// Update insecure code segment list
+				ArrayList<InsecureCodeSegment> newInsecureCodeSegments = visitor.getNewInsecureCodeSegments();
+				if (newInsecureCodeSegments != null)
+					m_insecureCodeSegments.addAll(newInsecureCodeSegments);
 			} catch (JavaModelException e) {
 				// From context.getAST8()
 				e.printStackTrace();
