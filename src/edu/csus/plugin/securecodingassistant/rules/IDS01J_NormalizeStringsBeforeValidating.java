@@ -82,4 +82,9 @@ public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		return "IDS01J";
 	}
 
+	@Override
+	public String getRuleName() {
+		return "IDS01-J. Normalize strings before validating them";
+	}
+
 }

@@ -14,10 +14,30 @@ import edu.csus.plugin.securecodingassistant.rules.IDS01J_NormalizeStringsBefore
 import edu.csus.plugin.securecodingassistant.rules.IDS07J_RuntimeExecMethod;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
+/**
+ * Uses the {@link NodeVisitor} to check each {@link org.eclipse.jdt.core.dom.ASTNode} to see if
+ * an {@link IRule} has been violated. Overrides the {@link CompilationParticipant#reconcile(ReconcileContext)}
+ * method. Adds to an {@link InsecureCodeSegment} list.
+ * @author Ben White
+ * @see NodeVisitor
+ * @see IRule
+ * @see InsecureCodeSegment
+ */
 public class SecureCompilationParticipant extends CompilationParticipant {
+	
+	/**
+	 * Collection of rules to be tested when {@link #reconcile(ReconcileContext)} is called
+	 */
 	private ArrayList<IRule> m_rules;
+	
+	/**
+	 * Collection of insecure code segments that have been detected
+	 */
 	private ArrayList<InsecureCodeSegment> m_insecureCodeSegments;
 	
+	/**
+	 * Creates new <code>SecureCompilationParticipant</code>
+	 */
 	public SecureCompilationParticipant() {
 		super();
 		
@@ -28,10 +48,20 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		m_rules.add(new IDS07J_RuntimeExecMethod());
 	}
 	
+	/**
+	 * Always returns true
+	 * @param project the <code>IJavaProject</code> that is being compiled 
+	 * @return Always returns <code>true</code>
+	 */
 	public boolean isActive(IJavaProject project) {
 		return true;
 	}
 	
+	/**
+	 * Overridden <code>reconcile()</code> method that creates the {@link NodeVisitor} to scan
+	 * through the abstract syntax tree and look for secure code rule violations
+	 * @param context The <code>ReconcileContext</code> that is being reconciled
+	 */
 	@Override
 	public void reconcile(ReconcileContext context) {
 		// Call Parent

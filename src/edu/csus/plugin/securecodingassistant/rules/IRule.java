@@ -22,4 +22,10 @@ public interface IRule {
 	 * @return The rule text containing the name, description and recommendation
 	 */
 	public String getRuleText();
+	
+	/**
+	 * The name of the rule violated
+	 * @return The name of the rule violated
+	 */
+	public String getRuleName();
 }

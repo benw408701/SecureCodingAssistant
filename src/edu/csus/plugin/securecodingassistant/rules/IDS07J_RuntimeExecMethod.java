@@ -47,4 +47,10 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 				+ " untrusted input and uses it in the execution of external "
 				+ "programs.");
 	}
+
+	@Override
+	public String getRuleName() {
+		// TODO Auto-generated method stub
+		return "IDS07-J. Sanitize untrusted data passed to the Runtime.exec() method";
+	}
 }
