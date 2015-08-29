@@ -71,7 +71,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		IJavaElementDelta elementDelta = context.getDelta();
 		IJavaElement element = elementDelta.getElement();
 		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
-			System.out.printf("The content of %s has changed%n",
+			System.err.printf("The content of %s has changed%n",
 					element.getElementName());
 			
 			// Check to see if any insecure code segments have been fixed

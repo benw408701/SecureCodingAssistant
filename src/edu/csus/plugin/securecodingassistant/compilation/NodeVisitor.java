@@ -75,7 +75,7 @@ public class NodeVisitor extends ASTVisitor {
 		// Iterate through rules
 		for (IRule rule : m_rules) {
 			if(rule.violated(node)) {
-				System.out.printf("Rule violated at node %s%n", node.toString());
+				System.err.printf("Rule violated at node %s%n", node.toString());
 				boolean capturedCode = false; // True if already found
 				for (InsecureCodeSegment cs : m_existingInsecureCodeSegments) {
 					try {

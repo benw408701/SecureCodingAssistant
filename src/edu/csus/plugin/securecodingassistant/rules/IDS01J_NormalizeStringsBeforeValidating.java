@@ -35,36 +35,41 @@ public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	@Override
 	public boolean violated(ASTNode node) {
 		boolean ruleViolated = false;
-		boolean patternMatcher = false;
 		
 		// Check to see if Pattern.matcher is called
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
 			String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
 			String methodName = method.getName().toString();
-			System.out.printf("Found method %s for class %s%n", methodName, className);
+			System.err.printf("Found method %s for class %s%n", methodName, className);
 			if (className.equals("Pattern") && methodName.equals("matcher"))
-				patternMatcher = true;
+				ruleViolated = true;
 		}
 		
 		// Pattern.matcher was called, look to see if Normalizer.normalize
 		// was called beforehand
-		if(patternMatcher) {
+		if(ruleViolated) {
 			ASTNode parent = node.getParent();
 
 			// Go to block level
 			while(!(parent instanceof Block)) {
-				parent = node.getParent();
+				parent = parent.getParent();
 			}
 			
-			
+			// Confirm at block level
 			if (parent instanceof Block) {
 				Block block = (Block)parent;
 				List<?> statements = block.statements();
 				
 				for (Object statement : statements) {
-					if (statement instanceof Statement) {
-						;
+					// Check to see if Normalizer() was called
+					if (statement instanceof MethodInvocation) {
+						MethodInvocation method = (MethodInvocation)node;
+						String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
+						String methodName = method.getName().toString();
+						System.err.printf("Found method %s for class %s%n", methodName, className);
+						if (className.equals("Normalizer") && methodName.equals("normalize"))
+							ruleViolated = false;
 					}
 				}
 			}
