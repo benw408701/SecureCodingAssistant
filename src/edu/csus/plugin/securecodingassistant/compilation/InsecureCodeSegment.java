@@ -28,11 +28,6 @@ public class InsecureCodeSegment {
 	private IRule m_ruleViolated;
 	
 	/**
-	 * The node in the abstract syntax tree where the code is located
-	 */
-	private ASTNode m_node;
-	
-	/**
 	 * A marker in the development environment that alerts the programmer
 	 * that they have an insecure segment of code
 	 */
@@ -56,7 +51,6 @@ public class InsecureCodeSegment {
 		end = start + node.getLength();
 	
 		m_ruleViolated = rule;
-		m_node = node;
 		try {
 			m_resource = context.getDelta().getElement().getUnderlyingResource();
 		
@@ -87,14 +81,6 @@ public class InsecureCodeSegment {
 	 */
 	public IRule getRule() {
 		return m_ruleViolated;
-	}
-	
-	/**
-	 * The node in the AST that has the rule violation
-	 * @return The node with the rule violation
-	 */
-	public ASTNode getNode() {
-		return m_node;
 	}
 	
 	/**

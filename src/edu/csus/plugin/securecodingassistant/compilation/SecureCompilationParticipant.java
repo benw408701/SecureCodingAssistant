@@ -2,6 +2,7 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -68,24 +69,17 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		
 		// Check to see if content has changed
 		IJavaElementDelta elementDelta = context.getDelta();
-
-		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
-
-			// Check to see if any insecure code segments have been fixed
-			for (InsecureCodeSegment cs : m_insecureCodeSegments) {
-				if (!cs.getRule().violated(cs.getNode()))
-					m_insecureCodeSegments.remove(cs);
-			}
-			
+		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {			
 			try {
 				CompilationUnit compilation = context.getAST8();
 				
 				// Create a new NodeVisitor to go through the AST and look for violated rules
-				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, m_insecureCodeSegments, context);
+				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, context);
 				compilation.accept(visitor);
 				
 				// Update insecure code segment list
-				ArrayList<InsecureCodeSegment> newInsecureCodeSegments = visitor.getNewInsecureCodeSegments();
+				ArrayList<InsecureCodeSegment> newInsecureCodeSegments = visitor.getInsecureCodeSegments();
+				clearMarkers();
 				if (newInsecureCodeSegments != null)
 					m_insecureCodeSegments.addAll(newInsecureCodeSegments);
 			} catch (JavaModelException e) {
@@ -95,5 +89,19 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		
 		}
 
+	}
+	
+	
+	private void clearMarkers() {
+		for (InsecureCodeSegment cs : m_insecureCodeSegments) {
+			try {
+				cs.getMarker().delete();
+			} catch (CoreException e) {
+				// Couldn't delete marker
+				e.printStackTrace();
+			}
+		}
+		
+		m_insecureCodeSegments.clear();
 	}
 }

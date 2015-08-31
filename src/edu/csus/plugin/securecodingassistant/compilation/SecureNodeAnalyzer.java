@@ -5,13 +5,9 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-
-import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
 /**
@@ -32,16 +28,10 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 	private ArrayList<IRule> m_rules;
 	
 	/**
-	 * A collection of existing <code>InsecureCodeSegment</code> objects that already
-	 * exist. These are needed to prevent duplicates from being created
-	 */
-	private ArrayList<InsecureCodeSegment> m_existingInsecureCodeSegments;
-	
-	/**
 	 * A collection of new <code>InseucreCodeSegment</code> objects. This collection is
 	 * added to each time a new insecure section of code is identified.
 	 */
-	private ArrayList<InsecureCodeSegment> m_newInsecureCodeSegments;
+	private ArrayList<InsecureCodeSegment> m_insecureCodeSegments;
 	
 	/**
 	 * The <code>ReconcileContext</code> where new violations will be created.
@@ -57,13 +47,11 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 	 * @param context The <code>ReconcileContext</code> where new violations will be created.
 	 */
 	public SecureNodeAnalyzer(ArrayList<IRule> rules, 
-			ArrayList<InsecureCodeSegment> insecureCodeSegments,
 			ReconcileContext context) {
 		super();
 		
 		m_rules = rules;
-		m_existingInsecureCodeSegments = insecureCodeSegments;
-		m_newInsecureCodeSegments = new ArrayList<InsecureCodeSegment>();
+		m_insecureCodeSegments = new ArrayList<InsecureCodeSegment>();
 		m_context = context;
 	}
 	
@@ -78,24 +66,7 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 		for (IRule rule : m_rules) {
 			if(rule.violated(node)) {
 				System.out.printf("In %s, rule violated at node %s%n", this.toString(), node.toString());
-				boolean capturedCode = false; // True if already found
-				for (InsecureCodeSegment cs : m_existingInsecureCodeSegments) {
-					try {
-						IMarker existingMarker = cs.getResource().findMarker(cs.getMarker().getId());
-						if (existingMarker != null &&
-								// See if the existing marker is for the same rule violation
-								existingMarker.getAttribute(Globals.Markers.VIOLATED_RULE) == rule.getRuleName()) {
-							capturedCode = true;
-							break;
-						}
-					} catch (CoreException e) {
-						// From findMarker()
-						e.printStackTrace();
-					}
-
-				}
-				if (!capturedCode)
-					m_newInsecureCodeSegments.add(new InsecureCodeSegment(node, rule, m_context));
+				m_insecureCodeSegments.add(new InsecureCodeSegment(node, rule, m_context));
 			}
 		}
 	}
@@ -105,7 +76,7 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 	 * all of the nodes in the abstract syntax tree.
 	 * @return Collection of <code>InsecureCodeSegment</code> objects
 	 */
-	public ArrayList<InsecureCodeSegment> getNewInsecureCodeSegments() {
-		return m_newInsecureCodeSegments;
+	public ArrayList<InsecureCodeSegment> getInsecureCodeSegments() {
+		return m_insecureCodeSegments;
 	}
 }
