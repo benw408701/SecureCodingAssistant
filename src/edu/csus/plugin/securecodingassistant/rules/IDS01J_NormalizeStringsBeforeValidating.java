@@ -3,12 +3,10 @@
  */
 package edu.csus.plugin.securecodingassistant.rules;
 
-import java.util.List;
-
+import java.util.ArrayList;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Statement;
 
 /**
  * Java Secure Coding Rule: IDS01-J. Normalize strings before validating
@@ -24,7 +22,7 @@ import org.eclipse.jdt.core.dom.Statement;
  * </p>
  * @author Ben White
  * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them"
- * 		Java Secure Coding Rule: IDS07-J</a>
+ * Java Secure Coding Rule: IDS07-J</a>
  *
  */
 public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
@@ -39,11 +37,7 @@ public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		// Check to see if Pattern.matcher is called
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
-			String methodName = method.getName().toString();
-			System.err.printf("Found method %s for class %s%n", methodName, className);
-			if (className.equals("Pattern") && methodName.equals("matcher"))
-				ruleViolated = true;
+			ruleViolated = Utility.calledMethod(method, "Pattern", "matcher");
 		}
 		
 		// Pattern.matcher was called, look to see if Normalizer.normalize
@@ -59,18 +53,16 @@ public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 			// Confirm at block level
 			if (parent instanceof Block) {
 				Block block = (Block)parent;
-				List<?> statements = block.statements();
+				ASTNodeProcessor processor = new ASTNodeProcessor();
+				block.accept(processor);
+				ArrayList<MethodInvocation> methods = processor.getMethods();
 				
-				for (Object statement : statements) {
-					// Check to see if Normalizer() was called
-					if (statement instanceof MethodInvocation) {
-						MethodInvocation method = (MethodInvocation)node;
-						String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
-						String methodName = method.getName().toString();
-						System.err.printf("Found method %s for class %s%n", methodName, className);
-						if (className.equals("Normalizer") && methodName.equals("normalize"))
-							ruleViolated = false;
-					}
+				MethodInvocation method = null;
+				for (int i = 0; i < methods.size() && method != node; i++) {
+					method = methods.get(i);
+					// Check to see if normalize was called prior to pattern matcher,
+					// If it was then the rule is no longer violated
+					ruleViolated = ruleViolated && !Utility.calledMethod(method, "Normalizer", "normalize");
 				}
 			}
 		}

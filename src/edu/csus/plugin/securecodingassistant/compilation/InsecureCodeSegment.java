@@ -48,7 +48,7 @@ public class InsecureCodeSegment {
 	 * @param node The AST node where the {@link IRule} was violated
 	 * @param rule The {@link IRule} that was violated
 	 * @param context The <code>ReconcileContext</code>, this is needed to create an {@link IMarker}
-	 * 			at the code location
+	 * at the code location
 	 */
 	public InsecureCodeSegment(ASTNode node, IRule rule, ReconcileContext context) {
 		int start, end, line;

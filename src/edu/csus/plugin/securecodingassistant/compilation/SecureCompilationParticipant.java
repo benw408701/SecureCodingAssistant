@@ -2,7 +2,6 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -15,11 +14,11 @@ import edu.csus.plugin.securecodingassistant.rules.IDS07J_RuntimeExecMethod;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
 /**
- * Uses the {@link NodeVisitor} to check each {@link org.eclipse.jdt.core.dom.ASTNode} to see if
+ * Uses the {@link SecureNodeAnalyzer} to check each {@link org.eclipse.jdt.core.dom.ASTNode} to see if
  * an {@link IRule} has been violated. Overrides the {@link CompilationParticipant#reconcile(ReconcileContext)}
  * method. Adds to an {@link InsecureCodeSegment} list.
  * @author Ben White
- * @see NodeVisitor
+ * @see SecureNodeAnalyzer
  * @see IRule
  * @see InsecureCodeSegment
  */
@@ -58,7 +57,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	}
 	
 	/**
-	 * Overridden <code>reconcile()</code> method that creates the {@link NodeVisitor} to scan
+	 * Overridden <code>reconcile()</code> method that creates the {@link SecureNodeAnalyzer} to scan
 	 * through the abstract syntax tree and look for secure code rule violations
 	 * @param context The <code>ReconcileContext</code> that is being reconciled
 	 */
@@ -69,11 +68,9 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		
 		// Check to see if content has changed
 		IJavaElementDelta elementDelta = context.getDelta();
-		IJavaElement element = elementDelta.getElement();
+
 		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
-			System.err.printf("The content of %s has changed%n",
-					element.getElementName());
-			
+
 			// Check to see if any insecure code segments have been fixed
 			for (InsecureCodeSegment cs : m_insecureCodeSegments) {
 				if (!cs.getRule().violated(cs.getNode()))
@@ -84,7 +81,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 				CompilationUnit compilation = context.getAST8();
 				
 				// Create a new NodeVisitor to go through the AST and look for violated rules
-				NodeVisitor visitor = new NodeVisitor(m_rules, m_insecureCodeSegments, context);
+				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, m_insecureCodeSegments, context);
 				compilation.accept(visitor);
 				
 				// Update insecure code segment list

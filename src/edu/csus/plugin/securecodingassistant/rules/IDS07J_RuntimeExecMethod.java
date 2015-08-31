@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * 
  * @author Ben White
  * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method">
- * 		Java Secure Coding Rule: IDS07-J</a>
+ * Java Secure Coding Rule: IDS07-J</a>
  *
  */
 public class IDS07J_RuntimeExecMethod implements IRule {
@@ -25,11 +25,7 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 		// Runtime.exec() would be a MethodInvocation
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			String className = method.resolveMethodBinding().getDeclaringClass().getName().toString();
-			String methodName = method.getName().toString();
-			System.err.printf("Found method %s for class %s%n", methodName, className);
-			if (className.equals("Runtime") && methodName.equals("exec"))
-				ruleViolated = true;
+			ruleViolated = Utility.calledMethod(method, "Runtime", "exec");
 		}
 		
 		return ruleViolated;

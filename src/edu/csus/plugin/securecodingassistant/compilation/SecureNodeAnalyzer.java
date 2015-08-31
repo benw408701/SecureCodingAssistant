@@ -22,7 +22,7 @@ import edu.csus.plugin.securecodingassistant.rules.IRule;
  * @see SecureCompilationParticipant
  * @see InsecureCodeSegment
  */
-public class NodeVisitor extends ASTVisitor {
+public class SecureNodeAnalyzer extends ASTVisitor {
 	
 	/**
 	 * A collection of rules to check for
@@ -54,7 +54,7 @@ public class NodeVisitor extends ASTVisitor {
 	 * @param insecureCodeSegments A list of insecure code segments that already exist
 	 * @param context The <code>ReconcileContext</code> where new violations will be created.
 	 */
-	public NodeVisitor(ArrayList<IRule> rules, 
+	public SecureNodeAnalyzer(ArrayList<IRule> rules, 
 			ArrayList<InsecureCodeSegment> insecureCodeSegments,
 			ReconcileContext context) {
 		super();
@@ -68,7 +68,7 @@ public class NodeVisitor extends ASTVisitor {
 	/**
 	 * Visits each node in the abstract syntax tree and
 	 * adds to the <code>InsecureCodeSegment</code> collection that is returned by
-	 * {@link NodeVisitor#getNewInsecureCodeSegments()}
+	 * {@link SecureNodeAnalyzer#getNewInsecureCodeSegments()}
 	 */
 	@Override
 	public void preVisit(ASTNode node) {
