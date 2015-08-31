@@ -20,7 +20,7 @@ import edu.csus.plugin.securecodingassistant.rules.IRule;
  * @see SecureCompilationParticipant
  * @see InsecureCodeSegment
  */
-public class SecureNodeAnalyzer extends ASTVisitor {
+class SecureNodeAnalyzer extends ASTVisitor {
 	
 	/**
 	 * A collection of rules to check for
@@ -43,7 +43,6 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 	 * constructor. The <code>rules</code>, <code>insecureCodeSegments</code>, and <code>context</code>
 	 * are required to scan for new insecure code.
 	 * @param rules A list of rules to look for
-	 * @param insecureCodeSegments A list of insecure code segments that already exist
 	 * @param context The <code>ReconcileContext</code> where new violations will be created.
 	 */
 	public SecureNodeAnalyzer(ArrayList<IRule> rules, 
@@ -58,7 +57,7 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 	/**
 	 * Visits each node in the abstract syntax tree and
 	 * adds to the <code>InsecureCodeSegment</code> collection that is returned by
-	 * {@link SecureNodeAnalyzer#getNewInsecureCodeSegments()}
+	 * {@link SecureNodeAnalyzer#getInsecureCodeSegments()}
 	 */
 	@Override
 	public void preVisit(ASTNode node) {

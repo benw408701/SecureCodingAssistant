@@ -20,7 +20,7 @@ import edu.csus.plugin.securecodingassistant.rules.IRule;
  * @see SecureCompilationParticipant
  * @see IRule
  */
-public class InsecureCodeSegment {
+class InsecureCodeSegment {
 	
 	/**
 	 * The rule that was violated in this segment of code
