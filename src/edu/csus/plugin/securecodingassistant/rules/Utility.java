@@ -30,6 +30,10 @@ final class Utility {
 		String miClassName = method.resolveMethodBinding().getDeclaringClass().getName().toString();
 		String miMethodName = method.getName().toString();
 		
+		if (miClassName.equals(className) && miMethodName.equals(methodName)) {
+			System.out.printf("In %s, found %s class and %s method%n", "Utility", className, methodName);
+		}
+		
 		return miClassName.equals(className) && miMethodName.equals(methodName);
 	}
 }

@@ -5,11 +5,13 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 
+import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
 /**
@@ -75,11 +77,14 @@ public class SecureNodeAnalyzer extends ASTVisitor {
 		// Iterate through rules
 		for (IRule rule : m_rules) {
 			if(rule.violated(node)) {
-				System.err.printf("Rule violated at node %s%n", node.toString());
+				System.out.printf("In %s, rule violated at node %s%n", this.toString(), node.toString());
 				boolean capturedCode = false; // True if already found
 				for (InsecureCodeSegment cs : m_existingInsecureCodeSegments) {
 					try {
-						if (cs.getResource().findMarker(cs.getMarker().getId()) != null) {
+						IMarker existingMarker = cs.getResource().findMarker(cs.getMarker().getId());
+						if (existingMarker != null &&
+								// See if the existing marker is for the same rule violation
+								existingMarker.getAttribute(Globals.Markers.VIOLATED_RULE) == rule.getRuleName()) {
 							capturedCode = true;
 							break;
 						}

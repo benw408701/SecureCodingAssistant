@@ -70,7 +70,7 @@ public class InsecureCodeSegment {
 			m_marker.setAttribute(IMarker.CHAR_END, end);
 			m_marker.setAttribute(IMarker.LOCATION, String.format("line %d", line));
 			m_marker.setAttribute(Globals.Markers.VIOLATED_RULE, rule.getRuleName());
-			System.err.printf("In %s, violated rule: %s%n", this.toString(),
+			System.out.printf("In %s, violated rule: %s%n", this.toString(),
 					m_marker.getAttribute(Globals.Markers.VIOLATED_RULE));
 		} catch (JavaModelException e) {
 			// From getUnderlyingResource(), getAST8()
