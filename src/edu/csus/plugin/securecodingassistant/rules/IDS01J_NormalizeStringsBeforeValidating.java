@@ -4,6 +4,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -25,7 +26,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * Java Secure Coding Rule: IDS07-J</a>
  *
  */
-public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
+class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	/* (non-Javadoc)
 	 * @see edu.csus.plugin.securecodingassistant.rules.IRule#violated(org.eclipse.jdt.core.dom.ASTNode)
@@ -82,6 +83,12 @@ public class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	@Override
 	public String getRuleName() {
 		return "IDS01-J. Normalize strings before validating them";
+	}
+
+	@Override
+	public String getRuleRecommendation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

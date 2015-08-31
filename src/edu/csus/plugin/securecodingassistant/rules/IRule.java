@@ -17,9 +17,8 @@ public interface IRule {
 	public boolean violated(ASTNode node);
 	
 	/**
-	 * Contains the name of the rule, a description of it and the 
-	 * recommendation for correcting it
-	 * @return The rule text containing the name, description and recommendation
+	 * The description of the rule that was violated
+	 * @return The description of the rule that was violated
 	 */
 	public String getRuleText();
 	
@@ -28,4 +27,10 @@ public interface IRule {
 	 * @return The name of the rule violated
 	 */
 	public String getRuleName();
+	
+	/**
+	 * The recommended action that will satisfy the rule
+	 * @return The recommended action that will satisfy the rule
+	 */
+	public String getRuleRecommendation();
 }

@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * Java Secure Coding Rule: IDS07-J</a>
  *
  */
-public class IDS07J_RuntimeExecMethod implements IRule {
+class IDS07J_RuntimeExecMethod implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -33,9 +33,7 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 
 	@Override
 	public String getRuleText() {
-		return String.format("Java Secure Coding Rule: IDS07-J. Sanitize untrusted data passed"
-				+ " to the Runtime.exec() method%n%n"
-				+ "External programs are commonly invoked to perform a function "
+		return String.format("External programs are commonly invoked to perform a function "
 				+ "required by the overall system. This practice is a form of "
 				+ "reuse and might even be considered a crude form of component"
 				+ "-based software engineering. Command and argument injection"
@@ -46,7 +44,12 @@ public class IDS07J_RuntimeExecMethod implements IRule {
 
 	@Override
 	public String getRuleName() {
-		// TODO Auto-generated method stub
 		return "IDS07-J. Sanitize untrusted data passed to the Runtime.exec() method";
+	}
+
+	@Override
+	public String getRuleRecommendation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

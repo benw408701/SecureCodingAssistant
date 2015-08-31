@@ -1,7 +1,6 @@
 package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
@@ -9,10 +8,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import edu.csus.plugin.securecodingassistant.rules.IDS01J_NormalizeStringsBeforeValidating;
-import edu.csus.plugin.securecodingassistant.rules.IDS07J_RuntimeExecMethod;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
+import edu.csus.plugin.securecodingassistant.rules.RuleFactory;
 
 /**
  * Uses the {@link SecureNodeAnalyzer} to check each {@link org.eclipse.jdt.core.dom.ASTNode} to see if
@@ -41,11 +38,8 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	public SecureCompilationParticipant() {
 		super();
 		
-		m_rules = new ArrayList<IRule>();
+		m_rules = RuleFactory.getAllRules();
 		m_insecureCodeSegments = new ArrayList<InsecureCodeSegment>();
-		
-		m_rules.add(new IDS01J_NormalizeStringsBeforeValidating());
-		m_rules.add(new IDS07J_RuntimeExecMethod());
 	}
 	
 	/**
