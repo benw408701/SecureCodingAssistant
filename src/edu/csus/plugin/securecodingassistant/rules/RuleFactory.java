@@ -22,6 +22,7 @@ public final class RuleFactory {
 	public static ArrayList<IRule> getAllRules() {
 		ArrayList<IRule> rules = new ArrayList<IRule>();
 		
+		rules.add(new IDS00J_PreventSQLInjection());
 		rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		rules.add(new IDS07J_RuntimeExecMethod());
 		

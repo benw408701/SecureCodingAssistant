@@ -3,10 +3,7 @@
  */
 package edu.csus.plugin.securecodingassistant.rules;
 
-import java.util.ArrayList;
-
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
@@ -35,37 +32,12 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	public boolean violated(ASTNode node) {
 		boolean ruleViolated = false;
 		
-		// Check to see if Pattern.matcher is called
+		// Check to see if Pattern.matcher is called and ensure that Normalizer.normalize
+		// Was called beforehand
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			ruleViolated = Utility.calledMethod(method, "Pattern", "matcher");
-		}
-		
-		// Pattern.matcher was called, look to see if Normalizer.normalize
-		// was called beforehand
-		if(ruleViolated) {
-			ASTNode parent = node.getParent();
-
-			// Go to block level
-			while(!(parent instanceof Block)) {
-				parent = parent.getParent();
-			}
-			
-			// Confirm at block level
-			if (parent instanceof Block) {
-				Block block = (Block)parent;
-				ASTNodeProcessor processor = new ASTNodeProcessor();
-				block.accept(processor);
-				ArrayList<MethodInvocation> methods = processor.getMethods();
-				
-				MethodInvocation method = null;
-				for (int i = 0; i < methods.size() && method != node; i++) {
-					method = methods.get(i);
-					// Check to see if normalize was called prior to pattern matcher,
-					// If it was then the rule is no longer violated
-					ruleViolated = ruleViolated && !Utility.calledMethod(method, "Normalizer", "normalize");
-				}
-			}
+			ruleViolated = Utility.calledMethod(method, "Pattern", "matcher")
+					&& !Utility.calledPrior(method, "Normalizer", "normalize");
 		}
 		
 		return ruleViolated;
