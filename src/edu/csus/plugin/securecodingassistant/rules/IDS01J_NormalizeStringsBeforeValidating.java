@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * and sanitization.
  * </p>
  * @author Ben White
- * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them"
- * Java Secure Coding Rule: IDS07-J</a>
+ * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">Java Secure Coding Rule: IDS01-J</a>
  *
  */
+// TODO: Make sure that the parameter to Normalizer.normalize() is the same that was used for Pattern.matcher()
 class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	/* (non-Javadoc)
@@ -76,8 +76,12 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	 */
 	@Override
 	public String getRuleText() {
-		// TODO Auto-generated method stub
-		return "IDS01J";
+		return "Many applications that accept untrusted input strings employ input filtering "
+				+ "and validation mechanisms based on the strings' character data. For example,"
+				+ " an application's strategy for avoiding cross-site scripting (XSS) "
+				+ "vulnerabilities may include forbidding <script> tags in inputs. Such "
+				+ "blacklisting mechanisms are a useful part of a security strategy, even though"
+				+ " they are insufficient for complete input validation and sanitization.";
 	}
 
 	@Override
@@ -87,8 +91,9 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	@Override
 	public String getRuleRecommendation() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Using Pattern.matcher() is a great way detect harmful things like angle brackets "
+				+ "which could indicate script tags, but the normalize method MUST be called "
+				+ "before running Pattern.matcher()";
 	}
 
 }
