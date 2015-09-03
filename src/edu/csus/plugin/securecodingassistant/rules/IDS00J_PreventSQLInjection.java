@@ -19,40 +19,20 @@ public class IDS00J_PreventSQLInjection implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		NodeType nType;
-		boolean ruleViolated;
+		boolean ruleViolated = false;
 		MethodInvocation method;
 		
-		ruleViolated = false;
-		
 		// Detect use of Statement.ExecuteQuery or PreparedStatement.ExecuteQuery
-		nType = NodeType.OTHER;
 		if (node instanceof MethodInvocation) {
 			method = (MethodInvocation) node;
-			if (Utility.calledMethod(method, "Statement", "executeQuery"))
-				nType = NodeType.STATEMENT;
-			else if (Utility.calledMethod(method, "PreparedStatement", "executeQuery"))
-				nType = NodeType.PREPARED_STATEMENT;
-		}
-		
-
-		switch (nType) {
 			// If Statement was used then always warn since they should have used a
 			// PreparedStatement
-			case STATEMENT:
+			if (Utility.calledMethod(method, "Statement", "executeQuery"))
 				ruleViolated = true;
-				break;
-				
 			// If PreparedStatement was used then make sure that setString() was
 			// called at least once
-			case PREPARED_STATEMENT:
-				method = (MethodInvocation) node; // legal since tested in if statement above
-				
-				break;
-				
-			case OTHER:
-			default:
-				break;
+			else if (Utility.calledMethod(method, "PreparedStatement", "executeQuery"))
+				ruleViolated = Utility.calledPrior(method, "PreparedStatement", "setString");
 		}
 
 		return ruleViolated;
@@ -77,9 +57,5 @@ public class IDS00J_PreventSQLInjection implements IRule {
 		// TODO Auto-generated method stub
 		return "Do not execute SQL queries with parameters directly, use a PreparedStatement and the "
 				+ "setString() method to insert the parameters";
-	}
-	
-	private enum NodeType {
-		STATEMENT, PREPARED_STATEMENT, OTHER
 	}
 }
