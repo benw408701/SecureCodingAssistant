@@ -57,7 +57,6 @@ public class IDS00J_PreventSQLInjection implements IRule {
 
 	@Override
 	public String getRuleRecommendation() {
-		// TODO Auto-generated method stub
 		return "Do not execute SQL queries with parameters directly, use a PreparedStatement and the "
 				+ "setString() method to insert the parameters";
 	}
