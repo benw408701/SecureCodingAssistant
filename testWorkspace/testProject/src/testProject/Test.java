@@ -19,6 +19,7 @@ public class Test {
 		Statement stmt = connection.createStatement();
 		PreparedStatement pStmt = connection.prepareStatement(null);
 		pStmt.setString(1, "");
+		
 		ResultSet rs = pStmt.executeQuery("testing");
 		
 		// Test IDS01J

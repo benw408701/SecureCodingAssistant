@@ -25,14 +25,17 @@ public class IDS00J_PreventSQLInjection implements IRule {
 		// Detect use of Statement.ExecuteQuery or PreparedStatement.ExecuteQuery
 		if (node instanceof MethodInvocation) {
 			method = (MethodInvocation) node;
-			// If Statement was used then always warn since they should have used a
-			// PreparedStatement
-			if (Utility.calledMethod(method, "Statement", "executeQuery"))
-				ruleViolated = true;
 			// If PreparedStatement was used then make sure that setString() was
 			// called at least once
-			else if (Utility.calledMethod(method, "PreparedStatement", "executeQuery"))
+			// TODO: This doesn't work, executeQuery was declared in Statement, not PreparedStatement
+			// so the result is always false.
+			if (Utility.calledMethod(method, "PreparedStatement", "executeQuery"))
 				ruleViolated = Utility.calledPrior(method, "PreparedStatement", "setString");
+			// If PreparedStatement was not used then see if Statement was used
+			// and then always return true. PreparedStatement should always be used
+			// instead of Statement
+			else if (Utility.calledMethod(method, "Statement", "executeQuery"))
+				ruleViolated = true;
 		}
 
 		return ruleViolated;
