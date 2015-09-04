@@ -1,0 +1,17 @@
+package testProject;
+
+import java.io.IOException;
+
+public class Test {
+
+	public static void main(String[] args) throws IOException {
+		// Test IDS07J
+		String dir = System.getProperty("dir");
+		Runtime rt = Runtime.getRuntime();
+
+		Process proc = rt.exec("cmd.exe /C dir " + dir);
+		
+		// Test IDS01J
+		
+	}
+}
