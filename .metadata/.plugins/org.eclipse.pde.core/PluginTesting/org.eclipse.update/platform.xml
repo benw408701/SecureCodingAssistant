@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config date="1441375174430" transient="false" version="3.0">
+<config date="1441848381699" transient="false" version="3.0">
 <site enabled="true" policy="USER-EXCLUDE" updateable="true" url="platform:/base/">
 <feature id="org.eclipse.ecf.filetransfer.httpclient4.feature" url="features/org.eclipse.ecf.filetransfer.httpclient4.feature_3.9.1.v20140827-1444/" version="3.9.1.v20140827-1444">
 </feature>
@@ -42,6 +42,8 @@
 <feature id="org.eclipse.ecf.filetransfer.ssl.feature" url="features/org.eclipse.ecf.filetransfer.ssl.feature_1.0.0.v20140827-1444/" version="1.0.0.v20140827-1444">
 </feature>
 <feature id="org.eclipse.equinox.p2.rcp.feature.source" url="features/org.eclipse.equinox.p2.rcp.feature.source_1.2.0.v20140523-0116/" version="1.2.0.v20140523-0116">
+</feature>
+<feature id="org.eclipse.sdk.examples" url="features/org.eclipse.sdk.examples_3.5.401.v20150204-1700/" version="3.5.401.v20150204-1700">
 </feature>
 <feature id="org.eclipse.jdt.source" url="features/org.eclipse.jdt.source_3.10.0.v20140925-0400/" version="3.10.0.v20140925-0400">
 </feature>
