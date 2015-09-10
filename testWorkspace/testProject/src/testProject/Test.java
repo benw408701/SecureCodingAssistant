@@ -22,6 +22,7 @@ public class Test {
 		
 		ResultSet rs = pStmt.executeQuery("testing");
 		
+		
 		// Test IDS01J
 		String s = "\uFE64" + "script" + "\uFE65";
 
