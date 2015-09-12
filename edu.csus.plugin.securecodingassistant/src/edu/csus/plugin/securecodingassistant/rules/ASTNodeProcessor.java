@@ -1,7 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.ArrayList;
-
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 

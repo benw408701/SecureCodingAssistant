@@ -31,7 +31,7 @@ final class Utility {
 	 * @see MethodInvocation
 	 */
 	public static boolean calledMethod(MethodInvocation method, String className, String methodName) {
-		String miClassName = method.resolveMethodBinding().getDeclaringClass().getName().toString();
+		String miClassName = method.getExpression().resolveTypeBinding().getName();
 		String miMethodName = method.getName().toString();
 		
 		return miClassName.equals(className) && miMethodName.equals(methodName);
