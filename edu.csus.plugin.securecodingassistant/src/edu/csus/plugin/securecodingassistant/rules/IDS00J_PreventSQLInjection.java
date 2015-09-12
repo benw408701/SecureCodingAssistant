@@ -4,7 +4,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
- * Java Secure Coding Rule: IDS00-J. Prevent SQL Injection
+ * Java Secure Coding Rule: IDS00-J. Prevent SQL injection
  * <p>
  * SQL injection vulnerabilities arise in applications where elements of a SQL query originate
  * from an untrusted source. Without precautions, the untrusted data may maliciously alter
@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * queries and stored procedures.
  * </p>
  * @author Ben White
- * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS00-J.+Prevent+SQL+injection">Java Secure Coding Rule: IDS00-J</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS00-J.+Prevent+SQL+injection">Java Secure Coding Rule: IDS00-J</a>
  */
 public class IDS00J_PreventSQLInjection implements IRule {
 
@@ -50,7 +50,7 @@ public class IDS00J_PreventSQLInjection implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "IDS00-J. Prevent SQL Injection";
+		return "IDS00-J. Prevent SQL injection";
 	}
 
 	@Override

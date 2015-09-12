@@ -25,6 +25,7 @@ public final class RuleFactory {
 		rules.add(new IDS00J_PreventSQLInjection());
 		rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		rules.add(new IDS07J_RuntimeExecMethod());
+		rules.add(new IDS11J_ModyStringsBeforeValidation());
 		
 		return rules;
 	}

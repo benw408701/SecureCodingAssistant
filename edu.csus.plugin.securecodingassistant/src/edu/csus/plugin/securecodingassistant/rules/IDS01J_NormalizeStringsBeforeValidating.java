@@ -13,21 +13,18 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * Many applications that accept untrusted input strings employ input filtering
  * and validation mechanisms based on the strings' character data. For example,
  * an application's strategy for avoiding cross-site scripting (XSS)
- * vulnerabilities may include forbidding <code>&lt;script&gt;</code> tags in
+ * vulnerabilities may include forbidding {@code <script>} tags in
  * inputs. Such blacklisting mechanisms are a useful part of a security
  * strategy, even though they are insufficient for complete input validation
  * and sanitization.
  * </p>
  * @author Ben White
- * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">Java Secure Coding Rule: IDS01-J</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">Java Secure Coding Rule: IDS01-J</a>
  *
  */
 // TODO: Make sure that the parameter to Normalizer.normalize() is the same that was used for Pattern.matcher()
 class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
-	/* (non-Javadoc)
-	 * @see edu.csus.plugin.securecodingassistant.rules.IRule#violated(org.eclipse.jdt.core.dom.ASTNode)
-	 */
 	@Override
 	public boolean violated(ASTNode node) {
 		boolean ruleViolated = false;
@@ -43,9 +40,6 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		return ruleViolated;
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.csus.plugin.securecodingassistant.rules.IRule#getRuleText()
-	 */
 	@Override
 	public String getRuleText() {
 		return "Many applications that accept untrusted input strings employ input filtering "

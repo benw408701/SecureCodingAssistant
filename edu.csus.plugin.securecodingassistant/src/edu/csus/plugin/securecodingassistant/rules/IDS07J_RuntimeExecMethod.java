@@ -11,11 +11,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * Rather than using <code>Runtime.exec()</code>, try some other alternatives.
  * </p>
  * @author Ben White
- * @see <a href="https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method">
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method">
  * Java Secure Coding Rule: IDS07-J</a>
  *
  */
-// TODO: Add additional alternatives besides simply avoiding Runtime.exec
 class IDS07J_RuntimeExecMethod implements IRule {
 
 	@Override
