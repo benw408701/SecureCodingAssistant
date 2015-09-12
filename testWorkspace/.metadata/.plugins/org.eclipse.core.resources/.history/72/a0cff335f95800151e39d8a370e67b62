@@ -20,7 +20,6 @@ public class Test {
 		PreparedStatement pStmt = connection.prepareStatement(null);
 		pStmt.setString(1, "");
 		
-		
 		ResultSet rs = pStmt.executeQuery("testing");
 
 
