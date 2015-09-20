@@ -4,6 +4,8 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
  * Java Secure Coding Rule: IDS11-J. Perform any string modifications before validation
@@ -23,9 +25,19 @@ public class IDS11J_ModyStringsBeforeValidation implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Check to see if a string object has been modified. If it has, then make sure
-		// Pattern.matcher wasn't called previously.
-		return false;
+		boolean ruleViolated = false;
+		
+		// Check to see if Pattern.matcher was used and if it was make sure the string
+		// wasn't modified afterwards
+		if(node instanceof MethodInvocation &&
+				Utility.calledMethod((MethodInvocation)node, "Pattern", "matcher")) {
+			MethodInvocation method = (MethodInvocation)node;
+			SimpleName str = (SimpleName)method.arguments().get(0);
+			
+			ruleViolated = Utility.modifiedAfter(node, str);
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override

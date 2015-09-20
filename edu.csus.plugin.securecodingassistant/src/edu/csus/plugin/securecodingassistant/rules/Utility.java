@@ -1,10 +1,11 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.ArrayList;
-
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
  * Collection of utility methods used by the Secure Coding Assistant Rules
@@ -63,17 +64,45 @@ final class Utility {
 			Block block = (Block)parent;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
-			ArrayList<MethodInvocation> blockMethods = processor.getMethods();
+			ArrayList<CompoundASTNode<MethodInvocation>> blockMethods = processor.getMethods();
 			
 			// Go through all blockMethods prior to method and look for a match
-			MethodInvocation blockMethod = null;
-			for (int i = 0; i < blockMethods.size() && blockMethod != method; i++) {
-				blockMethod = blockMethods.get(i);
+			for(CompoundASTNode<MethodInvocation> blockMethod : blockMethods)
 				// Check to see if className.methodName() was called prior to method
-				foundMethod = foundMethod || calledMethod(blockMethod, className, methodName);
-			}
+				foundMethod = foundMethod || calledMethod(blockMethod.getNode(), className, methodName);
 		}
 		
 		return foundMethod;
+	}
+	
+	/**
+	 * Use to see if a variable has been modified after a particular node in the syntax tree
+	 * @param node The node in the syntax tree to start the search
+	 * @param identifier The identifier to search for
+	 * @return True if the identifier was found being modified after the node
+	 */
+	public static boolean modifiedAfter(ASTNode node, SimpleName identifier) {
+		boolean isModified = false;
+
+		ASTNode parent = node.getParent();
+		
+		// Go to block level
+		while(!(parent instanceof Block)) {
+			parent = parent.getParent();
+		}
+		
+		// Confirm at block level
+		if (parent instanceof Block) {
+			Block block = (Block)parent;
+			ASTNodeProcessor processor = new ASTNodeProcessor();
+			block.accept(processor);
+			
+			// Go through all assignments
+			ArrayList<CompoundASTNode<Assignment>> assignments = processor.getAssignments();
+			for (CompoundASTNode<Assignment> assignment : assignments) {
+			}
+		}
+		
+		return isModified;
 	}
 }
