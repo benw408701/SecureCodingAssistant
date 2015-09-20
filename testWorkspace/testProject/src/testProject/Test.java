@@ -27,7 +27,6 @@ public class Test {
 		// Test IDS01J
 		String s = "\uFE64" + "script" + "\uFE65";
 
-
 		// Normalize (comment out to generate warning)
 		s = Normalizer.normalize(s, Form.NFKC);		
 	
@@ -37,11 +36,27 @@ public class Test {
 		
 		
 		
-		
+
 		// Test IDS07J
 		String dir = System.getProperty("dir");
 		Runtime rt = Runtime.getRuntime();
 
 		Process proc = rt.exec("cmd.exe /C dir " + dir);
+		
+		
+		
+		
+		// Test IDS11J
+		String s2 = "<scr!ipt>";
+		s2 = Normalizer.normalize(s2, Form.NFKC);
+		
+		// Look for script tag
+		pattern = Pattern.compile("<script>");
+		matcher = pattern.matcher(s2);
+		if (matcher.find())
+			throw new IllegalArgumentException("Invalid Input");
+		
+		// Delete noncharacter code points 
+		s2 = s2.replaceAll("[\\p{Cn}]","");
 	}
 }

@@ -5,6 +5,7 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
  * Java Secure Coding Rule: IDS01-J. Normalize strings before validating
@@ -22,7 +23,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">Java Secure Coding Rule: IDS01-J</a>
  *
  */
-// TODO: Make sure that the parameter to Normalizer.normalize() is the same that was used for Pattern.matcher()
 class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	@Override
@@ -33,8 +33,12 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		// Was called beforehand
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			ruleViolated = Utility.calledMethod(method, "Pattern", "matcher")
-					&& !Utility.calledPrior(method, "Normalizer", "normalize");
+			if(Utility.calledMethod(method, "Pattern", "matcher")) {
+				SimpleName argument = null;
+				if (method.arguments().get(0) instanceof SimpleName)
+					argument = (SimpleName)method.arguments().get(0);
+				ruleViolated = !Utility.calledPrior(method, "Normalizer", "normalize", argument);
+			}
 		}
 		
 		return ruleViolated;

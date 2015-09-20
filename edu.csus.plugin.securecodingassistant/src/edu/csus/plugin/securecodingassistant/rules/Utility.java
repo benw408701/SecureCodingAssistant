@@ -1,9 +1,12 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Iterator;
+
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -19,7 +22,7 @@ final class Utility {
 	 */
 	private Utility() {
 	}
-	
+
 	/**
 	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
 	 * is calling a particular method from a class.
@@ -32,12 +35,41 @@ final class Utility {
 	 * @see MethodInvocation
 	 */
 	public static boolean calledMethod(MethodInvocation method, String className, String methodName) {
-		String miClassName = method.getExpression().resolveTypeBinding().getName();
-		String miMethodName = method.getName().toString();
-		
-		return miClassName.equals(className) && miMethodName.equals(methodName);
+		return calledMethod(method, className, methodName, null);
 	}
 	
+	/**
+	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
+	 * is calling a particular method from a class with a given argument.
+	 * @param method The method invocation from the {@link ASTNode}
+	 * @param className The name of the class where the method is defined
+	 * @param methodName The name of the method without the parameters. For instance, if the method
+	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
+	 * @param argument The argument that needs to occur in the method to be considered a match
+	 * @return True if the <code>MethodInvocation</code> is <code>className.methodName()</code>
+	 * @see ASTNode
+	 * @see MethodInvocation
+	 */
+	public static boolean calledMethod(MethodInvocation method, String className, String methodName, SimpleName argument) {
+		
+		String miClassName = method.getExpression().resolveTypeBinding().getName();
+		String miMethodName = method.getName().toString();
+		boolean withArgument = argument == null;
+		boolean nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
+		
+		if(argument != null && nameMatch) {
+			for(Object o : method.arguments()) {
+				if (o instanceof Expression) {
+					Expression arg = (Expression)o;
+					ASTMatcher matcher = new ASTMatcher();
+					withArgument = withArgument || arg.subtreeMatch(matcher, argument);
+				}
+			}
+		}
+		
+		return nameMatch && withArgument;
+	}
+
 	/**
 	 * Use to check to see if a method is being called prior to a given method
 	 * @param method The method that was called
@@ -50,6 +82,23 @@ final class Utility {
 	 * @see MethodInvocation
 	 */
 	public static boolean calledPrior(MethodInvocation method, String className, String methodName) {
+		return calledPrior(method, className, methodName, null);
+	}
+	
+	/**
+	 * Use to check to see if a method is being called prior to a given method with a given argument
+	 * @param method The method that was called
+	 * @param className The name of the class of the method to be tested
+	 * @param methodName The name of the method to be tested to see if it occurs prior to the
+	 * given {@link MethodInvocation}
+	 * @param argument The argument that needs to occur in the prior method for it to be considered
+	 * a match
+	 * @return True if the <code>className.methodName()</code> is called prior to the
+	 * {@link MethodInvocation}
+	 * @see ASTNode
+	 * @see MethodInvocation
+	 */
+	public static boolean calledPrior(MethodInvocation method, String className, String methodName, SimpleName argument) {
 		boolean foundMethod = false;
 		int methodPosition; // the location of the method in the AST where searching should stop
 		boolean continueSearch = true; // false when searching shouldn't continue
@@ -72,7 +121,7 @@ final class Utility {
 			Iterator<MethodInvocation> blockMethodItr = blockMethods.iterator();
 			while(blockMethodItr.hasNext() && continueSearch) {
 				MethodInvocation blockMethod = blockMethodItr.next();
-				foundMethod = foundMethod || calledMethod(blockMethod, className, methodName);
+				foundMethod = foundMethod || calledMethod(blockMethod, className, methodName, argument);
 				continueSearch = blockMethods.getNum(blockMethod) < methodPosition;
 			}
 		}
@@ -107,7 +156,11 @@ final class Utility {
 			NodeArrayList<Assignment> assignments = processor.getAssignments();
 			for (Assignment assignment : assignments)
 				if (assignments.getNum(assignment) > methodPosition) {
-					
+					// TODO: Only checks to see left-hand-side is a simple name
+					Expression lhs = assignment.getLeftHandSide();
+					if (lhs instanceof SimpleName)
+						isModified = isModified ||
+							identifier.getFullyQualifiedName().equals(((SimpleName)lhs).getFullyQualifiedName());
 				}
 		}
 		

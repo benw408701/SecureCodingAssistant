@@ -58,7 +58,8 @@ public class IDS11J_ModyStringsBeforeValidation implements IRule {
 
 	@Override
 	public String getRuleRecommendation() {
-		return "Do not modify a string after validating it";
+		return "The Pattern.matcher() method should be called after all modifications to the string."
+				+ " Move any string modifications so that they occur prior to Pattern.matcher().";
 	}
 
 }
