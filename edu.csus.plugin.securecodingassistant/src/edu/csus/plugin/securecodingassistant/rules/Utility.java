@@ -1,6 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -51,7 +51,8 @@ final class Utility {
 	 */
 	public static boolean calledPrior(MethodInvocation method, String className, String methodName) {
 		boolean foundMethod = false;
-		
+		int methodPosition; // the location of the method in the AST where searching should stop
+		boolean continueSearch = true; // false when searching shouldn't continue
 		ASTNode parent = method.getParent();
 
 		// Go to block level
@@ -64,27 +65,31 @@ final class Utility {
 			Block block = (Block)parent;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
-			ArrayList<CompoundASTNode<MethodInvocation>> blockMethods = processor.getMethods();
+			NodeArrayList<MethodInvocation> blockMethods = processor.getMethods();
+			methodPosition = blockMethods.getNum(method);
 			
 			// Go through all blockMethods prior to method and look for a match
-			for(CompoundASTNode<MethodInvocation> blockMethod : blockMethods)
-				// Check to see if className.methodName() was called prior to method
-				foundMethod = foundMethod || calledMethod(blockMethod.getNode(), className, methodName);
+			Iterator<MethodInvocation> blockMethodItr = blockMethods.iterator();
+			while(blockMethodItr.hasNext() && continueSearch) {
+				MethodInvocation blockMethod = blockMethodItr.next();
+				foundMethod = foundMethod || calledMethod(blockMethod, className, methodName);
+				continueSearch = blockMethods.getNum(blockMethod) < methodPosition;
+			}
 		}
 		
 		return foundMethod;
 	}
 	
 	/**
-	 * Use to see if a variable has been modified after a particular node in the syntax tree
-	 * @param node The node in the syntax tree to start the search
+	 * Use to see if a variable has been modified after a <code>MethodInvocation</code> in the syntax tree
+	 * @param method The <code>MethodInvocation</code> in the syntax tree to start the search
 	 * @param identifier The identifier to search for
 	 * @return True if the identifier was found being modified after the node
 	 */
-	public static boolean modifiedAfter(ASTNode node, SimpleName identifier) {
+	public static boolean modifiedAfter(MethodInvocation method, SimpleName identifier) {
 		boolean isModified = false;
-
-		ASTNode parent = node.getParent();
+		int methodPosition; // The location of the method in the AST where searching should start
+		ASTNode parent = method.getParent();
 		
 		// Go to block level
 		while(!(parent instanceof Block)) {
@@ -96,11 +101,14 @@ final class Utility {
 			Block block = (Block)parent;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
+			methodPosition = processor.getMethods().getNum(method);
 			
 			// Go through all assignments
-			ArrayList<CompoundASTNode<Assignment>> assignments = processor.getAssignments();
-			for (CompoundASTNode<Assignment> assignment : assignments) {
-			}
+			NodeArrayList<Assignment> assignments = processor.getAssignments();
+			for (Assignment assignment : assignments)
+				if (assignments.getNum(assignment) > methodPosition) {
+					
+				}
 		}
 		
 		return isModified;

@@ -34,7 +34,7 @@ public class IDS11J_ModyStringsBeforeValidation implements IRule {
 			MethodInvocation method = (MethodInvocation)node;
 			SimpleName str = (SimpleName)method.arguments().get(0);
 			
-			ruleViolated = Utility.modifiedAfter(node, str);
+			ruleViolated = Utility.modifiedAfter(method, str);
 		}
 		
 		return ruleViolated;

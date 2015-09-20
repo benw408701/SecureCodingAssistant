@@ -1,7 +1,5 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
-import java.util.ArrayList;
-
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -17,12 +15,12 @@ class ASTNodeProcessor extends ASTVisitor {
 	/**
 	 * A list of methods invocations that are in the syntax tree
 	 */
-	private ArrayList<CompoundASTNode<MethodInvocation>> m_methods;
+	private NodeArrayList<MethodInvocation> m_methods;
 	
 	/**
 	 * A list of assignments that are in the syntax tree
 	 */
-	private ArrayList<CompoundASTNode<Assignment>> m_assignments;
+	private NodeArrayList<Assignment> m_assignments;
 	
 	/**
 	 * Counts the number of nodes visited
@@ -35,8 +33,8 @@ class ASTNodeProcessor extends ASTVisitor {
 	public ASTNodeProcessor() {
 		super();
 		
-		m_methods = new ArrayList<CompoundASTNode<MethodInvocation>>();
-		m_assignments = new ArrayList<CompoundASTNode<Assignment>>();
+		m_methods = new NodeArrayList<MethodInvocation>();
+		m_assignments = new NodeArrayList<Assignment>();
 		m_nodeCounter = 0;
 	}
 	
@@ -46,7 +44,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		m_methods.add(new CompoundASTNode<MethodInvocation>(methodInvocation, ++m_nodeCounter));
+		m_methods.addWithNum(methodInvocation, ++m_nodeCounter);
 		return super.visit(methodInvocation);
 	}
 	
@@ -56,7 +54,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(Assignment assignment) {
-		m_assignments.add(new CompoundASTNode<Assignment>(assignment, ++m_nodeCounter));
+		m_assignments.addWithNum(assignment, ++m_nodeCounter);
 		return super.visit(assignment);
 	}
 	
@@ -66,7 +64,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 */
-	public ArrayList<CompoundASTNode<MethodInvocation>> getMethods() {
+	public NodeArrayList<MethodInvocation> getMethods() {
 		return m_methods;
 	}
 	
@@ -76,7 +74,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * @return The list of <code>Assignment</code> objects that are in the
 	 * syntax tree
 	 */
-	public ArrayList<CompoundASTNode<Assignment>> getAssignments() {
+	public NodeArrayList<Assignment> getAssignments() {
 		return m_assignments;
 	}
 }
