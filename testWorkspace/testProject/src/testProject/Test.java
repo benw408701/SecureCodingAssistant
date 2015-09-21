@@ -28,7 +28,7 @@ public class Test {
 		String s = "\uFE64" + "script" + "\uFE65";
 
 		// Normalize (comment out to generate warning)
-		s = Normalizer.normalize(s, Form.NFKC);		
+		//s = Normalizer.normalize(s, Form.NFKC);		
 	
 		// Validate
 		Pattern pattern = Pattern.compile("[<>]");
@@ -45,7 +45,7 @@ public class Test {
 		
 		
 		
-		
+
 		// Test IDS11J
 		String s2 = "<scr!ipt>";
 		s2 = Normalizer.normalize(s2, Form.NFKC);
@@ -56,7 +56,8 @@ public class Test {
 		if (matcher.find())
 			throw new IllegalArgumentException("Invalid Input");
 		
-		// Delete noncharacter code points 
+		
+		// Delete non-character code points 
 		s2 = s2.replaceAll("[\\p{Cn}]","");
 	}
 }

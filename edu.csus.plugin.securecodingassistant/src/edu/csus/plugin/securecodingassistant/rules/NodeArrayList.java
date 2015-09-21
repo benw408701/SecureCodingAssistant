@@ -49,7 +49,7 @@ public class NodeArrayList<E extends ASTNode> extends ArrayList<E> {
 		
 		if(addSuccessful) {
 			// Check to make sure the size of m_nodeNum is one less than the size of the ArrayList
-			for (int i = m_nodeNum.size(); i < size() - 1; i++)
+			for (int i = m_nodeNum.size(); i < size() - 1; i++) // Loop until i == size() - 1
 				m_nodeNum.add(i, -1); // if no number was given then set to -1
 			
 			assert m_nodeNum.size() == size() - 1;

@@ -1,7 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Iterator;
-
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -46,7 +45,7 @@ final class Utility {
 	 * @param methodName The name of the method without the parameters. For instance, if the method
 	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
 	 * @param argument The argument that needs to occur in the method to be considered a match
-	 * @return True if the <code>MethodInvocation</code> is <code>className.methodName()</code>
+	 * @return <code>true</code> if the <code>MethodInvocation</code> is <code>className.methodName()</code>
 	 * @see ASTNode
 	 * @see MethodInvocation
 	 */
@@ -61,8 +60,7 @@ final class Utility {
 			for(Object o : method.arguments()) {
 				if (o instanceof Expression) {
 					Expression arg = (Expression)o;
-					ASTMatcher matcher = new ASTMatcher();
-					withArgument = withArgument || arg.subtreeMatch(matcher, argument);
+					withArgument = withArgument || arg.subtreeMatch(new ASTMatcher(), argument);
 				}
 			}
 		}
@@ -76,7 +74,7 @@ final class Utility {
 	 * @param className The name of the class of the method to be tested
 	 * @param methodName The name of the method to be tested to see if it occurs prior to the
 	 * given {@link MethodInvocation}
-	 * @return True if the <code>className.methodName()</code> is called prior to the
+	 * @return <code>true</code> if the <code>className.methodName()</code> is called prior to the
 	 * {@link MethodInvocation}
 	 * @see ASTNode
 	 * @see MethodInvocation
@@ -93,7 +91,7 @@ final class Utility {
 	 * given {@link MethodInvocation}
 	 * @param argument The argument that needs to occur in the prior method for it to be considered
 	 * a match
-	 * @return True if the <code>className.methodName()</code> is called prior to the
+	 * @return <code>true</code> if the <code>className.methodName()</code> is called prior to the
 	 * {@link MethodInvocation}
 	 * @see ASTNode
 	 * @see MethodInvocation
@@ -133,7 +131,7 @@ final class Utility {
 	 * Use to see if a variable has been modified after a <code>MethodInvocation</code> in the syntax tree
 	 * @param method The <code>MethodInvocation</code> in the syntax tree to start the search
 	 * @param identifier The identifier to search for
-	 * @return True if the identifier was found being modified after the node
+	 * @return <code>true</code> if the identifier was found being modified after the node
 	 */
 	public static boolean modifiedAfter(MethodInvocation method, SimpleName identifier) {
 		boolean isModified = false;
@@ -156,11 +154,8 @@ final class Utility {
 			NodeArrayList<Assignment> assignments = processor.getAssignments();
 			for (Assignment assignment : assignments)
 				if (assignments.getNum(assignment) > methodPosition) {
-					// TODO: Only checks to see left-hand-side is a simple name
 					Expression lhs = assignment.getLeftHandSide();
-					if (lhs instanceof SimpleName)
-						isModified = isModified ||
-							identifier.getFullyQualifiedName().equals(((SimpleName)lhs).getFullyQualifiedName());
+					isModified = isModified || lhs.subtreeMatch(new ASTMatcher(), identifier);
 				}
 		}
 		
