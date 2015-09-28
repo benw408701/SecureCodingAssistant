@@ -2,6 +2,7 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
@@ -23,6 +24,11 @@ class ASTNodeProcessor extends ASTVisitor {
 	private NodeArrayList<Assignment> m_assignments;
 	
 	/**
+	 * A list of instantiations
+	 */
+	private NodeArrayList<ClassInstanceCreation> m_instantiations;
+	
+	/**
 	 * Counts the number of nodes visited
 	 */
 	private int m_nodeCounter;
@@ -35,6 +41,7 @@ class ASTNodeProcessor extends ASTVisitor {
 		
 		m_methods = new NodeArrayList<MethodInvocation>();
 		m_assignments = new NodeArrayList<Assignment>();
+		m_instantiations = new NodeArrayList<ClassInstanceCreation>();
 		m_nodeCounter = 0;
 	}
 	
@@ -59,6 +66,16 @@ class ASTNodeProcessor extends ASTVisitor {
 	}
 	
 	/**
+	 * Will build a list of <code>ClassInstanceCreation</code> objects that are in the
+	 * syntax tree
+	 */
+	@Override
+	public boolean visit(ClassInstanceCreation instantiation) {
+		m_instantiations.addWithNum(instantiation, ++m_nodeCounter);
+		return super.visit(instantiation);
+	}
+	
+	/**
 	 * Retrieve the list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
@@ -76,5 +93,15 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	public NodeArrayList<Assignment> getAssignments() {
 		return m_assignments;
+	}
+	
+	/**
+	 * Retrieve the list of <code>ClassInstanceCreation</code> objects that are in the
+	 * syntax tree
+	 * @return The list of <code>ClassInstanceCreation</code> objects that are in the
+	 * syntax tree
+	 */
+	public NodeArrayList<ClassInstanceCreation> getInstanceCreations() {
+		return m_instantiations;
 	}
 }

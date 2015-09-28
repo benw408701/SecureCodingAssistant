@@ -63,22 +63,28 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		
 		// Check to see if content has changed
 		IJavaElementDelta elementDelta = context.getDelta();
-		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {			
-			try {
-				CompilationUnit compilation = context.getAST8();
-				
+		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
+			CompilationUnit compilation = null;
+			try {			
+				compilation = context.getAST8();
+			} catch (JavaModelException e) {
+				// From context.getAST8()
+				e.printStackTrace();
+			}
+			
+			// Clear all existing markers
+			clearMarkers();
+			
+			if (compilation != null) {
 				// Create a new NodeVisitor to go through the AST and look for violated rules
 				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, context);
 				compilation.accept(visitor);
 				
 				// Update insecure code segment list
-				ArrayList<InsecureCodeSegment> newInsecureCodeSegments = visitor.getInsecureCodeSegments();
-				clearMarkers();
-				if (newInsecureCodeSegments != null)
+				if (visitor != null) {
+					ArrayList<InsecureCodeSegment> newInsecureCodeSegments = visitor.getInsecureCodeSegments();
 					m_insecureCodeSegments.addAll(newInsecureCodeSegments);
-			} catch (JavaModelException e) {
-				// From context.getAST8()
-				e.printStackTrace();
+				}
 			}
 		
 		}

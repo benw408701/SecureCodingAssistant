@@ -22,10 +22,14 @@ public final class RuleFactory {
 	public static ArrayList<IRule> getAllRules() {
 		ArrayList<IRule> rules = new ArrayList<IRule>();
 		
+		// Input Validation and Data Sanitization
 		rules.add(new IDS00J_PreventSQLInjection());
 		rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		rules.add(new IDS07J_RuntimeExecMethod());
 		rules.add(new IDS11J_ModyStringsBeforeValidation());
+
+		// Characters and Strings
+		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
 		return rules;
 	}

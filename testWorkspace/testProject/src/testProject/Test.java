@@ -1,5 +1,8 @@
 package testProject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,7 +31,7 @@ public class Test {
 		String s = "\uFE64" + "script" + "\uFE65";
 
 		// Normalize (comment out to generate warning)
-		//s = Normalizer.normalize(s, Form.NFKC);		
+		s = Normalizer.normalize(s, Form.NFKC);		
 	
 		// Validate
 		Pattern pattern = Pattern.compile("[<>]");
@@ -49,6 +52,9 @@ public class Test {
 		// Test IDS11J
 		String s2 = "<scr!ipt>";
 		s2 = Normalizer.normalize(s2, Form.NFKC);
+
+		// Delete non-character code points 
+		s2 = s2.replaceAll("[\\p{Cn}]","");
 		
 		// Look for script tag
 		pattern = Pattern.compile("<script>");
@@ -56,8 +62,26 @@ public class Test {
 		if (matcher.find())
 			throw new IllegalArgumentException("Invalid Input");
 		
+
 		
-		// Delete non-character code points 
-		s2 = s2.replaceAll("[\\p{Cn}]","");
+		
+		
+		// Test STR00J
+		final int MAX_SIZE = 1024;
+		Socket socket = new Socket();
+		InputStream in = socket.getInputStream();
+		byte[] data = new byte[MAX_SIZE + 1];
+		int offset = 0; 
+		int bytesRead = 0;
+		String str = new String();
+		while ((bytesRead = in.read(data, offset, data.length - offset)) != -1) {
+			offset += bytesRead;
+			str += new String(data, offset, data.length - offset, "UTF-8");
+			if (offset >= data.length) {
+				throw new IOException("Too much input");
+			}
+		}
+		in.close();
+		socket.close();
 	}
 }

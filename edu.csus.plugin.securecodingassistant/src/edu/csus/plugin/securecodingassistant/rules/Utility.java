@@ -1,13 +1,16 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Iterator;
+
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 
 /**
  * Collection of utility methods used by the Secure Coding Assistant Rules
@@ -100,16 +103,9 @@ final class Utility {
 		boolean foundMethod = false;
 		int methodPosition; // the location of the method in the AST where searching should stop
 		boolean continueSearch = true; // false when searching shouldn't continue
-		ASTNode parent = method.getParent();
+		Block block = getBlock(method);
 
-		// Go to block level
-		while(!(parent instanceof Block)) {
-			parent = parent.getParent();
-		}
-		
-		// Confirm at block level
-		if (parent instanceof Block) {
-			Block block = (Block)parent;
+		if (block != null) {
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			NodeArrayList<MethodInvocation> blockMethods = processor.getMethods();
@@ -136,16 +132,9 @@ final class Utility {
 	public static boolean modifiedAfter(MethodInvocation method, SimpleName identifier) {
 		boolean isModified = false;
 		int methodPosition; // The location of the method in the AST where searching should start
-		ASTNode parent = method.getParent();
+		Block block = getBlock(method);
 		
-		// Go to block level
-		while(!(parent instanceof Block)) {
-			parent = parent.getParent();
-		}
-		
-		// Confirm at block level
-		if (parent instanceof Block) {
-			Block block = (Block)parent;
+		if (block != null) {
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			methodPosition = processor.getMethods().getNum(method);
@@ -160,5 +149,64 @@ final class Utility {
 		}
 		
 		return isModified;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given node contains an instantiation for the given class
+	 * with the given argument
+	 * @param node The node to search through
+	 * @param className The name of the class to look for a constructor for
+	 * @param argument Only return <code>true</code> if the constructor contains this argument
+	 * @return <code>true</code> if the given node contains the given constructor with the given argument
+	 */
+	public static boolean containsInstanceCreation(ASTNode node, String className, SimpleName argument) {
+		boolean containsInstanceCreation = false;
+		
+		ASTNodeProcessor processor = new ASTNodeProcessor();
+		node.accept(processor);
+		NodeArrayList<ClassInstanceCreation> instantiations = processor.getInstanceCreations();
+		
+		for (ClassInstanceCreation instantiation : instantiations)
+			// Note that a null argument will evaluate to true in the contains method
+			containsInstanceCreation = containsInstanceCreation ||
+					// TODO: The following does not work as expected
+					instantiation.arguments().contains(argument) &&
+					instantiation.resolveTypeBinding().getName().equals(className);
+		
+		return containsInstanceCreation;
+	}
+	
+	/**
+	 * Returns the block-level element that contains a given <code>ASTNode</code>
+	 * @param node The node contained on the block
+	 * @return The block that contains the node
+	 */
+	public static Block getBlock(ASTNode node) {
+		ASTNode parent = node.getParent();
+		
+		// Go to block level
+		while(parent != null && !(parent instanceof Block)) {
+			parent = parent.getParent();
+		}
+		
+		if (parent instanceof Block)
+			return (Block)parent;
+		else
+			return null;
+	}
+	
+	/**
+	 * Returns an enclosing statement for a given node
+	 * @param node The node to look for in the statement
+	 * @param statementType The type of statement to look for
+	 * @return The statement if found, <code>null</code> otherwise
+	 */
+	public static Statement getEnclosingStatement(ASTNode node, Class<? extends Statement> statementType) {
+		ASTNode parent = node.getParent();
+		
+		while(parent != null && !(statementType.equals(parent.getClass())))
+			parent = parent.getParent();
+		
+		return parent == null ? null : (Statement) parent;
 	}
 }
