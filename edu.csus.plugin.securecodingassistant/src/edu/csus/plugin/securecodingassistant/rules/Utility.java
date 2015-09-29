@@ -166,12 +166,20 @@ final class Utility {
 		node.accept(processor);
 		NodeArrayList<ClassInstanceCreation> instantiations = processor.getInstanceCreations();
 		
-		for (ClassInstanceCreation instantiation : instantiations)
-			// Note that a null argument will evaluate to true in the contains method
-			containsInstanceCreation = containsInstanceCreation ||
-					// TODO: The following does not work as expected
-					instantiation.arguments().contains(argument) &&
-					instantiation.resolveTypeBinding().getName().equals(className);
+		for (ClassInstanceCreation instantiation : instantiations) {
+			if (instantiation.resolveTypeBinding().getName().equals(className)) {
+				boolean argumentFound = argument != null; // true if none required
+				if (!argumentFound)
+					for (Object instArg : instantiation.arguments()) {
+						if (instArg instanceof SimpleName) {
+							argumentFound = argument.equals(instArg);
+							break;
+						}
+					}
+				// Note that a null argument will evaluate to true in the contains method
+				containsInstanceCreation = argumentFound;
+			}
+		}
 		
 		return containsInstanceCreation;
 	}
