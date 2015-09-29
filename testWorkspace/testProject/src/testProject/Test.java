@@ -43,8 +43,10 @@ public class Test {
 		String dir = System.getProperty("dir");
 		Runtime rt = Runtime.getRuntime();
 
+		// Comment out to remove warning
 		Process proc = rt.exec("cmd.exe /C dir " + dir);
 		
+
 		
 		
 
@@ -52,7 +54,7 @@ public class Test {
 		String s2 = "<scr!ipt>";
 		s2 = Normalizer.normalize(s2, Form.NFKC);
 
-		// Delete non-character code points 
+		// Delete non-character code points  (move to end to generate warning)
 		s2 = s2.replaceAll("[\\p{Cn}]","");
 		
 		// Look for script tag
@@ -63,10 +65,11 @@ public class Test {
 		
 
 		
-		
+
 		
 		// Test STR00J
 		final int MAX_SIZE = 1024;
+		@SuppressWarnings("resource")
 		Socket socket = new Socket();
 		InputStream in = socket.getInputStream();
 		byte[] data = new byte[MAX_SIZE + 1];
@@ -81,6 +84,5 @@ public class Test {
 			}
 		}
 		in.close();
-		socket.close();
 	}
 }

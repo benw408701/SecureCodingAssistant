@@ -53,7 +53,7 @@ public class STR00J_PartialCharFromVarWidthEnc implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "Java Secure Coding Rule: STR00-J. Don't form strings containing partial characters"
+		return "STR00-J. Don't form strings containing partial characters"
 				+ " from variable-width encodings";
 	}
 

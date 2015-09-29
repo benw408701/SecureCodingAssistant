@@ -1,6 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -56,17 +57,12 @@ final class Utility {
 		
 		String miClassName = method.getExpression().resolveTypeBinding().getName();
 		String miMethodName = method.getName().toString();
-		boolean withArgument = argument == null;
+		boolean withArgument = argument == null; // Default to true if no argument required
 		boolean nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
 		
-		if(argument != null && nameMatch) {
-			for(Object o : method.arguments()) {
-				if (o instanceof Expression) {
-					Expression arg = (Expression)o;
-					withArgument = withArgument || arg.subtreeMatch(new ASTMatcher(), argument);
-				}
-			}
-		}
+		// Do argument search if required
+		if(argument != null && nameMatch)
+			withArgument = argumentMatch(method.arguments(), argument);
 		
 		return nameMatch && withArgument;
 	}
@@ -103,9 +99,10 @@ final class Utility {
 		boolean foundMethod = false;
 		int methodPosition; // the location of the method in the AST where searching should stop
 		boolean continueSearch = true; // false when searching shouldn't continue
-		Block block = getBlock(method);
+		Statement stmt = getEnclosingStatement(method, Block.class);
 
-		if (block != null) {
+		if (stmt != null && stmt instanceof Block) {
+			Block block = (Block)stmt;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			NodeArrayList<MethodInvocation> blockMethods = processor.getMethods();
@@ -113,9 +110,9 @@ final class Utility {
 			
 			// Go through all blockMethods prior to method and look for a match
 			Iterator<MethodInvocation> blockMethodItr = blockMethods.iterator();
-			while(blockMethodItr.hasNext() && continueSearch) {
+			while(blockMethodItr.hasNext() && continueSearch && !foundMethod) {
 				MethodInvocation blockMethod = blockMethodItr.next();
-				foundMethod = foundMethod || calledMethod(blockMethod, className, methodName, argument);
+				foundMethod = calledMethod(blockMethod, className, methodName, argument);
 				continueSearch = blockMethods.getNum(blockMethod) < methodPosition;
 			}
 		}
@@ -132,9 +129,10 @@ final class Utility {
 	public static boolean modifiedAfter(MethodInvocation method, SimpleName identifier) {
 		boolean isModified = false;
 		int methodPosition; // The location of the method in the AST where searching should start
-		Block block = getBlock(method);
+		Statement stmt = getEnclosingStatement(method, Block.class);
 		
-		if (block != null) {
+		if (stmt != null && stmt instanceof Block) {
+			Block block = (Block) stmt;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			methodPosition = processor.getMethods().getNum(method);
@@ -142,9 +140,9 @@ final class Utility {
 			// Go through all assignments
 			NodeArrayList<Assignment> assignments = processor.getAssignments();
 			for (Assignment assignment : assignments)
-				if (assignments.getNum(assignment) > methodPosition) {
+				if (assignments.getNum(assignment) > methodPosition && !isModified) {
 					Expression lhs = assignment.getLeftHandSide();
-					isModified = isModified || lhs.subtreeMatch(new ASTMatcher(), identifier);
+					isModified = lhs.subtreeMatch(new ASTMatcher(), identifier);
 				}
 		}
 		
@@ -168,16 +166,9 @@ final class Utility {
 		
 		for (ClassInstanceCreation instantiation : instantiations) {
 			if (instantiation.resolveTypeBinding().getName().equals(className)) {
-				boolean argumentFound = argument != null; // true if none required
-				if (!argumentFound)
-					for (Object instArg : instantiation.arguments()) {
-						if (instArg instanceof SimpleName) {
-							argumentFound = argument.equals(instArg);
-							break;
-						}
-					}
-				// Note that a null argument will evaluate to true in the contains method
-				containsInstanceCreation = argumentFound;
+				containsInstanceCreation = argument == null; // true if none required
+				if (!containsInstanceCreation)
+					containsInstanceCreation = argumentMatch(instantiation.arguments(), argument);
 			}
 		}
 		
@@ -185,28 +176,9 @@ final class Utility {
 	}
 	
 	/**
-	 * Returns the block-level element that contains a given <code>ASTNode</code>
-	 * @param node The node contained on the block
-	 * @return The block that contains the node
-	 */
-	public static Block getBlock(ASTNode node) {
-		ASTNode parent = node.getParent();
-		
-		// Go to block level
-		while(parent != null && !(parent instanceof Block)) {
-			parent = parent.getParent();
-		}
-		
-		if (parent instanceof Block)
-			return (Block)parent;
-		else
-			return null;
-	}
-	
-	/**
 	 * Returns an enclosing statement for a given node
 	 * @param node The node to look for in the statement
-	 * @param statementType The type of statement to look for
+	 * @param statementType The type of statement to look for (e.g. Block, WhileStatement, etc.)
 	 * @return The statement if found, <code>null</code> otherwise
 	 */
 	public static Statement getEnclosingStatement(ASTNode node, Class<? extends Statement> statementType) {
@@ -216,5 +188,26 @@ final class Utility {
 			parent = parent.getParent();
 		
 		return parent == null ? null : (Statement) parent;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given argument occurs in the list of arguments
+	 * @param arguments A <code>List</code> of {@link Expression} type arguments
+	 * @param argument A {@link SimpleName} argument to look for in the list
+	 * @return <code>true</code> if the given argument occurs in the list of arguments
+	 * @see Expression
+	 * @see SimpleName
+	 * @see ClassInstanceCreation#arguments()
+	 * @see MethodInvocation#arguments()
+	 */
+	public static boolean argumentMatch(List<?> arguments, SimpleName argument) {
+		for (Object o : arguments)
+			if (o instanceof Expression) {
+				Expression e = (Expression)o;
+				if (e.subtreeMatch(new ASTMatcher(), argument))
+					return true;
+			}
+		
+		return false;
 	}
 }
