@@ -3,6 +3,8 @@
  */
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -33,11 +35,11 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		// Was called beforehand
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			if(Utility.calledMethod(method, "Pattern", "matcher")) {
+			if(Utility.calledMethod(method, Pattern.class.getCanonicalName(), "matcher")) {
 				SimpleName argument = null;
 				if (method.arguments().get(0) instanceof SimpleName)
 					argument = (SimpleName)method.arguments().get(0);
-				ruleViolated = !Utility.calledPrior(method, "Normalizer", "normalize", argument);
+				ruleViolated = !Utility.calledPrior(method, Normalizer.class.getCanonicalName(), "normalize", argument);
 			}
 		}
 		

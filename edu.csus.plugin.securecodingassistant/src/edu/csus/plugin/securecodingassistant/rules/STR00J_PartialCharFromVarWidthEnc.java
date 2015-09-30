@@ -1,5 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.io.InputStream;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -25,7 +26,7 @@ public class STR00J_PartialCharFromVarWidthEnc implements IRule {
 		
 		// Is data being read from an input stream? Class = InputStream, method = read.
 		if (node instanceof MethodInvocation
-				&& Utility.calledMethod((MethodInvocation)node, "InputStream", "read")) {
+				&& Utility.calledMethod((MethodInvocation)node, InputStream.class.getCanonicalName(), "read")) {
 			
 			// check to see if in while loop
 			Statement stmt = Utility.getEnclosingStatement(node, WhileStatement.class);
@@ -38,7 +39,7 @@ public class STR00J_PartialCharFromVarWidthEnc implements IRule {
 				
 				// If string is being constructed in the while loop then rule violated. Calling string constructor
 				// with byte buffer as the parameter
-				ruleViolated = Utility.containsInstanceCreation(wStmt.getBody(), "String", idBuffer);
+				ruleViolated = Utility.containsInstanceCreation(wStmt.getBody(), String.class.getCanonicalName(), idBuffer);
 			}		
 		}
 

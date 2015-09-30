@@ -31,6 +31,9 @@ public final class RuleFactory {
 		// Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
+		// Miscellaneous
+		rules.add(new MSC02J_GenerateStrongRandomNumbers());
+		
 		return rules;
 	}
 }

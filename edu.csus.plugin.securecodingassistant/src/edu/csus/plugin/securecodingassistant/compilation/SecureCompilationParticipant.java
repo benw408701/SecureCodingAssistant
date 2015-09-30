@@ -95,7 +95,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	private void clearMarkers() {
 		for (InsecureCodeSegment cs : m_insecureCodeSegments) {
 			try {
-				cs.getMarker().delete();
+				cs.deleteMarker();
 			} catch (CoreException e) {
 				// Couldn't delete marker
 				e.printStackTrace();

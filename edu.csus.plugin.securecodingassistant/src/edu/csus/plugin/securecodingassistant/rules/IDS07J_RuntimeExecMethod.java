@@ -24,7 +24,7 @@ class IDS07J_RuntimeExecMethod implements IRule {
 		// Runtime.exec() would be a MethodInvocation
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			ruleViolated = Utility.calledMethod(method, "Runtime", "exec");
+			ruleViolated = Utility.calledMethod(method, Runtime.class.getCanonicalName(), "exec");
 		}
 		
 		return ruleViolated;

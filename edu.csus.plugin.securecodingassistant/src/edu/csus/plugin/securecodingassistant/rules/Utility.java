@@ -30,7 +30,7 @@ final class Utility {
 	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
 	 * is calling a particular method from a class.
 	 * @param method The method invocation from the {@link ASTNode}
-	 * @param className The name of the class where the method is defined
+	 * @param className The qualified name of the class where the method is defined
 	 * @param methodName The name of the method without the parameters. For instance, if the method
 	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
 	 * @return True if the <code>MethodInvocation</code> is <code>className.methodName()</code>
@@ -45,7 +45,7 @@ final class Utility {
 	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
 	 * is calling a particular method from a class with a given argument.
 	 * @param method The method invocation from the {@link ASTNode}
-	 * @param className The name of the class where the method is defined
+	 * @param className The qualified name of the class where the method is defined
 	 * @param methodName The name of the method without the parameters. For instance, if the method
 	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
 	 * @param argument The argument that needs to occur in the method to be considered a match
@@ -54,15 +54,17 @@ final class Utility {
 	 * @see MethodInvocation
 	 */
 	public static boolean calledMethod(MethodInvocation method, String className, String methodName, SimpleName argument) {
-		
-		String miClassName = method.getExpression().resolveTypeBinding().getName();
-		String miMethodName = method.getName().toString();
-		boolean withArgument = argument == null; // Default to true if no argument required
-		boolean nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
-		
-		// Do argument search if required
-		if(argument != null && nameMatch)
-			withArgument = argumentMatch(method.arguments(), argument);
+		boolean nameMatch = false, withArgument = false;
+		if(method.getExpression() != null && method.getExpression().resolveTypeBinding() != null) {
+			String miClassName = method.getExpression().resolveTypeBinding().getQualifiedName();
+			String miMethodName = method.getName().toString();
+			withArgument = argument == null; // Default to true if no argument required
+			nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
+			
+			// Do argument search if required
+			if(argument != null && nameMatch)
+				withArgument = argumentMatch(method.arguments(), argument);
+		}
 		
 		return nameMatch && withArgument;
 	}
@@ -70,7 +72,7 @@ final class Utility {
 	/**
 	 * Use to check to see if a method is being called prior to a given method
 	 * @param method The method that was called
-	 * @param className The name of the class of the method to be tested
+	 * @param className The qualified name of the class of the method to be tested
 	 * @param methodName The name of the method to be tested to see if it occurs prior to the
 	 * given {@link MethodInvocation}
 	 * @return <code>true</code> if the <code>className.methodName()</code> is called prior to the
@@ -85,7 +87,7 @@ final class Utility {
 	/**
 	 * Use to check to see if a method is being called prior to a given method with a given argument
 	 * @param method The method that was called
-	 * @param className The name of the class of the method to be tested
+	 * @param className The qualified name of the class of the method to be tested
 	 * @param methodName The name of the method to be tested to see if it occurs prior to the
 	 * given {@link MethodInvocation}
 	 * @param argument The argument that needs to occur in the prior method for it to be considered
@@ -153,7 +155,7 @@ final class Utility {
 	 * Returns <code>true</code> if the given node contains an instantiation for the given class
 	 * with the given argument
 	 * @param node The node to search through
-	 * @param className The name of the class to look for a constructor for
+	 * @param className The qualified name of the class to look for a constructor for
 	 * @param argument Only return <code>true</code> if the constructor contains this argument
 	 * @return <code>true</code> if the given node contains the given constructor with the given argument
 	 */
@@ -165,7 +167,7 @@ final class Utility {
 		NodeArrayList<ClassInstanceCreation> instantiations = processor.getInstanceCreations();
 		
 		for (ClassInstanceCreation instantiation : instantiations) {
-			if (instantiation.resolveTypeBinding().getName().equals(className)) {
+			if (instantiation.resolveTypeBinding().getQualifiedName().equals(className)) {
 				containsInstanceCreation = argument == null; // true if none required
 				if (!containsInstanceCreation)
 					containsInstanceCreation = argumentMatch(instantiation.arguments(), argument);

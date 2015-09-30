@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
@@ -23,20 +22,10 @@ import edu.csus.plugin.securecodingassistant.rules.IRule;
 class InsecureCodeSegment {
 	
 	/**
-	 * The rule that was violated in this segment of code
-	 */
-	private IRule m_ruleViolated;
-	
-	/**
 	 * A marker in the development environment that alerts the programmer
 	 * that they have an insecure segment of code
 	 */
 	private IMarker m_marker;
-	
-	/**
-	 * The underlying resource where the <code>InsecureCodeSegment</code> occurs.
-	 */
-	private IResource m_resource;
 	
 	/**
 	 * Create new insecure code segment at given node that violates an {@link IRule}.
@@ -50,13 +39,12 @@ class InsecureCodeSegment {
 		start = node.getStartPosition();
 		end = start + node.getLength();
 	
-		m_ruleViolated = rule;
 		try {
-			m_resource = context.getDelta().getElement().getUnderlyingResource();
+			IResource resource = context.getDelta().getElement().getUnderlyingResource();
 		
 			line = context.getAST8().getLineNumber(start - 1);
 				
-			m_marker = m_resource.createMarker(Globals.Markers.SECURE_MARKER);
+			m_marker = resource.createMarker(Globals.Markers.SECURE_MARKER);
 			m_marker.setAttribute(IMarker.MESSAGE,
 					String.format("Rule violated: %s%n%nRule description: %s%n%n"
 							+ "Rule Solution: %s", rule.getRuleName(),
@@ -79,27 +67,10 @@ class InsecureCodeSegment {
 	}
 	
 	/**
-	 * The rule that was violated in the code segment
-	 * @return The violated rule
+	 * Deletes the associated marker, must call this to remove the marker from the IDE
+	 * @throws CoreException If the marker could not be deleted
 	 */
-	public IRule getRule() {
-		return m_ruleViolated;
-	}
-	
-	/**
-	 * The marker that is added that tells the developer that
-	 * a rule was violated
-	 * @return The IMarker object
-	 */
-	public IMarker getMarker() {
-		return m_marker;
-	}
-	
-	/**
-	 * The underlying resource where the <code>InsecureCodeSegment</code> occurs.
-	 * @return The underlying resource where the <code>InsecureCodeSegment</code> occurs.
-	 */
-	public IResource getResource() {
-		return m_resource;
+	public void deleteMarker() throws CoreException {
+		m_marker.delete();
 	}
 }

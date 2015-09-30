@@ -3,6 +3,7 @@
  */
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.regex.Pattern;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -30,7 +31,7 @@ public class IDS11J_ModyStringsBeforeValidation implements IRule {
 		// Check to see if Pattern.matcher was used and if it was make sure the string
 		// wasn't modified afterwards
 		if(node instanceof MethodInvocation &&
-				Utility.calledMethod((MethodInvocation)node, "Pattern", "matcher")) {
+				Utility.calledMethod((MethodInvocation)node, Pattern.class.getCanonicalName(), "matcher")) {
 			MethodInvocation method = (MethodInvocation)node;
 			SimpleName str = (SimpleName)method.arguments().get(0);
 			

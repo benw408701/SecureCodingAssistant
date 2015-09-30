@@ -1,5 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.sql.Statement;
+import java.sql.PreparedStatement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
@@ -27,13 +29,13 @@ public class IDS00J_PreventSQLInjection implements IRule {
 			method = (MethodInvocation) node;
 			// If PreparedStatement was used then make sure that setString() was
 			// called at least once, if not then the rule is violated
-			if (Utility.calledMethod(method, "PreparedStatement", "executeQuery"))
-				ruleViolated = !Utility.calledPrior(method, "PreparedStatement", "setString");
+			if (Utility.calledMethod(method, PreparedStatement.class.getCanonicalName(), "executeQuery"))
+				ruleViolated = !Utility.calledPrior(method, PreparedStatement.class.getCanonicalName(), "setString");
 			// If PreparedStatement was not used then see if Statement was used
 			// and then always return true. PreparedStatement should always be used
 			// instead of Statement
 			else
-				ruleViolated = Utility.calledMethod(method, "Statement", "executeQuery");
+				ruleViolated = Utility.calledMethod(method, Statement.class.getCanonicalName(), "executeQuery");
 		}
 
 		return ruleViolated;
