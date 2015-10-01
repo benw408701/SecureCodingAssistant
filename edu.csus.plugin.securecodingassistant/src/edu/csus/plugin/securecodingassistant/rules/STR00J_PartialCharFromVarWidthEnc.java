@@ -28,6 +28,7 @@ public class STR00J_PartialCharFromVarWidthEnc implements IRule {
 		if (node instanceof MethodInvocation
 				&& Utility.calledMethod((MethodInvocation)node, InputStream.class.getCanonicalName(), "read")) {
 			
+			// TODO: What if in another type of loop?
 			// check to see if in while loop
 			Statement stmt = Utility.getEnclosingStatement(node, WhileStatement.class);
 			if (stmt instanceof WhileStatement) {
