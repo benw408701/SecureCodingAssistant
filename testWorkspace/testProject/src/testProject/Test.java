@@ -73,6 +73,7 @@ public class Test {
 
 		
 		
+		
 		// Test STR00J
 		final int MAX_SIZE = 1024;
 		@SuppressWarnings("resource")

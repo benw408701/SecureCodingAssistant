@@ -1,5 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -107,15 +108,17 @@ final class Utility {
 			Block block = (Block)stmt;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
-			NodeArrayList<MethodInvocation> blockMethods = processor.getMethods();
-			methodPosition = blockMethods.getNum(method);
+			ArrayList<NodeNumPair> nodes = processor.getMethods();
+			methodPosition = searchNodeNumList(nodes, method);
 			
 			// Go through all blockMethods prior to method and look for a match
-			Iterator<MethodInvocation> blockMethodItr = blockMethods.iterator();
-			while(blockMethodItr.hasNext() && continueSearch && !foundMethod) {
-				MethodInvocation blockMethod = blockMethodItr.next();
+			Iterator<NodeNumPair> nodeItr = nodes.iterator();
+			while(nodeItr.hasNext() && continueSearch && !foundMethod) {
+				NodeNumPair n = nodeItr.next();
+				assert n.getNode() instanceof MethodInvocation;
+				MethodInvocation blockMethod = (MethodInvocation)n.getNode();
 				foundMethod = calledMethod(blockMethod, className, methodName, argument);
-				continueSearch = blockMethods.getNum(blockMethod) < methodPosition;
+				continueSearch = searchNodeNumList(nodes, blockMethod) < methodPosition;
 			}
 		}
 		
@@ -137,15 +140,18 @@ final class Utility {
 			Block block = (Block) stmt;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
-			methodPosition = processor.getMethods().getNum(method);
+			methodPosition = searchNodeNumList(processor.getMethods(), method);
 			
 			// Go through all assignments
-			NodeArrayList<Assignment> assignments = processor.getAssignments();
-			for (Assignment assignment : assignments)
-				if (assignments.getNum(assignment) > methodPosition && !isModified) {
+			ArrayList<NodeNumPair> nodes = processor.getAssignments();
+			for (NodeNumPair n : nodes) {
+				assert n.getNode() instanceof Assignment;
+				Assignment assignment = (Assignment)n.getNode();
+				if (searchNodeNumList(nodes, assignment) > methodPosition && !isModified) {
 					Expression lhs = assignment.getLeftHandSide();
 					isModified = lhs.subtreeMatch(new ASTMatcher(), identifier);
 				}
+			}
 		}
 		
 		return isModified;
@@ -164,13 +170,15 @@ final class Utility {
 		
 		ASTNodeProcessor processor = new ASTNodeProcessor();
 		node.accept(processor);
-		NodeArrayList<ClassInstanceCreation> instantiations = processor.getInstanceCreations();
+		ArrayList<NodeNumPair> nodes = processor.getInstanceCreations();
 		
-		for (ClassInstanceCreation instantiation : instantiations) {
-			if (instantiation.resolveTypeBinding().getQualifiedName().equals(className)) {
+		for (NodeNumPair n : nodes) {
+			assert n.getNode() instanceof ClassInstanceCreation;
+			ClassInstanceCreation instanceCreation = (ClassInstanceCreation)n.getNode();
+			if (instanceCreation.resolveTypeBinding().getQualifiedName().equals(className)) {
 				containsInstanceCreation = argument == null; // true if none required
 				if (!containsInstanceCreation)
-					containsInstanceCreation = argumentMatch(instantiation.arguments(), argument);
+					containsInstanceCreation = argumentMatch(instanceCreation.arguments(), argument);
 			}
 		}
 		
@@ -211,5 +219,18 @@ final class Utility {
 			}
 		
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private static int searchNodeNumList(ArrayList<NodeNumPair> nodeNumList, ASTNode node) {
+		for (NodeNumPair pair : nodeNumList) {
+			if (pair.getNode().equals(node))
+				return pair.getNum();
+		}
+		
+		return -1;
 	}
 }

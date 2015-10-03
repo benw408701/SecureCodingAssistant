@@ -1,5 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -16,17 +18,17 @@ class ASTNodeProcessor extends ASTVisitor {
 	/**
 	 * A list of methods invocations that are in the syntax tree
 	 */
-	private NodeArrayList<MethodInvocation> m_methods;
+	private ArrayList<NodeNumPair> m_methods;
 	
 	/**
 	 * A list of assignments that are in the syntax tree
 	 */
-	private NodeArrayList<Assignment> m_assignments;
+	private ArrayList<NodeNumPair> m_assignments;
 	
 	/**
 	 * A list of instantiations
 	 */
-	private NodeArrayList<ClassInstanceCreation> m_instantiations;
+	private ArrayList<NodeNumPair> m_instantiations;
 	
 	/**
 	 * Counts the number of nodes visited
@@ -39,9 +41,9 @@ class ASTNodeProcessor extends ASTVisitor {
 	public ASTNodeProcessor() {
 		super();
 		
-		m_methods = new NodeArrayList<MethodInvocation>();
-		m_assignments = new NodeArrayList<Assignment>();
-		m_instantiations = new NodeArrayList<ClassInstanceCreation>();
+		m_methods = new ArrayList<NodeNumPair>();
+		m_assignments = new ArrayList<NodeNumPair>();
+		m_instantiations = new ArrayList<NodeNumPair>();
 		m_nodeCounter = 0;
 	}
 	
@@ -51,7 +53,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		m_methods.addWithNum(methodInvocation, ++m_nodeCounter);
+		m_methods.add(new NodeNumPair(methodInvocation, ++m_nodeCounter));
 		return super.visit(methodInvocation);
 	}
 	
@@ -61,7 +63,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(Assignment assignment) {
-		m_assignments.addWithNum(assignment, ++m_nodeCounter);
+		m_assignments.add(new NodeNumPair(assignment, ++m_nodeCounter));
 		return super.visit(assignment);
 	}
 	
@@ -71,7 +73,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(ClassInstanceCreation instantiation) {
-		m_instantiations.addWithNum(instantiation, ++m_nodeCounter);
+		m_instantiations.add(new NodeNumPair(instantiation, ++m_nodeCounter));
 		return super.visit(instantiation);
 	}
 	
@@ -81,7 +83,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 */
-	public NodeArrayList<MethodInvocation> getMethods() {
+	public ArrayList<NodeNumPair> getMethods() {
 		return m_methods;
 	}
 	
@@ -91,7 +93,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * @return The list of <code>Assignment</code> objects that are in the
 	 * syntax tree
 	 */
-	public NodeArrayList<Assignment> getAssignments() {
+	public ArrayList<NodeNumPair> getAssignments() {
 		return m_assignments;
 	}
 	
@@ -101,7 +103,7 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * @return The list of <code>ClassInstanceCreation</code> objects that are in the
 	 * syntax tree
 	 */
-	public NodeArrayList<ClassInstanceCreation> getInstanceCreations() {
+	public ArrayList<NodeNumPair> getInstanceCreations() {
 		return m_instantiations;
 	}
 }
