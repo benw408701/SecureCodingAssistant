@@ -1,11 +1,14 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.io.InputStream;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
  * Java Secure Coding Rule: STR00-J. Don't form strings containing partial characters from
@@ -62,6 +65,11 @@ public class STR00J_PartialCharFromVarWidthEnc implements IRule {
 	@Override
 	public String getRuleRecommendation() {
 		return "Defer building text string until all data has been read by the buffer";
+	}
+
+	@Override
+	public int securityLevel() {
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
 }

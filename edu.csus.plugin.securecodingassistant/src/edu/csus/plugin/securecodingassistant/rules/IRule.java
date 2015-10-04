@@ -2,6 +2,8 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import edu.csus.plugin.securecodingassistant.Globals;
+
 /**
  * Interface for a secure coding rule
  * @author Ben White
@@ -33,4 +35,11 @@ public interface IRule {
 	 * @return The recommended action that will satisfy the rule
 	 */
 	public String getRuleRecommendation();
+	
+	/**
+	 * The security level of the violated rule}
+	 * @return A {@link Globals.Markers} security level
+	 * @see Globals.Markers
+	 */
+	public int securityLevel();
 }

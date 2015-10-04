@@ -1,13 +1,18 @@
 package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 import edu.csus.plugin.securecodingassistant.rules.RuleFactory;
 
@@ -56,6 +61,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	 * through the abstract syntax tree and look for secure code rule violations
 	 * @param context The <code>ReconcileContext</code> that is being reconciled
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void reconcile(ReconcileContext context) {
 		// Call Parent
@@ -63,17 +69,20 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		
 		// Check to see if content has changed
 		IJavaElementDelta elementDelta = context.getDelta();
-		if((elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
+		if(elementDelta != null &&
+				(elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
 			CompilationUnit compilation = null;
-			try {			
-				compilation = context.getAST8();
+			IResource resource = context.getWorkingCopy().getResource();
+			try {
+				// AST8 fails to properly recognize modifiers for some types
+				compilation = context.getAST4();
 			} catch (JavaModelException e) {
-				// From context.getAST8()
+				// From context.getAST4()
 				e.printStackTrace();
 			}
 			
 			// Clear all existing markers
-			clearMarkers();
+			clearMarkers(resource);
 			
 			if (compilation != null) {
 				// Create a new NodeVisitor to go through the AST and look for violated rules
@@ -92,16 +101,19 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	}
 	
 	
-	private void clearMarkers() {
-		for (InsecureCodeSegment cs : m_insecureCodeSegments) {
+	private void clearMarkers(IResource resource) {
+		Iterator<InsecureCodeSegment> csItr = m_insecureCodeSegments.iterator();
+		while (csItr.hasNext()) {
+			InsecureCodeSegment cs = csItr.next();
 			try {
-				cs.deleteMarker();
+				if(cs.getResource().equals(resource)) {
+					cs.deleteMarker();
+					csItr.remove();
+				}
 			} catch (CoreException e) {
 				// Couldn't delete marker
 				e.printStackTrace();
 			}
 		}
-		
-		m_insecureCodeSegments.clear();
 	}
 }

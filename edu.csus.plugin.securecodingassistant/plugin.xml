@@ -23,7 +23,10 @@
             value="false">
       </persistent>
       <attribute
-            name="violatedRule">
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.violatedRule">
+      </attribute>
+      <attribute
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.securityLevel">
       </attribute>
    </extension>
 

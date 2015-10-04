@@ -2,13 +2,16 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
  * Java Secure Coding Rule: IDS00-J. Prevent SQL injection
  * <p>
- * SQL injection vulnerabilities arise in applications where elements of a SQL query originate
+ * CERT Website: SQL injection vulnerabilities arise in applications where elements of a SQL query originate
  * from an untrusted source. Without precautions, the untrusted data may maliciously alter
  * the query, resulting in information leaks or data modification. The primary means of preventing
  * SQL injection are sanitization and validation, which are typically implemented as parameterized
@@ -43,7 +46,7 @@ public class IDS00J_PreventSQLInjection implements IRule {
 
 	@Override
 	public String getRuleText() {
-		return "SQL injection vulnerabilities arise in applications where elements of a SQL query "
+		return "CERT Website-SQL injection vulnerabilities arise in applications where elements of a SQL query "
 				+ "originate from an untrusted source. Without precautions, the untrusted data may "
 				+ "maliciously alter the query, resulting in information leaks or data modification. "
 				+ "The primary means of preventing SQL injection are sanitization and validation, "
@@ -59,5 +62,10 @@ public class IDS00J_PreventSQLInjection implements IRule {
 	public String getRuleRecommendation() {
 		return "Do not execute SQL queries with parameters directly, use a PreparedStatement and the "
 				+ "setString() method to insert the parameters";
+	}
+
+	@Override
+	public int securityLevel() {
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 }

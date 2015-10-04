@@ -3,6 +3,8 @@ package edu.csus.plugin.securecodingassistant.rules;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import edu.csus.plugin.securecodingassistant.Globals;
+
 /**
  * Java Secure Coding Rule: IDS07-J. Sanitize untrusted data passed
  * to the <code>Runtime.exec()</code> method
@@ -32,7 +34,7 @@ class IDS07J_RuntimeExecMethod implements IRule {
 
 	@Override
 	public String getRuleText() {
-		return "External programs are commonly invoked to perform a function "
+		return "CERT Website-External programs are commonly invoked to perform a function "
 				+ "required by the overall system. This practice is a form of "
 				+ "reuse and might even be considered a crude form of component"
 				+ "-based software engineering. Command and argument injection"
@@ -49,5 +51,10 @@ class IDS07J_RuntimeExecMethod implements IRule {
 	@Override
 	public String getRuleRecommendation() {
 		return "Avoid using Runtime.exec()";
+	}
+
+	@Override
+	public int securityLevel() {
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 }

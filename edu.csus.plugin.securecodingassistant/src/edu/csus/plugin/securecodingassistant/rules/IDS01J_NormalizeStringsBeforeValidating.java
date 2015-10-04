@@ -5,15 +5,18 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.text.Normalizer;
 import java.util.regex.Pattern;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
  * Java Secure Coding Rule: IDS01-J. Normalize strings before validating
  * them
  * <p>
- * Many applications that accept untrusted input strings employ input filtering
+ * CERT Website: Many applications that accept untrusted input strings employ input filtering
  * and validation mechanisms based on the strings' character data. For example,
  * an application's strategy for avoiding cross-site scripting (XSS)
  * vulnerabilities may include forbidding {@code <script>} tags in
@@ -48,7 +51,7 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	@Override
 	public String getRuleText() {
-		return "Many applications that accept untrusted input strings employ input filtering "
+		return "CERT Website-Many applications that accept untrusted input strings employ input filtering "
 				+ "and validation mechanisms based on the strings' character data. For example,"
 				+ " an application's strategy for avoiding cross-site scripting (XSS) "
 				+ "vulnerabilities may include forbidding <script> tags in inputs. Such "
@@ -66,6 +69,11 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		return "Using Pattern.matcher() is a great way detect harmful things like angle brackets "
 				+ "which could indicate script tags, but the normalize method MUST be called "
 				+ "before running Pattern.matcher()";
+	}
+
+	@Override
+	public int securityLevel() {
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
 }

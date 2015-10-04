@@ -20,12 +20,14 @@ import org.eclipse.jdt.core.dom.Statement;
  *
  */
 final class Utility {
-	
+
 	/**
 	 * Cannot instantiate
 	 */
 	private Utility() {
 	}
+	
+	// TODO: Provide a mechanism that the programmer can use to ignore false positives
 
 	/**
 	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
@@ -222,8 +224,11 @@ final class Utility {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Searches through an array list of {@link NodeNumPair} objects for a particular
+	 * {@link ASTNode} and returns the number associated with it
+	 * @param nodeNumList A list of {@link NodeNumPair} objects to search through
+	 * @param node The {@link ASTNode} to search for
+	 * @return The number associated with the node found in the list or -1 if not found
 	 */
 	private static int searchNodeNumList(ArrayList<NodeNumPair> nodeNumList, ASTNode node) {
 		for (NodeNumPair pair : nodeNumList) {

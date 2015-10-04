@@ -27,6 +27,9 @@ public final class RuleFactory {
 		rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		rules.add(new IDS07J_RuntimeExecMethod());
 		rules.add(new IDS11J_ModyStringsBeforeValidation());
+		
+		// Declarations and Initialization
+		rules.add(new DCL02J_DoNotModifyElements());
 
 		// Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());

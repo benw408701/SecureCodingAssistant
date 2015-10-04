@@ -1,13 +1,16 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Random;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
  * Java Secure Coding Rule: MSC02-J. Generate strong random numbers
  * <p>
- * Pseudorandom number generators (PRNGs) use deterministic mathematical algorithms 
+ * CERT Website: Pseudorandom number generators (PRNGs) use deterministic mathematical algorithms 
  * to produce a sequence of numbers with good statistical properties. However, the 
  * sequences of numbers produced fail to achieve true randomness. PRNGs usually 
  * start with an arithmetic seed value. The algorithm uses this seed to generate 
@@ -36,7 +39,7 @@ public class MSC02J_GenerateStrongRandomNumbers implements IRule {
 
 	@Override
 	public String getRuleText() {
-		return "The Java API provides a PRNG, the java.util.Random class. This PRNG is "
+		return "CERT Website-The Java API provides a PRNG, the java.util.Random class. This PRNG is "
 				+ "portable and repeatable. Consequently, two instances of the java.util."
 				+ "Random class that are created using the same seed will generate "
 				+ "identical sequences of numbers in all Java implementations. Seed "
@@ -56,6 +59,11 @@ public class MSC02J_GenerateStrongRandomNumbers implements IRule {
 	public String getRuleRecommendation() {
 		return "java.util.Random is not a secure random number generator, use "
 				+ "java.security.SecureRandom instead";
+	}
+
+	@Override
+	public int securityLevel() {
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
 }

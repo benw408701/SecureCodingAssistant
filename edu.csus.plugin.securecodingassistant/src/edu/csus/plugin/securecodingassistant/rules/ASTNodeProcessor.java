@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
@@ -31,6 +32,11 @@ class ASTNodeProcessor extends ASTVisitor {
 	private ArrayList<NodeNumPair> m_instantiations;
 	
 	/**
+	 * A list of enhanced for statements
+	 */
+	private ArrayList<NodeNumPair> m_enhancedForStatements;
+	
+	/**
 	 * Counts the number of nodes visited
 	 */
 	private int m_nodeCounter;
@@ -44,6 +50,7 @@ class ASTNodeProcessor extends ASTVisitor {
 		m_methods = new ArrayList<NodeNumPair>();
 		m_assignments = new ArrayList<NodeNumPair>();
 		m_instantiations = new ArrayList<NodeNumPair>();
+		m_enhancedForStatements = new ArrayList<NodeNumPair>();
 		m_nodeCounter = 0;
 	}
 	
@@ -78,6 +85,16 @@ class ASTNodeProcessor extends ASTVisitor {
 	}
 	
 	/**
+	 * Will build a list of <code>EnhancedForStatement</code> objects that are in the
+	 * syntax tree
+	 */
+	@Override
+	public boolean visit(EnhancedForStatement statement) {
+		m_enhancedForStatements.add(new NodeNumPair(statement, ++m_nodeCounter));
+		return super.visit(statement);
+	}
+	
+	/**
 	 * Retrieve the list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
@@ -105,5 +122,15 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	public ArrayList<NodeNumPair> getInstanceCreations() {
 		return m_instantiations;
+	}
+	
+	/**
+	 * Retrieve the list of <code>EnhancedForStatement</code> objects that are in the
+	 * syntax tree
+	 * @return The list of <code>EnhancedForStatement</code> objects that are in the
+	 * syntax tree
+	 */
+	public ArrayList<NodeNumPair> getEnhancedForStatements() {
+		return m_enhancedForStatements;
 	}
 }
