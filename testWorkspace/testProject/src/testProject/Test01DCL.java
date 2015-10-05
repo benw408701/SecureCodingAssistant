@@ -9,6 +9,8 @@ public class Test01DCL {
 		
 		// Test DCL02J
 		ArrayList<Object> list = new ArrayList<Object>();
+		
+		
 		// Make o "final"
 		for(final Object o : list) {
 			

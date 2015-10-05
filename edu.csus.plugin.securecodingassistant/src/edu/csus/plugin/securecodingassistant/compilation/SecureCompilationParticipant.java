@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -61,7 +60,6 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	 * through the abstract syntax tree and look for secure code rule violations
 	 * @param context The <code>ReconcileContext</code> that is being reconciled
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public void reconcile(ReconcileContext context) {
 		// Call Parent
@@ -75,7 +73,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			IResource resource = context.getWorkingCopy().getResource();
 			try {
 				// AST8 fails to properly recognize modifiers for some types
-				compilation = context.getAST4();
+				compilation = context.getAST8();
 			} catch (JavaModelException e) {
 				// From context.getAST4()
 				e.printStackTrace();
