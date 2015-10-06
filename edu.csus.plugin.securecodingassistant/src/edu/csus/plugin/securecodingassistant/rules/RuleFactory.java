@@ -33,7 +33,7 @@ public final class RuleFactory {
 		
 		// Expressions
 		rules.add(new EXP00J_DoNotIgnoreValuesReturnedByMethods());
-
+		rules.add(new EXP02J_DoNotUseObjectEquaslToCompareArrays());
 		// Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
