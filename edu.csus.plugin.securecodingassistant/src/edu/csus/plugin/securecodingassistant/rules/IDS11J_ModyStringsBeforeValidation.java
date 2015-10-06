@@ -25,7 +25,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White
  * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS11-J.+Perform+any+string+modifications+before+validation">Java Secure Coding Rule: IDS11-J</a>
  */
-public class IDS11J_ModyStringsBeforeValidation implements IRule {
+class IDS11J_ModyStringsBeforeValidation implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {

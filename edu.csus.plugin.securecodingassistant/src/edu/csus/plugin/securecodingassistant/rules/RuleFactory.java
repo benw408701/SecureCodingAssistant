@@ -30,6 +30,9 @@ public final class RuleFactory {
 		
 		// Declarations and Initialization
 		rules.add(new DCL02J_DoNotModifyElements());
+		
+		// Expressions
+		rules.add(new EXP00J_DoNotIgnoreValuesReturnedByMethods());
 
 		// Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());

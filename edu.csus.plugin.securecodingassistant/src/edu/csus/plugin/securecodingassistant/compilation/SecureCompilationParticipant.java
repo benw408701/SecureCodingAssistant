@@ -60,6 +60,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	 * through the abstract syntax tree and look for secure code rule violations
 	 * @param context The <code>ReconcileContext</code> that is being reconciled
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void reconcile(ReconcileContext context) {
 		// Call Parent
@@ -73,7 +74,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			IResource resource = context.getWorkingCopy().getResource();
 			try {
 				// AST8 fails to properly recognize modifiers for some types
-				compilation = context.getAST8();
+				compilation = context.getAST4();
 			} catch (JavaModelException e) {
 				// From context.getAST4()
 				e.printStackTrace();

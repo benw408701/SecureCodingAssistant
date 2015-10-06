@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
  * @see ASTNode
  * @see ASTNodeProcessor
  */
-public class NodeNumPair {
+class NodeNumPair {
 
 	/**
 	 * The stored node
@@ -26,7 +26,7 @@ public class NodeNumPair {
 	 * @param node The <code>ASTNode</code>
 	 * @param num The number to associate with the node
 	 */
-	NodeNumPair (ASTNode node, int num) {
+	public NodeNumPair (ASTNode node, int num) {
 		m_node = node;
 		m_num = num;
 	}

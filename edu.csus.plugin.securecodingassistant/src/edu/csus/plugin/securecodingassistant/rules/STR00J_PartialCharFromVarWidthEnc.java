@@ -21,7 +21,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White
  * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/STR00-J.+Don%27t+form+strings+containing+partial+characters+from+variable-width+encodings">Java Secure Coding Rule: STR00-J</a>
  */
-public class STR00J_PartialCharFromVarWidthEnc implements IRule {
+class STR00J_PartialCharFromVarWidthEnc implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {

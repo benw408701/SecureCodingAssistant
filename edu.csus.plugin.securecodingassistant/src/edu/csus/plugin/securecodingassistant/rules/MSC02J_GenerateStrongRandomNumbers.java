@@ -29,7 +29,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White
  * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">MSC02-J. Generate strong random numbers</a>
  */
-public class MSC02J_GenerateStrongRandomNumbers implements IRule {
+class MSC02J_GenerateStrongRandomNumbers implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
