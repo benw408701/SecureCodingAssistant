@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 import edu.csus.plugin.securecodingassistant.rules.RuleFactory;
 
@@ -65,10 +64,10 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		// Call Parent
 		super.reconcile(context);
 		
-		// Check to see if content has changed
+		// Check to see if AST has changed
 		IJavaElementDelta elementDelta = context.getDelta();
 		if(elementDelta != null &&
-				(elementDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
+				(elementDelta.getFlags() & IJavaElementDelta.F_AST_AFFECTED) != 0) {
 			CompilationUnit compilation = null;
 			IResource resource = context.getWorkingCopy().getResource();
 			try {
@@ -97,7 +96,6 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 		}
 
 	}
-	
 	
 	private void clearMarkers(IResource resource) {
 		Iterator<InsecureCodeSegment> csItr = m_insecureCodeSegments.iterator();
