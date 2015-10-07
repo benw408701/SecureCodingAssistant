@@ -52,15 +52,7 @@ class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 				+ "methods such as Object.equals(). However, arrays do not "
 				+ "support any methods besides those provided by Object. "
 				+ "Consequently, using Object.equals() on any array compares only "
-				+ "array references, not their contents. Programmers who wish to "
-				+ "compare the contents of two arrays must use the static two-"
-				+ "argument Arrays.equals() method. This method considers two "
-				+ "arrays equivalent if both arrays contain the same number of "
-				+ "elements, and all corresponding pairs of elements in the two "
-				+ "arrays are equivalent, according to Object.equals(). In other "
-				+ "words, two arrays are equal if they contain equivalent elements "
-				+ "in the same order. To test for reference equality, use the "
-				+ "reference equality operators, == and !=.  ";
+				+ "array references, not their contents.";
 	}
 
 	@Override
@@ -71,8 +63,15 @@ class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 
 	@Override
 	public String getRuleRecommendation() {
-		return "If testing for reference equality use == or !=. If testing for "
-				+ "content equality use Array.equals()";
+		return "CERT Website-Programmers who wish to "
+				+ "compare the contents of two arrays must use the static two-"
+				+ "argument Arrays.equals() method. This method considers two "
+				+ "arrays equivalent if both arrays contain the same number of "
+				+ "elements, and all corresponding pairs of elements in the two "
+				+ "arrays are equivalent, according to Object.equals(). In other "
+				+ "words, two arrays are equal if they contain equivalent elements "
+				+ "in the same order. To test for reference equality, use the "
+				+ "reference equality operators, == and !=.";
 	}
 
 	@Override

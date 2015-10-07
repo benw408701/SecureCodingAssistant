@@ -12,7 +12,8 @@ public class Test02EXP {
 		int i = 3;
 		
 		// Remove assignment to generate warning
-		s = String.valueOf(i);
+		String.valueOf(i);
+		
 		
 		
 		// Test EXP02J

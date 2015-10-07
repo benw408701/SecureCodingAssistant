@@ -34,6 +34,11 @@ public final class RuleFactory {
 		// Expressions
 		rules.add(new EXP00J_DoNotIgnoreValuesReturnedByMethods());
 		rules.add(new EXP02J_DoNotUseObjectEquaslToCompareArrays());
+		
+		// Numeric Types and Operations
+		rules.add(new NUM07J_DoNotAttemptComparisonsWithNaN());
+		rules.add(new NUM09J_DoNotUseFloatingPointAsLoopCounters());
+		
 		// Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
