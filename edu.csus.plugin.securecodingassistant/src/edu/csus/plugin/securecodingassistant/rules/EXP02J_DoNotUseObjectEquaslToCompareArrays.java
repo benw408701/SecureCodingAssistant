@@ -28,7 +28,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * <code>Object.equals()</code> method to compare two arrays is disallowed.
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">EXP02-J. Do not use the Object.equals() method to compare two arrays</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">Java Secure Coding Rule: EXP02-J</a>
  */
 class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 

@@ -13,7 +13,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * arithmetic does not precisely represent decimal values
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters">NUM09-J. Do not use floating-point variables as loop counters</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters">Java Secure Coding Rule: NUM09-J</a>
  */
 class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 

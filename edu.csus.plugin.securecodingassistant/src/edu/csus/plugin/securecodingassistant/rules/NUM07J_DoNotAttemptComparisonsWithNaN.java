@@ -16,7 +16,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * inequality operator != returns true if either operand is NaN.
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM07-J.+Do+not+attempt+comparisons+with+NaN">NUM07-J. Do not attempt comparisons with NaN</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM07-J.+Do+not+attempt+comparisons+with+NaN">Java Secure Coding Rule: NUM07-J</a>
  */
 class NUM07J_DoNotAttemptComparisonsWithNaN implements IRule {
 

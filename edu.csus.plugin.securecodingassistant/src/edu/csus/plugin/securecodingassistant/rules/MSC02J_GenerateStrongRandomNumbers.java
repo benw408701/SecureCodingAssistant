@@ -1,10 +1,8 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.Random;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -27,7 +25,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * lookup table for estimating future seed values.
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">MSC02-J. Generate strong random numbers</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">Java Secure Coding Rule: MSC02-J</a>
  */
 class MSC02J_GenerateStrongRandomNumbers implements IRule {
 

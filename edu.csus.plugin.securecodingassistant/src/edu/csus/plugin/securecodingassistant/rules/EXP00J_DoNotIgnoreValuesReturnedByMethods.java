@@ -25,7 +25,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * <code>ProcessBuilder.redirectErrorStream(boolean)</code>.
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP00-J.+Do+not+ignore+values+returned+by+methods">EXP00-J. Do not ignore values returned by methods</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP00-J.+Do+not+ignore+values+returned+by+methods">Java Secure Coding Rule: EXP00-J</a>
  */
 class EXP00J_DoNotIgnoreValuesReturnedByMethods implements IRule {
 
