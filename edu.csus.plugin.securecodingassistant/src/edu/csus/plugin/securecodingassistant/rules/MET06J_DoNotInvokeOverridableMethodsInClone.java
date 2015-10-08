@@ -2,6 +2,21 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import edu.csus.plugin.securecodingassistant.Globals;
+
+/**
+ * Java Secure Coding Rule: MET06-J. Do not invoke overridable methods in clone()
+ * CERT Website: Calling overridable methods from the <code>clone()</code> method
+ * is insecure. First, a malicious subclass could override the method and affect
+ * the behavior of the <code>clone()</code> method. Second, a trusted subclass
+ * could observe (and potentially modify) the cloned object in a partially initialized
+ * state before its construction has concluded. In either case, the subclass could
+ * leave the clone, the object being cloned, or both in an inconsistent state.
+ * Consequently, <code>clone()</code> methods may invoke only methods that are
+ * <code>final</code> or <code>private</code>. 
+ * @author Ben White
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=34668550">Java Secure Coding Rule: MET06-J</a>
+ */
 class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 
 	@Override
@@ -12,26 +27,30 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 
 	@Override
 	public String getRuleText() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Calling overridable methods from the clone() method is insecure. "
+				+ "First, a malicious subclass could override the method and affect "
+				+ "the behavior of the clone() method. Second, a trusted subclass "
+				+ "could observe (and potentially modify) the cloned object in a "
+				+ "partially initialized state before its construction has concluded. "
+				+ "In either case, the subclass could leave the clone, the object "
+				+ "being cloned, or both in an inconsistent state. Consequently, "
+				+ "clone() methods may invoke only methods that are final or private.";
 	}
 
 	@Override
 	public String getRuleName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "MET06-J. Do not invoke overridable methods in clone()";
 	}
 
 	@Override
 	public String getRuleRecommendation() {
-		// TODO Auto-generated method stub
-		return null;
+		return "When overridding the clone() method make sure that none of the methods "
+				+ "that are called are also overriddable.";
 	}
 
 	@Override
 	public int securityLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
 }

@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
  * @author Ben White
  * @see <a target="_blank" href="">Java Secure Coding Rule: </a>
  */
-class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
+class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -38,4 +38,5 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
 }
