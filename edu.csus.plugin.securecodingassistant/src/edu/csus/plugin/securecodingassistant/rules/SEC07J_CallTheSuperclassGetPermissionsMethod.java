@@ -17,7 +17,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * subclassed. 
  * </p>
  * @author Ben White
- * @see <a target="_blank" href="">Java Secure Coding Rule: SEC07-J</a>
+ * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SEC07-J.+Call+the+superclass%27s+getPermissions%28%29+method+when+writing+a+custom+class+loader">Java Secure Coding Rule: SEC07-J</a>
  */
 class SEC07J_CallTheSuperclassGetPermissionsMethod implements IRule {
 

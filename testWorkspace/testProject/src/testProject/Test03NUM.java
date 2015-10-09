@@ -11,8 +11,8 @@ public class Test03NUM {
 	    }
 	    
 	    // Test NUM09J
-	    for (float x = 0.1f; x <= 1.0f; x += 0.1f) {
-	    	  System.out.println(x);
+	    for (float x2 = 0.1f; x2 <= 1.0f; x2 += 0.1f) {
+	    	  System.out.println(x2);
 	    	}
 	}
 	

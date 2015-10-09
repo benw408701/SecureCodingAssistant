@@ -22,27 +22,33 @@ public final class RuleFactory {
 	public static ArrayList<IRule> getAllRules() {
 		ArrayList<IRule> rules = new ArrayList<IRule>();
 		
-		// Input Validation and Data Sanitization
+		// 00. Input Validation and Data Sanitization
 		rules.add(new IDS00J_PreventSQLInjection());
 		rules.add(new IDS01J_NormalizeStringsBeforeValidating());
 		rules.add(new IDS07J_RuntimeExecMethod());
 		rules.add(new IDS11J_ModyStringsBeforeValidation());
 		
-		// Declarations and Initialization
+		// 01. Declarations and Initialization
 		rules.add(new DCL02J_DoNotModifyElements());
 		
-		// Expressions
+		// 02. Expressions
 		rules.add(new EXP00J_DoNotIgnoreValuesReturnedByMethods());
 		rules.add(new EXP02J_DoNotUseObjectEquaslToCompareArrays());
 		
-		// Numeric Types and Operations
+		// 03. Numeric Types and Operations
 		rules.add(new NUM07J_DoNotAttemptComparisonsWithNaN());
 		rules.add(new NUM09J_DoNotUseFloatingPointAsLoopCounters());
 		
-		// Characters and Strings
+		// 04. Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
-		// Miscellaneous
+		// 07. Exceptional Behavior
+		rules.add(new ERR08J_DoNotCatchNullPointerException());
+		
+		// 16. Runtime Environment
+		rules.add(new ENV02J_DoNotTurstTheValuesOfEnvironmentVariables());
+		
+		// 49. Miscellaneous
 		rules.add(new MSC02J_GenerateStrongRandomNumbers());
 		
 		return rules;

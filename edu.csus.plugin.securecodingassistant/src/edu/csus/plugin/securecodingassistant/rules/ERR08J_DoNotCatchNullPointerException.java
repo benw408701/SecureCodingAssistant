@@ -1,6 +1,8 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -32,8 +34,20 @@ class ERR08J_DoNotCatchNullPointerException implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO See if NullPointerException or it's ancestors are in a catch block
-		return false;
+		boolean ruleViolated = false;
+		
+		if (node instanceof CatchClause) {
+			// Get the exception type being caught
+			SingleVariableDeclaration exception = ((CatchClause)node).getException();
+			String exceptionType = exception.resolveBinding().getType().getQualifiedName();
+			// Is it NullPointerException or one of its ancestors?
+			ruleViolated = exceptionType.equals(NullPointerException.class.getCanonicalName())
+					|| exceptionType.equals(RuntimeException.class.getCanonicalName())
+					|| exceptionType.equals(Exception.class.getCanonicalName())
+					|| exceptionType.equals(Throwable.class.getCanonicalName());
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override

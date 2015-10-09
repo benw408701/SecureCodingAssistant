@@ -1,6 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -34,12 +35,15 @@ class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Check for call to System.getenv
+		boolean ruleViolated = false;
 		
-		// TODO Future: Was result sanitized properly?
-		
-		// TODO Future: POSIX /usr/bin/printenv command
-		return false;
+		// Is node a method invocation?
+		if(node instanceof MethodInvocation)
+			// Was System.getenv() called?
+			ruleViolated = Utility.calledMethod((MethodInvocation) node,
+					System.class.getCanonicalName(), "getenv");
+
+		return ruleViolated;
 	}
 
 	@Override
