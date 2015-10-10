@@ -3,13 +3,13 @@ package edu.csus.plugin.securecodingassistant.rules;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -36,12 +36,32 @@ final class Utility {
 	 * @param className The qualified name of the class where the method is defined
 	 * @param methodName The name of the method without the parameters. For instance, if the method
 	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
+	 * @param <code>true</code> if desired search behavior is to search super class hierarchy up
+	 * to <code>Object</code> when looking to see if a method was called. For instance, if
+	 * <code>method()</code> is defined in class A but called from subclass B. Use this flag if
+	 * passing class A as the class name.
+	 * @return True if the <code>MethodInvocation</code> is <code>className.methodName()</code>
+	 * @see ASTNode
+	 * @see MethodInvocation
+	 */
+	public static boolean calledMethod(MethodInvocation method, String className, String methodName,
+			boolean searchClassHierarchy) {
+		return calledMethod(method, className, methodName, null, searchClassHierarchy);
+	}
+	
+	/**
+	 * Use to check to see if a <code>MethodInvocation</code> node of an abstract syntax tree
+	 * is calling a particular method from a class.
+	 * @param method The method invocation from the {@link ASTNode}
+	 * @param className The qualified name of the class where the method is defined
+	 * @param methodName The name of the method without the parameters. For instance, if the method
+	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
 	 * @return True if the <code>MethodInvocation</code> is <code>className.methodName()</code>
 	 * @see ASTNode
 	 * @see MethodInvocation
 	 */
 	public static boolean calledMethod(MethodInvocation method, String className, String methodName) {
-		return calledMethod(method, className, methodName, null);
+		return calledMethod(method, className, methodName, null, false);
 	}
 	
 	/**
@@ -52,17 +72,33 @@ final class Utility {
 	 * @param methodName The name of the method without the parameters. For instance, if the method
 	 * that is being searched for is <code>System.out.println()</code>, then pass <code>println</code>
 	 * @param argument The argument that needs to occur in the method to be considered a match
+	 * @param <code>true</code> if desired search behavior is to search super class hierarchy up
+	 * to <code>Object</code> when looking to see if a method was called. For instance, if
+	 * <code>method()</code> is defined in class A but called from subclass B. Use this flag if
+	 * passing class A as the class name.
 	 * @return <code>true</code> if the <code>MethodInvocation</code> is <code>className.methodName()</code>
 	 * @see ASTNode
 	 * @see MethodInvocation
 	 */
-	public static boolean calledMethod(MethodInvocation method, String className, String methodName, SimpleName argument) {
+	public static boolean calledMethod(MethodInvocation method, String className,
+			String methodName, SimpleName argument, boolean searchClassHierarchy) {
+		
 		boolean nameMatch = false, withArgument = false;
 		if(method.getExpression() != null && method.getExpression().resolveTypeBinding() != null) {
 			String miClassName = method.getExpression().resolveTypeBinding().getQualifiedName();
 			String miMethodName = method.getName().toString();
 			withArgument = argument == null; // Default to true if no argument required
 			nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
+			
+			// If searching hierarchy then search declaring class then parent classes
+			if (searchClassHierarchy && !nameMatch) {
+				ITypeBinding superClass = method.resolveMethodBinding().getDeclaringClass();
+				nameMatch = superClass.getQualifiedName().equals(className);
+				while(!nameMatch && !superClass.getQualifiedName().equals(Object.class.getCanonicalName())) {
+					superClass = superClass.getSuperclass();
+					nameMatch = superClass.getQualifiedName().equals(className);
+				}
+			}
 			
 			// Do argument search if required
 			if(argument != null && nameMatch)
@@ -119,7 +155,7 @@ final class Utility {
 				NodeNumPair n = nodeItr.next();
 				assert n.getNode() instanceof MethodInvocation;
 				MethodInvocation blockMethod = (MethodInvocation)n.getNode();
-				foundMethod = calledMethod(blockMethod, className, methodName, argument);
+				foundMethod = calledMethod(blockMethod, className, methodName, argument, false);
 				continueSearch = searchNodeNumList(nodes, blockMethod) < methodPosition;
 			}
 		}

@@ -1,7 +1,10 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.io.InputStream;
+import java.io.Reader;
 import org.eclipse.jdt.core.dom.ASTNode;
-
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -43,7 +46,25 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 	@Override
 	public boolean violated(ASTNode node) {
 		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Check to see if in CastExpression
+		if (node instanceof CastExpression) {
+			CastExpression cast = (CastExpression)node;
+			// Check to see if expression portion is a method invocation
+			if (cast.getExpression() instanceof MethodInvocation) {
+				MethodInvocation method = (MethodInvocation)cast.getExpression();
+				String castType = cast.getType().resolveBinding().getQualifiedName();
+				// Rule is violated if InputStream.read() or ancestor is called and cast to byte
+				// or if Reader.read() or ancestor is called and cast to char
+				ruleViolated = (castType.equals(byte.class.getCanonicalName())
+								&& Utility.calledMethod(method, InputStream.class.getCanonicalName(), "read", true))
+						|| (castType.equals(char.class.getCanonicalName())
+								&& Utility.calledMethod(method, Reader.class.getCanonicalName(), "read", true));
+			}
+		}
+
+		return ruleViolated;
 	}
 
 	@Override
@@ -63,7 +84,8 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 
 	@Override
 	public String getRuleRecommendation() {
-		return "Do not cast the result of InputStream.read() or Reader.read() to an int.";
+		return "Do not cast the result of InputStream.read() to a byte or Reader.read() "
+				+ "to a byte.";
 	}
 
 	@Override

@@ -12,7 +12,7 @@ public class Test01DCL {
 		
 		
 		// Make o "final"
-		for(final Object o : list) {
+		for(Object o : list) {
 			
 		}
 	}

@@ -45,6 +45,9 @@ public final class RuleFactory {
 		// 07. Exceptional Behavior
 		rules.add(new ERR08J_DoNotCatchNullPointerException());
 		
+		// 13. Input Output
+		rules.add(new FIO08J_DistinguishBetweenCharactersOrBytes());
+		
 		// 16. Runtime Environment
 		rules.add(new ENV02J_DoNotTurstTheValuesOfEnvironmentVariables());
 		
