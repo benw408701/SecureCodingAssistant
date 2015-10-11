@@ -1,6 +1,9 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -22,8 +25,40 @@ class MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is this a method declaration?
+		if (node instanceof MethodDeclaration) {
+			MethodDeclaration methodDec = (MethodDeclaration) node;
+			// Is it overriding a method declared in the parent class?
+			IMethodBinding parentMethod = Utility.getSuperClassDeclaration(methodDec.resolveBinding());
+			// If there is a parent method and it isn't clone (the access level of clone is supposed
+			// to be increased from protected to public)
+			if (parentMethod != null && !parentMethod.getName().equals("clone"))
+			{
+				// Has the accessibility been increased?
+				int parentAccessModifier = parentMethod.getModifiers() &
+						(Modifier.PROTECTED | Modifier.PUBLIC);
+				int accessModifier = methodDec.getModifiers() &
+						(Modifier.PROTECTED | Modifier.PUBLIC);
+				switch(parentAccessModifier) {
+				case 0: // Package Private which is no modifier
+					// Cannot increase to protected or public
+					ruleViolated = (accessModifier & Modifier.PROTECTED) != 0
+									|| (accessModifier & Modifier.PUBLIC) != 0;
+					break;
+				case Modifier.PROTECTED:
+					// Cannot increase to public
+					ruleViolated = (accessModifier & Modifier.PUBLIC) != 0;
+					break;
+				case Modifier.PUBLIC:
+					// super class is already public, cannot increase visibility
+					break;
+				}
+			}
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override

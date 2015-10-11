@@ -5,9 +5,7 @@ import java.io.InputStream;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -33,9 +31,9 @@ class STR00J_PartialCharFromVarWidthEnc implements IRule {
 			
 			// TODO: What if in another type of loop?
 			// check to see if in while loop
-			Statement stmt = Utility.getEnclosingStatement(node, WhileStatement.class);
-			if (stmt instanceof WhileStatement) {
-				WhileStatement wStmt = (WhileStatement)stmt;
+			ASTNode encNode = Utility.getEnclosingNode(node, WhileStatement.class);
+			if (encNode instanceof WhileStatement) {
+				WhileStatement wStmt = (WhileStatement)encNode;
 				MethodInvocation method = (MethodInvocation)node;
 				
 				// Capture identifier of byte buffer

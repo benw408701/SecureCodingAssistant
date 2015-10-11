@@ -1,6 +1,10 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -22,7 +26,35 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 	@Override
 	public boolean violated(ASTNode node) {
 		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is this a MethodInvocation
+		if (node instanceof MethodInvocation) {
+			MethodInvocation method = (MethodInvocation)node;
+			
+			// Is this in a clone() method?
+			ASTNode encNode = Utility.getEnclosingNode(node, MethodDeclaration.class);
+			if (encNode != null && encNode instanceof MethodDeclaration) {
+				MethodDeclaration methodDec = (MethodDeclaration) encNode;
+				if (methodDec.resolveBinding().getName().equals("clone")) {
+					// Verify that the class implements Cloneable
+					boolean implementsCloneable = false;
+					for (ITypeBinding typeBinding : methodDec.resolveBinding().getDeclaringClass().getInterfaces()) {
+						if (typeBinding.getQualifiedName().equals(Cloneable.class.getCanonicalName())) {
+							implementsCloneable = true;
+							break;
+						}
+					}
+					
+					// This is a method invocation that is in an overridden clone()
+					ruleViolated = implementsCloneable &&
+							(method.resolveMethodBinding().getModifiers() & Modifier.FINAL) == 0 &&
+							(method.resolveMethodBinding().getModifiers() & Modifier.PRIVATE) == 0;
+				}
+			}
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override

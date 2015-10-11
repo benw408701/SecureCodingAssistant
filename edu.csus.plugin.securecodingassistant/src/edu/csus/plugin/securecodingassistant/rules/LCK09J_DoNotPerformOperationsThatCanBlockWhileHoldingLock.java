@@ -1,6 +1,13 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.io.Console;
+import java.net.Socket;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -32,8 +39,34 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is node a method invocation for Thread.sleep(), Socket.getOutputStream(),
+		// Socket.getInputStream() or Console.readLine()?
+		if(node instanceof MethodInvocation) {
+			MethodInvocation method = (MethodInvocation) node;
+			if(Utility.calledMethod(method, Thread.class.getCanonicalName(), "sleep")
+					|| Utility.calledMethod(method, Socket.class.getCanonicalName(), "getOutputStream")
+					|| Utility.calledMethod(method, Socket.class.getCanonicalName(), "getInputStream")
+					|| Utility.calledMethod(method, Console.class.getCanonicalName(), "readLine")) {
+			
+				// Is the method invocation in a method definition that is declared to be synchronized?
+				ASTNode encNode = Utility.getEnclosingNode(method, MethodDeclaration.class);
+				if(encNode != null && encNode instanceof MethodDeclaration) {
+					MethodDeclaration methodDec = (MethodDeclaration)encNode;
+					List<?> modList = methodDec.modifiers();
+					for (Object o : modList) {
+						if (o instanceof Modifier) {
+							Modifier mod = (Modifier)o;
+							ruleViolated = (mod.getKeyword().toFlagValue() & Modifier.SYNCHRONIZED) != 0;
+						}
+					}
+				}
+				
+			}
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override
@@ -55,9 +88,9 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 
 	@Override
 	public String getRuleRecommendation() {
-		return "Do not call Thread.sleep(), Socket.getOutputStream(), or Socket.getInput"
-				+ "Stream() from a synchronized method. Instead of Thread.sleep(), try "
-				+ "calling wait which immediately releases current monitor.";
+		return "Do not call Thread.sleep(), Socket.getOutputStream(), Socket.getInput"
+				+ "Stream(), or Console.readLine() from a synchronized method. Instead of "
+				+ "Thread.sleep(), try calling wait which immediately releases current monitor.";
 	}
 
 	@Override

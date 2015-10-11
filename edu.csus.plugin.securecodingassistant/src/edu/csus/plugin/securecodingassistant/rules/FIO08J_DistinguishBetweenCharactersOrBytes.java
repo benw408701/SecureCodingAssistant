@@ -45,7 +45,6 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
 		boolean ruleViolated = false;
 		
 		// Check to see if in CastExpression

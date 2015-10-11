@@ -42,8 +42,15 @@ public final class RuleFactory {
 		// 04. Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
+		// 06. Methods
+		rules.add(new MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods());
+		rules.add(new MET06J_DoNotInvokeOverridableMethodsInClone());
+		
 		// 07. Exceptional Behavior
 		rules.add(new ERR08J_DoNotCatchNullPointerException());
+		
+		// 09. Locking
+		rules.add(new LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock());
 		
 		// 13. Input Output
 		rules.add(new FIO08J_DistinguishBetweenCharactersOrBytes());

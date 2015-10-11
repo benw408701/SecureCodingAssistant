@@ -9,10 +9,10 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 
 /**
  * Collection of utility methods used by the Secure Coding Assistant Rules
@@ -140,10 +140,10 @@ final class Utility {
 		boolean foundMethod = false;
 		int methodPosition; // the location of the method in the AST where searching should stop
 		boolean continueSearch = true; // false when searching shouldn't continue
-		Statement stmt = getEnclosingStatement(method, Block.class);
+		ASTNode node = getEnclosingNode(method, Block.class);
 
-		if (stmt != null && stmt instanceof Block) {
-			Block block = (Block)stmt;
+		if (node != null && node instanceof Block) {
+			Block block = (Block)node;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			ArrayList<NodeNumPair> nodes = processor.getMethods();
@@ -172,10 +172,10 @@ final class Utility {
 	public static boolean modifiedAfter(MethodInvocation method, SimpleName identifier) {
 		boolean isModified = false;
 		int methodPosition; // The location of the method in the AST where searching should start
-		Statement stmt = getEnclosingStatement(method, Block.class);
+		ASTNode node = getEnclosingNode(method, Block.class);
 		
-		if (stmt != null && stmt instanceof Block) {
-			Block block = (Block) stmt;
+		if (node != null && node instanceof Block) {
+			Block block = (Block) node;
 			ASTNodeProcessor processor = new ASTNodeProcessor();
 			block.accept(processor);
 			methodPosition = searchNodeNumList(processor.getMethods(), method);
@@ -224,18 +224,18 @@ final class Utility {
 	}
 	
 	/**
-	 * Returns an enclosing statement for a given node
+	 * Returns an enclosing node for a given node
 	 * @param node The node to look for in the statement
-	 * @param statementType The type of statement to look for (e.g. Block, WhileStatement, etc.)
-	 * @return The statement if found, <code>null</code> otherwise
+	 * @param nodeType The type of node to look for (e.g. Block, WhileStatement, etc.)
+	 * @return The node if found, <code>null</code> otherwise
 	 */
-	public static Statement getEnclosingStatement(ASTNode node, Class<? extends Statement> statementType) {
+	public static ASTNode getEnclosingNode(ASTNode node, Class<? extends ASTNode> nodeType) {
 		ASTNode parent = node.getParent();
 		
-		while(parent != null && !(statementType.equals(parent.getClass())))
+		while(parent != null && !(nodeType.equals(parent.getClass())))
 			parent = parent.getParent();
 		
-		return parent == null ? null : (Statement) parent;
+		return parent == null ? null : parent;
 	}
 	
 	/**
@@ -257,6 +257,30 @@ final class Utility {
 			}
 		
 		return false;
+	}
+	
+	/**
+	 * When a method is overridding another method this retrieves the <code>IMethodBinding</code>
+	 * object from the super class.
+	 * @param methodDec The <code>IMethodBinding</code> that overrides a method declaration from
+	 * a parent class.
+	 * @return The <code>IMethodBinding</code> from the parent class that was overridden or
+	 * <code>null</code> if none found.
+	 */
+	public static IMethodBinding getSuperClassDeclaration(IMethodBinding method) {
+		// Get super class 
+		ITypeBinding superClass = method.getDeclaringClass().getSuperclass();
+		while (superClass != null) {
+			// Loop through all declared methods in the super class
+			for(IMethodBinding superMethod : superClass.getDeclaredMethods()) {
+				if (method.overrides(superMethod)) {
+					return superMethod;
+				}
+			}
+			// Get next super class
+			superClass = superClass.getSuperclass();
+		}
+		return null;
 	}
 	
 	/**
