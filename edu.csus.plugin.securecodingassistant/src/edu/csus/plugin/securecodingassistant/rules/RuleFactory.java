@@ -42,6 +42,9 @@ public final class RuleFactory {
 		// 04. Characters and Strings
 		rules.add(new STR00J_PartialCharFromVarWidthEnc());
 		
+		// 05. Object Orientation
+		rules.add(new OBJ09J_CompareClassesAndNotClassNames());
+		
 		// 06. Methods
 		rules.add(new MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods());
 		rules.add(new MET06J_DoNotInvokeOverridableMethodsInClone());
@@ -51,6 +54,9 @@ public final class RuleFactory {
 		
 		// 09. Locking
 		rules.add(new LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock());
+		
+		// 10. Thread APIs
+		rules.add(new THI05J_DoNotUseThreadStopToTerminateThreads());
 		
 		// 13. Input Output
 		rules.add(new FIO08J_DistinguishBetweenCharactersOrBytes());

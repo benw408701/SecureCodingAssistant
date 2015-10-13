@@ -25,7 +25,6 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
 		boolean ruleViolated = false;
 		
 		// Is this a MethodInvocation

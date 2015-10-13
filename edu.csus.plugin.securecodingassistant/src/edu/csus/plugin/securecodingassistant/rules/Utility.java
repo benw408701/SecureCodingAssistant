@@ -85,7 +85,7 @@ final class Utility {
 		
 		boolean nameMatch = false, withArgument = false;
 		if(method.getExpression() != null && method.getExpression().resolveTypeBinding() != null) {
-			String miClassName = method.getExpression().resolveTypeBinding().getQualifiedName();
+			String miClassName = method.getExpression().resolveTypeBinding().getBinaryName();
 			String miMethodName = method.getName().toString();
 			withArgument = argument == null; // Default to true if no argument required
 			nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
@@ -93,10 +93,10 @@ final class Utility {
 			// If searching hierarchy then search declaring class then parent classes
 			if (searchClassHierarchy && !nameMatch) {
 				ITypeBinding superClass = method.resolveMethodBinding().getDeclaringClass();
-				nameMatch = superClass.getQualifiedName().equals(className);
-				while(!nameMatch && !superClass.getQualifiedName().equals(Object.class.getCanonicalName())) {
+				nameMatch = superClass.getBinaryName().equals(className);
+				while(!nameMatch && !superClass.getBinaryName().equals(Object.class.getCanonicalName())) {
 					superClass = superClass.getSuperclass();
-					nameMatch = superClass.getQualifiedName().equals(className);
+					nameMatch = superClass.getBinaryName().equals(className);
 				}
 			}
 			
@@ -213,7 +213,8 @@ final class Utility {
 		for (NodeNumPair n : nodes) {
 			assert n.getNode() instanceof ClassInstanceCreation;
 			ClassInstanceCreation instanceCreation = (ClassInstanceCreation)n.getNode();
-			if (instanceCreation.resolveTypeBinding().getQualifiedName().equals(className)) {
+			if (instanceCreation.resolveTypeBinding() != null &&
+					instanceCreation.resolveTypeBinding().getBinaryName().equals(className)) {
 				containsInstanceCreation = argument == null; // true if none required
 				if (!containsInstanceCreation)
 					containsInstanceCreation = argumentMatch(instanceCreation.arguments(), argument);

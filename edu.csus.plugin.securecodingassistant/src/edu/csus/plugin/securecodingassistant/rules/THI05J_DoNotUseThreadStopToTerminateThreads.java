@@ -1,6 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -33,8 +34,13 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		// Check to see if Thread.stop() was called
+		if (node instanceof MethodInvocation) {
+			MethodInvocation method = (MethodInvocation) node;
+			ruleViolated = Utility.calledMethod(method, Thread.class.getCanonicalName(), "stop");
+		}
+		return ruleViolated;
 	}
 
 	@Override

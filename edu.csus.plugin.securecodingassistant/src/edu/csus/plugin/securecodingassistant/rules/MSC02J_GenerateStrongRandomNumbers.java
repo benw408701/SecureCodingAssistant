@@ -31,8 +31,14 @@ class MSC02J_GenerateStrongRandomNumbers implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		return node instanceof ClassInstanceCreation &&
-				((ClassInstanceCreation)node).resolveTypeBinding().getQualifiedName().equals(Random.class.getCanonicalName());
+		boolean ruleViolated = false;
+		// Check to see if a Random object is being created
+		if (node instanceof ClassInstanceCreation) {
+			ClassInstanceCreation instance = (ClassInstanceCreation) node;
+			ruleViolated = instance.resolveTypeBinding() != null &&
+					instance.resolveTypeBinding().getQualifiedName().equals(Random.class.getCanonicalName());
+		}
+		return ruleViolated;
 	}
 
 	@Override

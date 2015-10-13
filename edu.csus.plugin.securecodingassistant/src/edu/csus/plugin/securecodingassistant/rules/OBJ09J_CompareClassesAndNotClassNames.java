@@ -1,6 +1,8 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -43,8 +45,28 @@ class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is node a method invocation
+		if (node instanceof MethodInvocation) {
+			MethodInvocation method = (MethodInvocation) node;
+			
+			// Check to see if String.equals() is called
+			if (Utility.calledMethod(method, String.class.getCanonicalName(), "equals")) {
+				// Check to see if the expression is another method invocation
+				Expression exp = method.getExpression();
+				if (exp != null && exp instanceof MethodInvocation) {
+					MethodInvocation outerMethod = (MethodInvocation)exp;
+					// Rule is violated if the outer method was Class.getName
+					ruleViolated = Utility.calledMethod(outerMethod, Class.class.getCanonicalName(), "getName");
+				}
+			}
+		}
+		
+
+		
+		int.class.getName().equals(Integer.class.getName());
+		return ruleViolated;
 	}
 
 	@Override

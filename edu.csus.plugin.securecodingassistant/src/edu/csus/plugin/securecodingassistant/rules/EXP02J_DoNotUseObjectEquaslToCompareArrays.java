@@ -40,8 +40,9 @@ class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 		if (node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
 			// Was equals called from an array?
-			ruleViolated = method.getExpression().resolveTypeBinding().isArray()
-					&& method.getName().toString().equals("equals");
+			if (method.getExpression().resolveTypeBinding() != null)
+				ruleViolated = method.getExpression().resolveTypeBinding().isArray()
+						&& method.getName().toString().equals("equals");
 		}
 		return ruleViolated;
 	}

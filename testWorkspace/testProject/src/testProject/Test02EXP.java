@@ -12,7 +12,7 @@ public class Test02EXP {
 		int i = 3;
 		
 		// Remove assignment to generate warning
-		String.valueOf(i);
+		s = String.valueOf(i);
 		
 		
 		
@@ -20,7 +20,7 @@ public class Test02EXP {
 		int[] test = new int[20];
 		int[] test2 = new int[30];
 		
-		Arrays.equals(test, test2);
+		boolean result = Arrays.equals(test, test2);
 		
 		test.equals(test2);
 		

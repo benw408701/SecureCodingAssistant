@@ -27,7 +27,8 @@ class NUM07J_DoNotAttemptComparisonsWithNaN implements IRule {
 		// Is the node an infix boolean expression?
 		if(node instanceof InfixExpression) {
 			InfixExpression expression = (InfixExpression)node;
-			if(expression.resolveTypeBinding().getName().equals("boolean")) {
+			if(expression.resolveTypeBinding() != null &&
+					expression.resolveTypeBinding().getName().equals("boolean")) {
 				// Get left-hand-side and right-hand-side
 				Expression lhs = expression.getLeftOperand(), rhs = expression.getRightOperand();
 				if (lhs instanceof QualifiedName)
