@@ -38,10 +38,12 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 				if (methodDec.resolveBinding().getName().equals("clone")) {
 					// Verify that the class implements Cloneable
 					boolean implementsCloneable = false;
-					for (ITypeBinding typeBinding : methodDec.resolveBinding().getDeclaringClass().getInterfaces()) {
-						if (typeBinding.getQualifiedName().equals(Cloneable.class.getCanonicalName())) {
-							implementsCloneable = true;
-							break;
+					if (methodDec.resolveBinding() != null) {
+						for (ITypeBinding typeBinding : methodDec.resolveBinding().getDeclaringClass().getInterfaces()) {
+							if (typeBinding.getQualifiedName().equals(Cloneable.class.getCanonicalName())) {
+								implementsCloneable = true;
+								break;
+							}
 						}
 					}
 					

@@ -1,6 +1,12 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.io.Serializable;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
@@ -29,8 +35,39 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implement
 
 	@Override
 	public boolean violated(ASTNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is this a method declaration?
+		if (node instanceof MethodDeclaration) {
+			
+			// Is the method declared in a class that implements Serializable?
+			MethodDeclaration methodDec = (MethodDeclaration)node;
+			if (methodDec.resolveBinding() != null) {
+				boolean implementsSerializable = false;
+				IMethodBinding methodBinding = methodDec.resolveBinding();
+				for (ITypeBinding typeBinding : methodBinding.getDeclaringClass().getInterfaces()) {
+					if (typeBinding.getQualifiedName().equals(Serializable.class.getCanonicalName())) {
+						implementsSerializable = true;
+						break;
+					}
+				}
+				
+				// If the method name is writeObject, readObject or readObjectNoData then it
+				// must be marked private
+				if (implementsSerializable && (methodBinding.getName().equals("writeObject")
+						|| methodBinding.getName().equals("readObject")
+						|| methodBinding.getName().equals("readObjectNoData")))
+					ruleViolated = (methodBinding.getModifiers() & Modifier.PRIVATE) != Modifier.PRIVATE;
+				
+				// If the method name is readResolve or writeReplace then it must be marked
+				// protected and cannot be marked static
+				if (implementsSerializable && (methodBinding.getName().equals("readResolve")
+						|| methodBinding.getName().equals("writeReplace")))
+					ruleViolated = (methodBinding.getModifiers() & (Modifier.PROTECTED | Modifier.STATIC)) != Modifier.PROTECTED; 
+			}
+		}
+		
+		return ruleViolated;
 	}
 
 	@Override

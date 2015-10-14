@@ -61,6 +61,9 @@ public final class RuleFactory {
 		// 13. Input Output
 		rules.add(new FIO08J_DistinguishBetweenCharactersOrBytes());
 		
+		// 14. Serialization
+		rules.add(new SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods());
+		
 		// 16. Runtime Environment
 		rules.add(new ENV02J_DoNotTurstTheValuesOfEnvironmentVariables());
 		
