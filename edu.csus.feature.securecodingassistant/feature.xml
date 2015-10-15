@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="edu.csus.feature.securecodingassistant"
+      label="Secure Coding Assistant"
+      version="1.0.0">
+
+   <description url="http://benw408701.github.io/SecureCodingAssistant/">
+      The Secure Coding Assistant is a plugin for the Eclipse Development
+Environment that alerts developers when they are at risk of violating
+one of the secure coding rules for the Java programming language
+as defined by the CERT division of the Software Engineering Institute
+at Carnegie Mellon University.
+   </description>
+
+   <copyright url="http://benw408701.github.io/SecureCodingAssistant/">
+      (C) 2015
+   </copyright>
+
+   <license url="http://www.gnu.org/licenses/gpl-3.0.en.html">
+      GNU GENERAL PUBLIC LICENSE
+   </license>
+
+   <url>
+      <discovery label="CERT Secure Coding Rules" url="https://www.securecoding.cert.org/confluence/display/java/2+Rules"/>
+      <discovery label="JavaDoc" url="http://athena.ecs.csus.edu/~whiteb/javadoc/"/>
+      <discovery label="Project Proposal" url="http://athena.ecs.csus.edu/~whiteb/docs/ProjectProposal.docx"/>
+   </url>
+
+   <plugin
+         id="edu.csus.plugin.securecodingassistant"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
