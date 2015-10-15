@@ -64,6 +64,9 @@ public final class RuleFactory {
 		// 14. Serialization
 		rules.add(new SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods());
 		
+		// 15. Platform Security
+		rules.add(new SEC07J_CallTheSuperclassGetPermissionsMethod());
+		
 		// 16. Runtime Environment
 		rules.add(new ENV02J_DoNotTurstTheValuesOfEnvironmentVariables());
 		

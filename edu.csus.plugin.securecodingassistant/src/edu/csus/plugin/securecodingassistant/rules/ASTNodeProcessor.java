@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 /**
  * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.
@@ -37,6 +38,11 @@ class ASTNodeProcessor extends ASTVisitor {
 	private ArrayList<NodeNumPair> m_enhancedForStatements;
 	
 	/**
+	 * A list of super method invocations
+	 */
+	private ArrayList<NodeNumPair> m_superMethods;
+	
+	/**
 	 * Counts the number of nodes visited
 	 */
 	private int m_nodeCounter;
@@ -51,6 +57,7 @@ class ASTNodeProcessor extends ASTVisitor {
 		m_assignments = new ArrayList<NodeNumPair>();
 		m_instantiations = new ArrayList<NodeNumPair>();
 		m_enhancedForStatements = new ArrayList<NodeNumPair>();
+		m_superMethods = new ArrayList<NodeNumPair>();
 		m_nodeCounter = 0;
 	}
 	
@@ -95,6 +102,16 @@ class ASTNodeProcessor extends ASTVisitor {
 	}
 	
 	/**
+	 * Will build a list of <code>SuperMethodInvocation</code> objects that are in the
+	 * syntax tree
+	 */
+	@Override
+	public boolean visit(SuperMethodInvocation method) {
+		m_superMethods.add(new NodeNumPair(method, ++m_nodeCounter));
+		return super.visit(method);
+	}
+	
+	/**
 	 * Retrieve the list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
@@ -132,5 +149,15 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	public ArrayList<NodeNumPair> getEnhancedForStatements() {
 		return m_enhancedForStatements;
+	}
+	
+	/**
+	 * Retrieve the list of <code>SuperMethodInvocation</code> objects that are in the
+	 * syntax tree
+	 * @return The list of <code>SuperMethodInvocation</code> objects that are in the
+	 * syntax tree
+	 */
+	public ArrayList<NodeNumPair> getSuperMethodInvocations() {
+		return m_superMethods;
 	}
 }

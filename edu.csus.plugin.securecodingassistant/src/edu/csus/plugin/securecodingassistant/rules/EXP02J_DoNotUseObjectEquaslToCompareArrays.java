@@ -42,7 +42,7 @@ class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 			// Was equals called from an array?
 			if (method.getExpression().resolveTypeBinding() != null)
 				ruleViolated = method.getExpression().resolveTypeBinding().isArray()
-						&& method.getName().toString().equals("equals");
+						&& method.getName().getFullyQualifiedName().equals("equals");
 		}
 		return ruleViolated;
 	}

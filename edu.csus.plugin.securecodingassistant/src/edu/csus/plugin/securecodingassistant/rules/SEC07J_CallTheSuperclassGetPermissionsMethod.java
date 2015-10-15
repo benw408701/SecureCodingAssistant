@@ -1,7 +1,9 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.security.SecureClassLoader;
 import org.eclipse.jdt.core.dom.ASTNode;
-
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -24,7 +26,32 @@ class SEC07J_CallTheSuperclassGetPermissionsMethod implements IRule {
 	@Override
 	public boolean violated(ASTNode node) {
 		// TODO Auto-generated method stub
-		return false;
+		boolean ruleViolated = false;
+		
+		// Is this a method declaration for getPermissions?
+		if (node instanceof MethodDeclaration) {
+			MethodDeclaration methodDec = (MethodDeclaration) node;
+			
+			// Does the declaring class extend SecureClassLoader?
+			if (methodDec.resolveBinding() != null &&
+					methodDec.resolveBinding().getDeclaringClass() != null &&
+					methodDec.resolveBinding().getDeclaringClass().getSuperclass().getQualifiedName().equals(SecureClassLoader.class.getCanonicalName())) {
+				ruleViolated = true; // Rule is violated if method exists without call to super
+				
+				// Is there a call to super.getPermissions within the method declaration?
+				ASTNodeProcessor processor = new ASTNodeProcessor();
+				node.accept(processor);
+				for (NodeNumPair methodNode : processor.getSuperMethodInvocations()) {
+					assert methodNode.getNode() instanceof SuperMethodInvocation;
+					SuperMethodInvocation method = (SuperMethodInvocation) methodNode.getNode();
+					if (method.getName().getFullyQualifiedName().equals("getPermissions")) {
+						ruleViolated = false;
+						break;
+					}
+				}
+			}
+		}
+		return ruleViolated;
 	}
 
 	@Override

@@ -86,7 +86,7 @@ final class Utility {
 		boolean nameMatch = false, withArgument = false;
 		if(method.getExpression() != null && method.getExpression().resolveTypeBinding() != null) {
 			String miClassName = method.getExpression().resolveTypeBinding().getBinaryName();
-			String miMethodName = method.getName().toString();
+			String miMethodName = method.getName().getFullyQualifiedName();
 			withArgument = argument == null; // Default to true if no argument required
 			nameMatch = miClassName.equals(className) && miMethodName.equals(methodName);
 			
