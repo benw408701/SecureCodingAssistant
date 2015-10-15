@@ -35,6 +35,7 @@ class SEC07J_CallTheSuperclassGetPermissionsMethod implements IRule {
 			// Does the declaring class extend SecureClassLoader?
 			if (methodDec.resolveBinding() != null &&
 					methodDec.resolveBinding().getDeclaringClass() != null &&
+					methodDec.resolveBinding().getDeclaringClass().getSuperclass() != null &&
 					methodDec.resolveBinding().getDeclaringClass().getSuperclass().getQualifiedName().equals(SecureClassLoader.class.getCanonicalName())) {
 				ruleViolated = true; // Rule is violated if method exists without call to super
 				

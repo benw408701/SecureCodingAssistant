@@ -3,7 +3,7 @@
    <description name="Ben White Plugin Update Site" url="http://ecs.csus.edu/~bwhite/plugins">
       Update site for Secure Coding Assistant
    </description>
-   <feature url="features/edu.csus.feature.securecodingassistant_1.0.0.201510142242.jar" id="edu.csus.feature.securecodingassistant" version="1.0.0.201510142242">
+   <feature url="features/edu.csus.feature.securecodingassistant_1.0.0.201510142300.jar" id="edu.csus.feature.securecodingassistant" version="1.0.0.201510142300">
       <category name="Secure Coding Assistant"/>
    </feature>
    <category-def name="Secure Coding Assistant" label="Secure Coding Assistant"/>
