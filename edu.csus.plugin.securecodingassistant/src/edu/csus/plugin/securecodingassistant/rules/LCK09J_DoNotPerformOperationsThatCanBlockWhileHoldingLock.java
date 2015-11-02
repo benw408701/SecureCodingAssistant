@@ -3,12 +3,10 @@ package edu.csus.plugin.securecodingassistant.rules;
 import java.io.Console;
 import java.net.Socket;
 import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

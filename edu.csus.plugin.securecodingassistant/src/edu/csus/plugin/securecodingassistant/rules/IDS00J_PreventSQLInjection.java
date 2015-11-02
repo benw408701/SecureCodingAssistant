@@ -2,10 +2,8 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

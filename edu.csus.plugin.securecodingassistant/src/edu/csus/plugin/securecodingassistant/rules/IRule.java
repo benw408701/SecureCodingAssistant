@@ -1,7 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

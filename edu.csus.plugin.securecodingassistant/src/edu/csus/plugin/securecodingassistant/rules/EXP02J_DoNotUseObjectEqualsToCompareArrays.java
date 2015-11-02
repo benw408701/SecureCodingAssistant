@@ -30,7 +30,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White
  * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">Java Secure Coding Rule: EXP02-J</a>
  */
-class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
+class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -40,7 +40,8 @@ class EXP02J_DoNotUseObjectEquaslToCompareArrays implements IRule {
 		if (node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
 			// Was equals called from an array?
-			if (method.getExpression().resolveTypeBinding() != null)
+			if (method.getExpression() != null &&
+					method.getExpression().resolveTypeBinding() != null)
 				ruleViolated = method.getExpression().resolveTypeBinding().isArray()
 						&& method.getName().getFullyQualifiedName().equals("equals");
 		}

@@ -2,7 +2,6 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

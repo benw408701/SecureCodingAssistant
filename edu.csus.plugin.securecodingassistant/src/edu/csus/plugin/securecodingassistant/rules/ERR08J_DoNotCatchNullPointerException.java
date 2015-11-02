@@ -3,7 +3,6 @@ package edu.csus.plugin.securecodingassistant.rules;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
