@@ -1,13 +1,11 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.io.Serializable;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

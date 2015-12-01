@@ -1,10 +1,6 @@
-/**
- * 
- */
 package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
-
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;

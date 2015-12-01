@@ -2,7 +2,6 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElementDelta;

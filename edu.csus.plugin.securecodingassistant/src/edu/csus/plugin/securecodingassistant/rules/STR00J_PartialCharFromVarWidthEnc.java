@@ -1,7 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.io.InputStream;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
