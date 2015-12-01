@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description name="Ben White CSUS Project Feature Site" url="http://athena.ecs.csus.edu/~whiteb/">
+   <description name="Ben White CSUS Project Feature Site" url="http://athena.ecs.csus.edu/~whiteb/plugins">
       Site hosts Secure Coding Assistant plugin
    </description>
    <feature url="features/edu.csus.feature.securecodingassistant_1.0.0.jar" id="edu.csus.feature.securecodingassistant" version="1.0.0">
