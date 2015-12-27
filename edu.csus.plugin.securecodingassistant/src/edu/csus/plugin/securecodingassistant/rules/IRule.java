@@ -11,7 +11,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
 public interface IRule {
 	
 	/**
-	 * Checks to see if the rule has been violated in a given expression
+	 * Checks to see if the rule has been violated in a given node
 	 * @param node The node to be evaluated
 	 * @return true if the rule was violated, false otherwise
 	 */
