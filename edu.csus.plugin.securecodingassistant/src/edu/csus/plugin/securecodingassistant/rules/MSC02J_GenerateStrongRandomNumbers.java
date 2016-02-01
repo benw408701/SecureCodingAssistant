@@ -35,8 +35,9 @@ class MSC02J_GenerateStrongRandomNumbers implements IRule {
 		// Check to see if a Random object is being created
 		if (node instanceof ClassInstanceCreation) {
 			ClassInstanceCreation instance = (ClassInstanceCreation) node;
-			ruleViolated = instance.resolveTypeBinding() != null &&
-					instance.resolveTypeBinding().getQualifiedName().equals(Random.class.getCanonicalName());
+			ruleViolated = instance.getType() != null &&
+					instance.getType().resolveBinding() != null &&
+					instance.getType().resolveBinding().getQualifiedName().equals(Random.class.getCanonicalName());
 		}
 		return ruleViolated;
 	}

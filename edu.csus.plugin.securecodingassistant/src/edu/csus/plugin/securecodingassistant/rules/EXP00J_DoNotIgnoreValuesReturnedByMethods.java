@@ -35,7 +35,7 @@ class EXP00J_DoNotIgnoreValuesReturnedByMethods implements IRule {
 		// Is the node a method invocation?
 		if (node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			ITypeBinding returnType = method.resolveTypeBinding();
+			ITypeBinding returnType = method.resolveMethodBinding() == null ? null : method.resolveMethodBinding().getReturnType();
 			// Does it have a return type?
 			if (returnType != null && !returnType.getQualifiedName().equals("void")) {
 				ASTNode parent = method.getParent();

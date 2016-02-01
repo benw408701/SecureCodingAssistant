@@ -213,8 +213,9 @@ final class Utility {
 		for (NodeNumPair n : nodes) {
 			assert n.getNode() instanceof ClassInstanceCreation;
 			ClassInstanceCreation instanceCreation = (ClassInstanceCreation)n.getNode();
-			if (instanceCreation.resolveTypeBinding() != null &&
-					instanceCreation.resolveTypeBinding().getBinaryName().equals(className)) {
+			if (instanceCreation.getType() != null &&
+					instanceCreation.getType().resolveBinding() != null &&
+					instanceCreation.getType().resolveBinding().getBinaryName().equals(className)) {
 				containsInstanceCreation = argument == null; // true if none required
 				if (!containsInstanceCreation)
 					containsInstanceCreation = argumentMatch(instanceCreation.arguments(), argument);

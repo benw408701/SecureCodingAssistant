@@ -29,15 +29,15 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	public boolean violated(ASTNode node) {
 		boolean ruleViolated = false;
 		
-		// Check to see if Pattern.matcher is called and ensure that Normalizer.normalize
-		// Was called beforehand
+		// Check to see if Normalizer.normalize was called. Rule is violated if
+		// Pattern.matcher was called beforehand with the same argument
 		if(node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation)node;
-			if(Utility.calledMethod(method, Pattern.class.getCanonicalName(), "matcher")) {
+			if(Utility.calledMethod(method, Normalizer.class.getCanonicalName(), "normalize")) {
 				SimpleName argument = null;
 				if (method.arguments().get(0) instanceof SimpleName)
 					argument = (SimpleName)method.arguments().get(0);
-				ruleViolated = !Utility.calledPrior(method, Normalizer.class.getCanonicalName(), "normalize", argument);
+				ruleViolated = Utility.calledPrior(method, Pattern.class.getCanonicalName(), "matcher", argument);
 			}
 		}
 		
