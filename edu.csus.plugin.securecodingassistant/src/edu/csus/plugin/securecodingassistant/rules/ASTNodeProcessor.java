@@ -65,6 +65,7 @@ class ASTNodeProcessor extends ASTVisitor {
 		m_instantiations = new ArrayList<NodeNumPair>();
 		m_enhancedForStatements = new ArrayList<NodeNumPair>();
 		m_superMethods = new ArrayList<NodeNumPair>();
+		m_variableDeclarations = new ArrayList<NodeNumPair>();
 		m_nodeCounter = 0;
 	}
 	

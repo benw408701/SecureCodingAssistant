@@ -18,6 +18,8 @@ public class Test00IDS {
 		Statement stmt = connection.createStatement();
 		PreparedStatement pStmt = connection.prepareStatement(null);
 		pStmt.setString(1, "");
+		
+		// Remove the + username from the declaration to make the rs3 alert go away
 		String queryString = "SELECT * FROM tbl WHERE usr = " + username;
 		
 		// Uncomment rs2 or comment pstmt to test rule

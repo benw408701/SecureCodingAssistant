@@ -58,12 +58,9 @@ class SecureNodeAnalyzer extends ASTVisitor {
 	@Override
 	public void preVisit(ASTNode node) {
 		// Iterate through rules
-		for (IRule rule : m_rules) {
-			if(rule.violated(node)) {
-				System.out.printf("In %s, rule violated at node %s%n", this.toString(), node.toString());
+		for (IRule rule : m_rules)
+			if(rule.violated(node))				
 				m_insecureCodeSegments.add(new InsecureCodeSegment(node, rule, m_context));
-			}
-		}
 	}
 	
 	/**
