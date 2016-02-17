@@ -6,7 +6,10 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.
@@ -40,6 +43,11 @@ class ASTNodeProcessor extends ASTVisitor {
 	 * A list of super method invocations
 	 */
 	private ArrayList<NodeNumPair> m_superMethods;
+	
+	/**
+	 * A list of variable declaration fragments
+	 */
+	private ArrayList<NodeNumPair> m_variableDeclarations;
 	
 	/**
 	 * Counts the number of nodes visited
@@ -111,6 +119,16 @@ class ASTNodeProcessor extends ASTVisitor {
 	}
 	
 	/**
+	 * Will build a list of <code>VariableDeclarationFragment</code> objects that are in the
+	 * syntax tree
+	 */
+	@Override
+	public boolean visit(VariableDeclarationFragment declaration) {
+		m_variableDeclarations.add(new NodeNumPair(declaration, ++m_nodeCounter));
+		return super.visit(declaration);
+	}
+	
+	/**
 	 * Retrieve the list of <code>MethodInvocation</code> objects that are in the
 	 * syntax tree
 	 * @return The list of <code>MethodInvocation</code> objects that are in the
@@ -158,5 +176,15 @@ class ASTNodeProcessor extends ASTVisitor {
 	 */
 	public ArrayList<NodeNumPair> getSuperMethodInvocations() {
 		return m_superMethods;
+	}
+	
+	/**
+	 * Retrieve the list of <code>VariableDeclarationFragment</code> objects that are in the
+	 * syntax tree
+	 * @return The list of <code>VariableDeclarationFragment</code> objects that are in the
+	 * syntax tree
+	 */
+	public ArrayList<NodeNumPair> getVariableDeclarationFragments() {
+		return m_variableDeclarations;
 	}
 }

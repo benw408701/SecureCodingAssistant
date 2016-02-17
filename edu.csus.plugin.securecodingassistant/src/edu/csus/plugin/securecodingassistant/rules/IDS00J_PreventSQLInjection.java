@@ -2,8 +2,15 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -33,10 +40,51 @@ class IDS00J_PreventSQLInjection implements IRule {
 			if (Utility.calledMethod(method, PreparedStatement.class.getCanonicalName(), "executeQuery"))
 				ruleViolated = !Utility.calledPrior(method, PreparedStatement.class.getCanonicalName(), "setString");
 			// If PreparedStatement was not used then see if Statement was used
-			// and then always return true. PreparedStatement should always be used
-			// instead of Statement
-			else
-				ruleViolated = Utility.calledMethod(method, Statement.class.getCanonicalName(), "executeQuery");
+			// and then return true if the string being used wasn't a literal string
+			else if (Utility.calledMethod(method, Statement.class.getCanonicalName(), "executeQuery")) {
+				// Rule is violated if the argument was created using a compound expression
+				// (anything except for a literal string)
+				if (method.arguments().size() > 0
+						&& method.arguments().get(0) instanceof SimpleName) {
+					// The argument in this case would be  the query string being passed to the database
+					SimpleName argument = (SimpleName) method.arguments().get(0);
+					ASTNode parent = node.getParent();
+
+					// Look for assignments to the query string in parent nodes
+					while (parent != null && !ruleViolated) {
+						ASTNodeProcessor processor = new ASTNodeProcessor();
+						parent.accept(processor);
+						// Check all of the assignments
+						for(NodeNumPair assignmentPair : processor.getAssignments()) {
+							Assignment assignment = (Assignment)assignmentPair.getNode();
+							// If the assignment is for the query string and the right hand side
+							// is not a literal string then the rule has been violated
+							if (assignment.getLeftHandSide().subtreeMatch(new ASTMatcher(), argument)
+									&& !(assignment.getRightHandSide() instanceof StringLiteral)) {
+								ruleViolated = true;
+								break;
+							}
+						}
+						// If the rule still isn't violated, check all of the declarations
+						if (!ruleViolated) {
+							for(NodeNumPair declarationPair : processor.getVariableDeclarationFragments()) {
+								VariableDeclarationFragment declaration = (VariableDeclarationFragment) declarationPair.getNode();
+								// If the variable being declared is the query string and the right hand
+								// side is not a literal string then the rule has been violated
+								if (declaration.getName().subtreeMatch(new ASTMatcher(), argument)
+										&& !(declaration.getInitializer() instanceof StringLiteral)) {
+									ruleViolated = true;
+									break;
+								}
+							}
+						}
+						parent = parent.getParent();
+					}
+				}
+				else
+					// In this case the argument could have been a simple name
+					ruleViolated = true;
+			}
 		}
 
 		return ruleViolated;
