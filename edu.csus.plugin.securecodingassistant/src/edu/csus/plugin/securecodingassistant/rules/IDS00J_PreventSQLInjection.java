@@ -44,6 +44,7 @@ class IDS00J_PreventSQLInjection implements IRule {
 			else if (Utility.calledMethod(method, Statement.class.getCanonicalName(), "executeQuery")) {
 				// Rule is violated if the argument was created using a compound expression
 				// (anything except for a literal string)
+				// In this first case there is a variable being passed to executeQuery()
 				if (method.arguments().size() > 0
 						&& method.arguments().get(0) instanceof SimpleName) {
 					// The argument in this case would be  the query string being passed to the database
@@ -81,9 +82,12 @@ class IDS00J_PreventSQLInjection implements IRule {
 						parent = parent.getParent();
 					}
 				}
+				// In this case there is another type of argument being sent, the rule
+				// is violated if that argument is anything except a string literal
 				else
 					// In this case the argument could have been a simple name
-					ruleViolated = true;
+					ruleViolated = !(method.arguments().size() > 0
+							&& method.arguments().get(0) instanceof StringLiteral);
 			}
 		}
 
