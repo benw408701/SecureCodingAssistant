@@ -1,14 +1,9 @@
-/**
- * 
- */
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.util.regex.Pattern;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**

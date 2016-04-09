@@ -2,7 +2,6 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
-
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -10,7 +9,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
