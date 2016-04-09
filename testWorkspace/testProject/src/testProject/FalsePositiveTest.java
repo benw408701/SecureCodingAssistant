@@ -1,21 +1,22 @@
 package testProject;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 public class FalsePositiveTest {
 
-	public void testSQL() {
+	@SuppressWarnings({ "null", "unused" })
+	public void testSQL() throws SQLException {
 
 		Connection conn;
-		DataSource pool;
+		DataSource pool = null;
 		Statement stmt;
 		ResultSet rs;
 		boolean loggedIn;
+		String username = null, password = null;
 		
 		conn = pool.getConnection( );
 		String sql = "select * from user where username='" + username +"' and password='" + password + "'";
@@ -30,6 +31,7 @@ public class FalsePositiveTest {
 		
 		
 		// From cwe
+		/*
 		String path = getInputPath();
 		if (path.startsWith("/safe_dir/"))
 		{
@@ -48,16 +50,9 @@ public class FalsePositiveTest {
 
 			// first check to see if the object is of the same class
 			if (obj.getClass().getName().equals(this.getClass().getName())) {
+			*/
 
-			// then compare object fields
-			...
-			if (...) {
-			isEquals = true;
-			}
-			}
 
-			return isEquals;
-			}
 	}
 }
 
