@@ -6,8 +6,11 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: ERR08-J. Do not catch NullPointerException or any of its
  * ancestors
+ * </p>
  * <p>
  * CERT Webiste: Programs must not catch <code>java.lang.NullPointerException</code>.
  * A <code>NullPointerException</code> exception thrown at runtime indicates the existence
@@ -26,8 +29,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * to continue execution after first catching and logging (or worse, suppressing) the
  * exception rarely succeed.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ERR08-J.+Do+not+catch+NullPointerException+or+any+of+its+ancestors">Java Secure Coding Rule: ERR08-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ERR08-J.+Do+not+catch+NullPointerException+or+any+of+its+ancestors">ERR08-J</a>
  */
 class ERR08J_DoNotCatchNullPointerException implements IRule {
 

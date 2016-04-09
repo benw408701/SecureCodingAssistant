@@ -8,15 +8,18 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: STR00-J. Don't form strings containing partial characters from
  * variable-width encodings.
+ * </p>
  * <p>
  * Programmers must not form strings containing partial characters, for example, when converting
  * variable-width encoded character data to strings. Avoid this by not building a text string until
  * confirmed that all data has been read from the buffer.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/STR00-J.+Don%27t+form+strings+containing+partial+characters+from+variable-width+encodings">Java Secure Coding Rule: STR00-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/STR00-J.+Don%27t+form+strings+containing+partial+characters+from+variable-width+encodings">STR00-J</a>
  */
 class STR00J_PartialCharFromVarWidthEnc implements IRule {
 

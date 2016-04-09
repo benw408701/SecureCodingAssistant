@@ -5,8 +5,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: EXP02-J. Do not use the Object.equals() method
  * to compare two arrays
+ * </p>
  * <p>
  * CERT Website: In Java, arrays are objects and support object methods such
  * as <code>Object.equals()</code>. However, arrays do not support any methods
@@ -27,8 +30,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * exists in the use of reference equality operators, the use of the 
  * <code>Object.equals()</code> method to compare two arrays is disallowed.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">Java Secure Coding Rule: EXP02-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">EXP02-J</a>
  */
 class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 

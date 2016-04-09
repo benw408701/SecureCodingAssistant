@@ -12,7 +12,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: IDS11-J. Perform any string modifications before validation
+ * </p>
  * <p>
  * CERT Website: It is important that a string not be modified after validation has occurred because doing 
  * so may allow an attacker to bypass validation. For example, a program may filter out the 
@@ -22,8 +25,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * {@code <script>} tag, but the subsequent removal of the exclamation mark creates a
  * {@code <script>} tag in the input.
  * </p>  
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS11-J.+Perform+any+string+modifications+before+validation">Java Secure Coding Rule: IDS11-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS11-J.+Perform+any+string+modifications+before+validation">IDS11-J</a>
  */
 class IDS11J_ModifyStringsBeforeValidation implements IRule {
 

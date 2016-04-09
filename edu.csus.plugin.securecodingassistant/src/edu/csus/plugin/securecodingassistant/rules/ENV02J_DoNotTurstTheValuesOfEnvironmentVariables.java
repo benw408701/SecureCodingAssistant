@@ -5,7 +5,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: ENV02-J. Do not trust the values of environment variables
+ * </p>
  * <p>
  * CERT Website: Programs that execute in a more trusted domain than their environment must
  * assume that the values of environment variables are untrusted and must sanitize and
@@ -27,8 +30,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * other means, including system properties, that environment variable must not be used.
  * Finally, environment variables must not be used without appropriate validation.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ENV02-J.+Do+not+trust+the+values+of+environment+variables">Java Secure Coding Rule: ENV02-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ENV02-J.+Do+not+trust+the+values+of+environment+variables">ENV02-J</a>
  */
 class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
 

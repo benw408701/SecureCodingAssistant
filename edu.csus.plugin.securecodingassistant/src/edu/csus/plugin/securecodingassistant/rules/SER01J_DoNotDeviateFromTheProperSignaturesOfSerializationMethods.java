@@ -9,8 +9,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: SER01-J. Do not deviate from the proper signatures of
  * serialization methods
+ * </p>
  * <p>
  * CERT Website: Unlike most interfaces, <code>Serializable</code> does not define the
  * method signatures it requires. Interfaces allow only public fields and methods, whereas
@@ -26,8 +29,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * methods must be implemented with specific signatures. They must be declared
  * <code>private</code> so that extending classes cannot invoke or override them.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SER01-J.+Do+not+deviate+from+the+proper+signatures+of+serialization+methods">Java Secure Coding Rule: SER01-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SER01-J.+Do+not+deviate+from+the+proper+signatures+of+serialization+methods">SER01-J</a>
  */
 class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implements IRule {
 

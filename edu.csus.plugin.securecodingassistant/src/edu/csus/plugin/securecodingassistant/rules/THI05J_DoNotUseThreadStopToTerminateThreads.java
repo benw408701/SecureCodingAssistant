@@ -5,7 +5,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: THI05-J. Do not use Thread.stop() to terminate threads
+ * </p>
  * <p>
  * CERT Website: Certain thread APIs were introduced to facilitate thread suspension,
  * resumption, and termination but were later deprecated because of inherent design
@@ -26,8 +29,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * or <code>finally</code> blocks [Sun 1999]. Consequently, programs must not invoke
  * <code>Thread.stop()</code>.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/THI05-J.+Do+not+use+Thread.stop%28%29+to+terminate+threads">Java Secure Coding Rule: THI05-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/THI05-J.+Do+not+use+Thread.stop%28%29+to+terminate+threads">Java Secure Coding Rule: THI05-J</a>
  */
 class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 

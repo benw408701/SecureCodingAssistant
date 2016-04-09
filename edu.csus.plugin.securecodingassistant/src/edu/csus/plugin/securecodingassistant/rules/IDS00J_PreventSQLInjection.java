@@ -14,7 +14,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: IDS00-J. Prevent SQL injection
+ * </p>
  * <p>
  * CERT Website: SQL injection vulnerabilities arise in applications where elements of a SQL query originate
  * from an untrusted source. Without precautions, the untrusted data may maliciously alter
@@ -22,8 +25,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * SQL injection are sanitization and validation, which are typically implemented as parameterized
  * queries and stored procedures.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS00-J.+Prevent+SQL+injection">Java Secure Coding Rule: IDS00-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS00-J.+Prevent+SQL+injection">IDS00-J</a>
  */
 class IDS00J_PreventSQLInjection implements IRule {
 

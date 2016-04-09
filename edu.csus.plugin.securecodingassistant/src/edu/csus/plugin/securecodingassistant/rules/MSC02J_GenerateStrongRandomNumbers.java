@@ -6,7 +6,10 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: MSC02-J. Generate strong random numbers
+ * </p>
  * <p>
  * CERT Website: Pseudorandom number generators (PRNGs) use deterministic mathematical algorithms 
  * to produce a sequence of numbers with good statistical properties. However, the 
@@ -24,8 +27,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * by performing some reconnaissance on the vulnerable target and can then build a 
  * lookup table for estimating future seed values.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">Java Secure Coding Rule: MSC02-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">MSC02-J</a>
  */
 class MSC02J_GenerateStrongRandomNumbers implements IRule {
 

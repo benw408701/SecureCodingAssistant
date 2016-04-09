@@ -10,8 +10,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: LCK09-J. Do not perform operations that can block while
  * holding a lock
+ * </p>
  * <p>
  * CERT Website: Holding locks while performing time-consuming or blocking operations can
  * severely degrade system performance and can result in starvation. Furthermore, deadlock
@@ -30,8 +33,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * added to a queue, assuming that the queue's <code>put()</code> operation incurs little
  * overhead as compared to file I/O [Goetz 2006].
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/LCK09-J.+Do+not+perform+operations+that+can+block+while+holding+a+lock">Java Secure Coding Rule: LCK09-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/LCK09-J.+Do+not+perform+operations+that+can+block+while+holding+a+lock">LCK09-J</a>
  */
 class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule {
 

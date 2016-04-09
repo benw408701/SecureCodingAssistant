@@ -8,8 +8,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: IDS01-J. Normalize strings before validating
  * them
+ * </p>
  * <p>
  * CERT Website: Many applications that accept untrusted input strings employ input filtering
  * and validation mechanisms based on the strings' character data. For example,
@@ -19,8 +22,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * strategy, even though they are insufficient for complete input validation
  * and sanitization.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">Java Secure Coding Rule: IDS01-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">IDS01-J</a>
  *
  */
 class IDS01J_NormalizeStringsBeforeValidating implements IRule {

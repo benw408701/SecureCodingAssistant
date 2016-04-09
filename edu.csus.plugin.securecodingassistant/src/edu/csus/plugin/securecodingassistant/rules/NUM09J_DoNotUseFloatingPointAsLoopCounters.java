@@ -6,13 +6,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: NUM09-J. Do not use floating-point variables as loop counters
+ * </p>
  * <p>
  * Floating point numbers are not an appropriate loop counter since floating point
  * arithmetic does not precisely represent decimal values
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters">Java Secure Coding Rule: NUM09-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters">NUM09-J</a>
  */
 class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 

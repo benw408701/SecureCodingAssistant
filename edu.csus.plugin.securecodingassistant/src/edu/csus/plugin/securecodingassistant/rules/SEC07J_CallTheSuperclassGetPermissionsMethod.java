@@ -7,8 +7,11 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: SEC07-J. Call the superclass's getPermissions() method when
  * writing a custom class loader
+ * </p>
  * <p>
  * CERT Website: When a custom class loader must override the <code>getPermissions()</code>
  * method, the implementation must consult the default system policy by explicitly
@@ -18,8 +21,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * elevated privileges. <code>ClassLoader</code> is abstract and must not be directly
  * subclassed. 
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SEC07-J.+Call+the+superclass%27s+getPermissions%28%29+method+when+writing+a+custom+class+loader">Java Secure Coding Rule: SEC07-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SEC07-J.+Call+the+superclass%27s+getPermissions%28%29+method+when+writing+a+custom+class+loader">SEC07-J</a>
  */
 class SEC07J_CallTheSuperclassGetPermissionsMethod implements IRule {
 

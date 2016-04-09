@@ -7,7 +7,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: EXP00-J. Do not ignore values returned by methods
+ * </p>
  * <p>
  * CERT Website: Methods can return values to communicate failure or success
  * or to update local objects or fields. Security risks can arise when method
@@ -23,8 +26,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * of the error stream is the overloaded single-argument method
  * <code>ProcessBuilder.redirectErrorStream(boolean)</code>.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP00-J.+Do+not+ignore+values+returned+by+methods">Java Secure Coding Rule: EXP00-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP00-J.+Do+not+ignore+values+returned+by+methods">EXP00-J</a>
  */
 class EXP00J_DoNotIgnoreValuesReturnedByMethods implements IRule {
 

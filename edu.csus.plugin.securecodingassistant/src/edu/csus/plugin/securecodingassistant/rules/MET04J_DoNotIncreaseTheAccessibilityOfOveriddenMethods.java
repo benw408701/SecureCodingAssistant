@@ -7,8 +7,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: MET04-J. Do not increase the accessibility of overridden or
  * hidden methods
+ * </p>
  * <p>
  * CERT Website: Increasing the accessibility of overridden or hidden methods permits a
  * malicious subclass to offer wider access to the restricted method than was originally
@@ -17,8 +20,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * cannot be declared final, programs must refrain from increasing the accessibility of
  * overridden methods.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MET04-J.+Do+not+increase+the+accessibility+of+overridden+or+hidden+methods">Java Secure Coding Rule: MET04-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MET04-J.+Do+not+increase+the+accessibility+of+overridden+or+hidden+methods">MET04-J</a>
  */
 class MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods implements IRule {
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description name="Ben White Plugin Update Site" url="http://ecs.csus.edu/~bwhite/plugins">
+   <description name="Ben White Plugin Update Site" url="http://bwprojects.org/SecureCodingPlugin">
       Update site for Secure Coding Assistant
    </description>
-   <feature url="features/edu.csus.feature.securecodingassistant_1.0.0.201602162058.jar" id="edu.csus.feature.securecodingassistant" version="1.0.0.201602162058">
-      <category name="Secure Coding Assistant"/>
+   <feature url="features/edu.csus.feature.securecodingassistant_1.0.0.201604091528.jar" id="edu.csus.feature.securecodingassistant" version="1.0.0.201604091528">
+      <category name="SecureCodingAssistant"/>
    </feature>
-   <category-def name="Secure Coding Assistant" label="Secure Coding Assistant"/>
+   <category-def name="SecureCodingAssistant" label="SecureCodingAssistant"/>
 </site>

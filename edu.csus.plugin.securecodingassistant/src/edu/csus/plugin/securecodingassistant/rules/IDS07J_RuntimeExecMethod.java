@@ -5,16 +5,17 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: IDS07-J. Sanitize untrusted data passed
  * to the <code>Runtime.exec()</code> method
+ * </p>
  * <p>
  * Any command that is sent to <code>Runtime.exec()</code> must be sanitized.
  * Rather than using <code>Runtime.exec()</code>, try some other alternatives.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method">
- * Java Secure Coding Rule: IDS07-J</a>
- *
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method">IDS07-J</a>
  */
 class IDS07J_RuntimeExecMethod implements IRule {
 

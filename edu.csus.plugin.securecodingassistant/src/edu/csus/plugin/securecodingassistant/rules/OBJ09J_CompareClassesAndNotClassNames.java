@@ -6,7 +6,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: OBJ09-J. Compare classes and not class names
+ * </p>
  * <p>
  * CERT Website: In a Java Virtual Machine (JVM), "Two classes are the same class (and
  * consequently the same type) if they are loaded by the same class loader and they
@@ -38,8 +41,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * to be two different classes. Also note that the <code>equals()</code> method might
  * not return true when comparing objects originating from the same codebase.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/OBJ09-J.+Compare+classes+and+not+class+names">Java Secure Coding Rule: OBJ09-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/OBJ09-J.+Compare+classes+and+not+class+names">OBJ09-J</a>
  */
 class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 

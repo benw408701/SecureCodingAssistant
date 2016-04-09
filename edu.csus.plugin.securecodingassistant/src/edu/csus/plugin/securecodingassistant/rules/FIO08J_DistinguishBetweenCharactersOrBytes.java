@@ -8,8 +8,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: FIO08-J. Distinguish between characters or bytes read from a
  * stream and -1
+ * </p>
  * <p>
  * CERT Website: The abstract <code>InputStream.read()</code> and <code>Reader.read()</code>
  * methods are used to read a byte or character, respectively, from a stream. The
@@ -38,8 +41,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * specific instance of NUM12-J. Ensure conversions of numeric types to narrower types
  * do not result in lost or misinterpreted data.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="">Java Secure Coding Rule: </a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1">FIO08-J</a>
  */
 class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 
