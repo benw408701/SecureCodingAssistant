@@ -7,8 +7,11 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
+ * <b><i>The text and/or code below is from the CERT website: <a target="_blank" href="https://www.securecoding.cert.org">https://www.securecoding.cert.org</a></i></b>
+ * <p>
  * Java Secure Coding Rule: DCL02-J. Do not modify the collection's elements during an
  * enhanced for statement
+ * </p>
  * <p>
  * CERT Website: Unlike the basic for statement, assignments to the loop variable fail to affect the
  * loop's iteration order over the underlying set of objects. Consequently, an assignment
@@ -21,8 +24,8 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * Declare all enhanced for statement loop variables final. The final declaration causes
  * Java compilers to flag and reject any assignments made to the loop variable.
  * </p>
- * @author Ben White
- * @see <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/DCL02-J.+Do+not+modify+the+collection%27s+elements+during+an+enhanced+for+statement">Java Secure Coding Rule: DCL02-J</a>
+ * @author Ben White (Plugin Logic), CERT (Rule Definition)
+ * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/DCL02-J.+Do+not+modify+the+collection%27s+elements+during+an+enhanced+for+statement">DCL02-J</a>
  */
 class DCL02J_DoNotModifyElements implements IRule {
 
