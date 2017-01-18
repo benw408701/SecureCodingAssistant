@@ -1,11 +1,18 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.io.Serializable;
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -32,7 +39,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/SER01-J.+Do+not+deviate+from+the+proper+signatures+of+serialization+methods">SER01-J</a>
  */
-class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implements IRule {
+class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -66,6 +73,8 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implement
 						|| methodBinding.getName().equals("writeReplace")))
 					ruleViolated = (methodBinding.getModifiers() & (Modifier.PROTECTED | Modifier.STATIC)) != Modifier.PROTECTED; 
 			}
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		
 		return ruleViolated;
@@ -85,7 +94,7 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implement
 
 	@Override
 	public String getRuleName() {
-		return "SER01-J. Do not deviate from the proper signatures of serialization methods";
+		return Globals.RuleNames.SER01_J;
 	}
 
 	@Override
@@ -97,6 +106,63 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implement
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.SER01_J;
+	}
+	
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
+		if (!violated(node))
+			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
+		
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
+		MethodDeclaration methodDeclaration = (MethodDeclaration)node;
+		String methodName = methodDeclaration.getName().getIdentifier();
+		if (methodName.equals("writeObject") || methodName.equals("readObject") || methodName.equals("readObjectNoData")) {
+			for (Object obj: methodDeclaration.modifiers()) {
+				if (obj instanceof Modifier) {
+					Modifier m = (Modifier)obj;
+					if (m.isProtected() || m.isPublic() || m.isStatic()) {
+						rewrite.remove(m, null);
+					}
+				}
+			}
+			if ((methodDeclaration.getModifiers() & Modifier.PRIVATE) != Modifier.PRIVATE) {
+				Modifier priM = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+				ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
+				listRewrite.insertFirst(priM, null);
+			}
+			
+			list.put("Change method to private", rewrite);
+			
+		} else if (methodName.equals("readResolve") || methodName.equals("writeReplace")) {
+			for (Object obj: methodDeclaration.modifiers()) {
+				if (obj instanceof Modifier) {
+					Modifier m = (Modifier)obj;
+					if (m.isStatic() || m.isPublic() || m.isPrivate()) {
+						rewrite.remove(m, null);
+					}
+				}
+			}
+			if ((methodDeclaration.getModifiers() & Modifier.PROTECTED) != Modifier.PROTECTED) {
+				Modifier priM = ast.newModifier(ModifierKeyword.PROTECTED_KEYWORD);
+				ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
+				listRewrite.insertFirst(priM, null);
+			}
+			
+			list.put("Change to protected and nonstatic method", rewrite);
+		}
+		
+		
+		list.putAll(super.getSolutions(node));
+		return list;
 	}
 
 }

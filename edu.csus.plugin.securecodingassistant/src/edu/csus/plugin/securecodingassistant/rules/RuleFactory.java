@@ -73,6 +73,11 @@ public final class RuleFactory {
 		// 49. Miscellaneous
 		rules.add(new MSC02J_GenerateStrongRandomNumbers());
 		
+		// PreCondition, PostCondition, Invariant check
+		rules.add(new PostConditionCheck());
+		rules.add(new PreConditionCheck());
+		rules.add(new InvariantCheck());
+		
 		return rules;
 	}
 }

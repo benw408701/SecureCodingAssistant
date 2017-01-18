@@ -2,6 +2,7 @@ package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -10,6 +11,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 import edu.csus.plugin.securecodingassistant.rules.RuleFactory;
 
@@ -81,7 +84,11 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			// Clear all existing markers
 			clearMarkers(resource);
 			
+			// Empty all existing solutions
+			Globals.RULE_SOLUTIONS.clear();
+			
 			if (compilation != null) {
+
 				// Create a new NodeVisitor to go through the AST and look for violated rules
 				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, context);
 				compilation.accept(visitor);

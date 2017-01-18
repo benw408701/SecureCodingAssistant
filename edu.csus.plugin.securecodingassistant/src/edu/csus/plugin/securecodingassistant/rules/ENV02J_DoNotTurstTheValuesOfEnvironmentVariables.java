@@ -1,7 +1,14 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -33,17 +40,23 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ENV02-J.+Do+not+trust+the+values+of+environment+variables">ENV02-J</a>
  */
-class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
-
+class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables extends SecureCodingRule {
+	
 	@Override
 	public boolean violated(ASTNode node) {
 		boolean ruleViolated = false;
 		
 		// Is node a method invocation?
-		if(node instanceof MethodInvocation)
+		if(node instanceof MethodInvocation) {
 			// Was System.getenv() called?
 			ruleViolated = Utility.calledMethod((MethodInvocation) node,
 					System.class.getCanonicalName(), "getenv");
+			
+			//if node violates rule, check whether method contains skip rule check
+			if (ruleViolated) {
+				ruleViolated = super.violated(node);
+			}
+		}
 
 		return ruleViolated;
 	}
@@ -58,7 +71,7 @@ class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "ENV02-J. Do not trust the values of environment variables";
+		return Globals.RuleNames.ENV02_J;
 	}
 
 	@Override
@@ -71,4 +84,36 @@ class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+		if (!violated(node))
+			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
+		
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		MethodInvocation oldMethodInvocation = (MethodInvocation)node;
+		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
+		SimpleName name = ast.newSimpleName("System");
+		newMethodInvocation.setExpression(name);
+		newMethodInvocation.setName(ast.newSimpleName("getProperty"));
+		StringLiteral sl = ast.newStringLiteral();
+		sl.setLiteralValue("user.name");
+		newMethodInvocation.arguments().add(sl);
+	
+		rewrite.replace(oldMethodInvocation, newMethodInvocation, null);
+
+
+		TreeMap<String, ASTRewrite> map = new TreeMap<>();
+		map.putAll(super.getSolutions(node));
+		map.put("Change to System.getProperty(\"user.name\")", rewrite);
+		return map;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.ENV02_J;
+	}
+
+	
 }

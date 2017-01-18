@@ -3,10 +3,19 @@ package edu.csus.plugin.securecodingassistant.rules;
 import java.io.Console;
 import java.net.Socket;
 import java.util.List;
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -36,7 +45,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/LCK09-J.+Do+not+perform+operations+that+can+block+while+holding+a+lock">LCK09-J</a>
  */
-class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule {
+class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -65,6 +74,8 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 				}
 				
 			}
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		
 		return ruleViolated;
@@ -84,7 +95,7 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 
 	@Override
 	public String getRuleName() {
-		return "LCK09-J. Do not perform operations that can block while holding a lock";
+		return Globals.RuleNames.LCK09_J;
 	}
 
 	@Override
@@ -99,4 +110,49 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
 
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.LCK09_J;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
+		if (!violated(node))
+			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
+		
+		TreeMap<String, ASTRewrite> map = new TreeMap<>();
+		
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
+		MethodInvocation mi = (MethodInvocation)node;
+		if ("Thread".equals(mi.getExpression().toString()) && "sleep".equals(mi.getName().getIdentifier())) {
+			//get the sleep(time) stmt
+			Statement stmt = SecureCodingNodeVisitor.getStatement(node);
+			//get argument simple name
+			String arg = "";
+			if (mi.arguments() != null && mi.arguments().get(0) != null) {
+				arg = mi.arguments().get(0).toString();
+			}
+			
+			// wait(time)
+			MethodInvocation wait = ast.newMethodInvocation();
+			wait.setName(ast.newSimpleName("wait"));
+			wait.arguments().add(ast.newSimpleName(arg));
+			ExpressionStatement expstmt = ast.newExpressionStatement(wait);
+			
+			SimpleName sn = (SimpleName) rewrite.createStringPlaceholder("/*condition does not hold*/", ASTNode.SIMPLE_NAME);
+			
+			//while(<>) {wait(time);}
+			WhileStatement wstmt = ast.newWhileStatement();
+			wstmt.setExpression(sn);
+			wstmt.setBody(expstmt);
+			
+			rewrite.replace(stmt, wstmt, null);
+			map.put("Remove Thread.sleep", rewrite);
+		}
+		map.putAll(super.getSolutions(node));
+		return map;
+	}
 }

@@ -1,9 +1,12 @@
 package edu.csus.plugin.securecodingassistant.compilation;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+
+import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
 /**
@@ -59,8 +62,13 @@ class SecureNodeAnalyzer extends ASTVisitor {
 	public void preVisit(ASTNode node) {
 		// Iterate through rules
 		for (IRule rule : m_rules)
-			if(rule.violated(node))				
+			if(rule.violated(node))	{
+				Globals.RULE_SOLUTIONS.put(rule.getRuleID() + node.hashCode(), rule.getSolutions(node));
+				if (rule.getICompilationUnit() != null) {
+					Globals.RULE_ICOMPILATIONUNIT.put(rule.getRuleID() + node.hashCode(), rule.getICompilationUnit());
+				}
 				m_insecureCodeSegments.add(new InsecureCodeSegment(node, rule, m_context));
+			}
 	}
 	
 	/**

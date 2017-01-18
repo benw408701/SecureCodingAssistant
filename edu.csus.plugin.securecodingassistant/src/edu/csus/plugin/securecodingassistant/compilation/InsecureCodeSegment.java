@@ -5,6 +5,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 
@@ -42,6 +45,23 @@ class InsecureCodeSegment {
 		int start, end, line;
 		start = node.getStartPosition();
 		end = start + node.getLength();
+		String message_note = String.format("NOTE: The text and/or code below is from the "
+				+ "CERT website https://www.securecoding.cert.org%n%n");
+		
+		//Change start and end position if node break precondition/postcondition/invariant check
+		if (rule.getRuleName().equals(Globals.RuleNames.POSTCONDITION_CHECK)
+				|| rule.getRuleName().equals(Globals.RuleNames.PRECONDITION_CHECK)) {
+			MethodDeclaration md = (MethodDeclaration) node;
+			start = md.getName().getStartPosition();
+			end = md.getBody().getStartPosition();
+			message_note = "";
+		} else if (rule.getRuleName().equals(Globals.RuleNames.INVARIANT_CHECK)) {
+			TypeDeclaration td = (TypeDeclaration) node;
+			start = td.getName().getStartPosition();
+			end = start + td.getName().getLength();
+			message_note = "";
+		}
+		
 		String severity = "";
 		
 		switch (rule.securityLevel()) {
@@ -63,13 +83,9 @@ class InsecureCodeSegment {
 			line = context.getAST8().getLineNumber(start - 1);
 			
 			m_marker = resource.createMarker(Globals.Markers.SECURE_MARKER);
-			m_marker.setAttribute(IMarker.MESSAGE,
-					String.format("Rule violated: %s%nSeverity: %s%n%n"
-							+ "NOTE: The text and/or code below is from the "
-							+ "CERT website https://www.securecoding.cert.org%n%n"
-							+ "Rule description: %s%n"
-							+ "Rule Solution: %s", rule.getRuleName(), severity,
-							rule.getRuleText(), rule.getRuleRecommendation()));
+			m_marker.setAttribute(IMarker.MESSAGE, String.format(
+					"Rule violated: %s%nSeverity: %s%n%n%s" + "Rule description: %s%n" + "Rule Solution: %s",
+					rule.getRuleName(), severity, message_note, rule.getRuleText(), rule.getRuleRecommendation()));
 			m_marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 			m_marker.setAttribute(Globals.Markers.SECURITY_LEVEL, rule.securityLevel());
 			m_marker.setAttribute(IMarker.LINE_NUMBER, line);
@@ -77,7 +93,9 @@ class InsecureCodeSegment {
 			m_marker.setAttribute(IMarker.CHAR_END, end);
 			m_marker.setAttribute(IMarker.LOCATION, String.format("line %d", line));
 			m_marker.setAttribute(Globals.Markers.VIOLATED_RULE, rule.getRuleName());
-			
+			m_marker.setAttribute(Globals.Markers.HASHCODE, node.hashCode());
+			m_marker.setAttribute(Globals.Markers.RULE_ID, rule.getRuleID());
+
 			// Show high security levels as errors, lower as warnings
 			if(rule.securityLevel() == Globals.Markers.SECURITY_LEVEL_HIGH)
 				m_marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);

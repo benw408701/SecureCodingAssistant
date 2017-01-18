@@ -1,8 +1,13 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -32,7 +37,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/ERR08-J.+Do+not+catch+NullPointerException+or+any+of+its+ancestors">ERR08-J</a>
  */
-class ERR08J_DoNotCatchNullPointerException implements IRule {
+class ERR08J_DoNotCatchNullPointerException extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -47,11 +52,17 @@ class ERR08J_DoNotCatchNullPointerException implements IRule {
 					|| exceptionType.equals(RuntimeException.class.getCanonicalName())
 					|| exceptionType.equals(Exception.class.getCanonicalName())
 					|| exceptionType.equals(Throwable.class.getCanonicalName());
+			
+			//if node violates rule, check whether method contains skip rule check
+			if (ruleViolated) {
+				ruleViolated = super.violated(node);
+			}
 		}
 		
 		return ruleViolated;
 	}
 
+	
 	@Override
 	public String getRuleText() {
 		return "Catching a null pointer exception (or any of its ancestors) increases "
@@ -61,7 +72,7 @@ class ERR08J_DoNotCatchNullPointerException implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "ERR08-J. Do not catch NullPointerException or any of its ancestors";
+		return Globals.RuleNames.ERR08_J;
 	}
 
 	@Override
@@ -73,6 +84,27 @@ class ERR08J_DoNotCatchNullPointerException implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
+	}
+
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+		if (!violated(node))
+			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
+				
+		AST ast = node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		rewrite.remove(node, null);
+
+		TreeMap<String, ASTRewrite> list = new TreeMap<String, ASTRewrite>();
+		list.putAll(super.getSolutions(node));
+		list.put("Remove Catch Clause", rewrite);
+		return list;
+	}
+
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.ERR08_J;
 	}
 
 }

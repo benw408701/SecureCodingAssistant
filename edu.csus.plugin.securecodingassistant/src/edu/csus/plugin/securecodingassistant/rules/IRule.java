@@ -1,6 +1,11 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -30,6 +35,12 @@ public interface IRule {
 	public String getRuleName();
 	
 	/**
+	 * The ID of the rule violated
+	 * @return The name of the rule violated
+	 */
+	public String getRuleID();
+	
+	/**
 	 * The recommended action that will satisfy the rule
 	 * @return The recommended action that will satisfy the rule
 	 */
@@ -41,4 +52,9 @@ public interface IRule {
 	 * @see Globals.Markers
 	 */
 	public int securityLevel();
+	
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node);
+	
+	public ICompilationUnit getICompilationUnit();
+	
 }

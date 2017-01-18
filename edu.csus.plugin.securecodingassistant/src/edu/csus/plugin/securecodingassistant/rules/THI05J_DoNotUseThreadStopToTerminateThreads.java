@@ -1,7 +1,12 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -32,7 +37,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/THI05-J.+Do+not+use+Thread.stop%28%29+to+terminate+threads">Java Secure Coding Rule: THI05-J</a>
  */
-class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
+class THI05J_DoNotUseThreadStopToTerminateThreads extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -41,6 +46,9 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 		if (node instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation) node;
 			ruleViolated = Utility.calledMethod(method, Thread.class.getCanonicalName(), "stop");
+			
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		return ruleViolated;
 	}
@@ -61,7 +69,7 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "THI05-J. Do not use Thread.stop() to terminate threads";
+		return Globals.RuleNames.THI05_J;
 	}
 
 	@Override
@@ -74,4 +82,34 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.THI05_J;
+	}
+	
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
+		if (!violated(node))
+			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
+		
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
+		//change thread.stop() to thread.interrupt()
+		MethodInvocation mi = (MethodInvocation)node;
+		MethodInvocation newMI = ast.newMethodInvocation();
+		newMI.setName(ast.newSimpleName("interrupt"));
+		newMI.setExpression(ast.newSimpleName(mi.getExpression().toString()));
+
+		rewrite.replace(mi, newMI, null);
+		
+		list.put("Use Thread.interrupt instead of stop", rewrite);
+		
+		list.putAll(super.getSolutions(node));
+		return list;
+	}
+	
 }

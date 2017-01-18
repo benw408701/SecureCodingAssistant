@@ -1,8 +1,15 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -17,7 +24,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters">NUM09-J</a>
  */
-class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
+class NUM09J_DoNotUseFloatingPointAsLoopCounters extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -38,6 +45,9 @@ class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 					}
 				}
 			}
+			
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		return ruleViolated;
 	}
@@ -50,7 +60,7 @@ class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "NUM09-J. Do not use floating-point variables as loop counters";
+		return Globals.RuleNames.NUM09_J;
 	}
 
 	@Override
@@ -61,6 +71,38 @@ class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.NUM09_J;
+	}
+	
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
+		if (!violated(node))
+			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
+		
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
+		ForStatement fs = (ForStatement)node;
+		for (Object obj: fs.initializers()) {
+			if (obj instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression vde = (VariableDeclarationExpression)obj;
+				if (vde.getType() != null && ("Double".equalsIgnoreCase(vde.getType().toString()) || "Float".equalsIgnoreCase(vde.getType().toString()))) {
+					Type newType = ast.newPrimitiveType(PrimitiveType.INT);
+					Type oldType = vde.getType();
+					rewrite.replace(oldType, newType, null);
+					list.put("Change type to int", rewrite);
+				}
+			}
+		}
+		
+		list.putAll(super.getSolutions(node));
+		return list;
 	}
 
 }

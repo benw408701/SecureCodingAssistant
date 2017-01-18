@@ -28,6 +28,22 @@
       <attribute
             name="edu.csus.plugin.securecodingassistant.securecodingmarker.securityLevel">
       </attribute>
+      <attribute
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.hashCode">
+      </attribute>
+      <attribute
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.ruleId">
+      </attribute>
+   </extension>
+   
+   <extension
+         id="edu.csus.plugin.securecodingassistant.marker.resolution"
+         name="Secure Coding Marker Resolution"
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            class="edu.csus.plugin.securecodingassistant.markerresolution.SecureCodingAssistantMarkerResolutiongenerator"
+            markerType="edu.csus.plugin.securecodingassistant.securecodingmarker">
+      </markerResolutionGenerator>
    </extension>
 
 </plugin>

@@ -1,7 +1,14 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -33,7 +40,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays">EXP02-J</a>
  */
-class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
+class EXP02J_DoNotUseObjectEqualsToCompareArrays extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -47,6 +54,11 @@ class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 					method.getExpression().resolveTypeBinding() != null)
 				ruleViolated = method.getExpression().resolveTypeBinding().isArray()
 						&& method.getName().getFullyQualifiedName().equals("equals");
+			
+			//if node violates rule, check whether method contains skip rule check
+			if (ruleViolated) {
+				ruleViolated = super.violated(node);
+			}
 		}
 		return ruleViolated;
 	}
@@ -62,8 +74,7 @@ class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "EXP02-J. Do not use the Object.equals() method to compare"
-				+ " two arrays";
+		return Globals.RuleNames.EXP02_J;
 	}
 
 	@Override
@@ -83,5 +94,50 @@ class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+		if (!violated(node))
+			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
+
+		AST ast = node.getAST();
+
+		MethodInvocation methodInvocation = (MethodInvocation) node;
+
+		// Solution 1: Arrays.equals(array1, array2);
+		ASTRewrite rewrite1 = ASTRewrite.create(ast);
+		MethodInvocation newMethodInvocation1 = ast.newMethodInvocation();
+		newMethodInvocation1.setExpression(ast.newName("Arrays"));
+		newMethodInvocation1.setName(ast.newSimpleName("equals"));
+
+		newMethodInvocation1.arguments().add((Expression) rewrite1.createCopyTarget(methodInvocation.getExpression()));
+		newMethodInvocation1.arguments()
+				.add((Expression) rewrite1.createCopyTarget((ASTNode) methodInvocation.arguments().get(0)));
+
+		rewrite1.replace(methodInvocation, newMethodInvocation1, null);
+
+		// Solution 2: array1 == array2;
+		ASTRewrite rewrite2 = ASTRewrite.create(ast);
+		InfixExpression infixExpression = ast.newInfixExpression();
+		infixExpression.setLeftOperand((Expression) rewrite2.createCopyTarget(methodInvocation.getExpression()));
+		infixExpression.setOperator(InfixExpression.Operator.EQUALS);
+		infixExpression.setRightOperand(ast.newSimpleName(methodInvocation.arguments().get(0).toString()));
+
+		rewrite2.replace(methodInvocation, infixExpression, null);
+
+		// Add solutions to list;
+		TreeMap<String, ASTRewrite> map = new TreeMap<String, ASTRewrite>();
+		map.putAll(super.getSolutions(node));
+		map.put("Use Arrays.equals() to compare", rewrite1);
+		map.put("Use == to compare", rewrite2);
+		return map;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.EXP02_J;
+	}
+
 
 }

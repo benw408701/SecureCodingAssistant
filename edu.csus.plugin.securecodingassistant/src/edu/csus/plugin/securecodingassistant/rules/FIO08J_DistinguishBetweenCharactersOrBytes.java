@@ -2,9 +2,14 @@ package edu.csus.plugin.securecodingassistant.rules;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -44,7 +49,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1">FIO08-J</a>
  */
-class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
+class FIO08J_DistinguishBetweenCharactersOrBytes extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -64,6 +69,8 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 						|| (castType.equals(char.class.getCanonicalName())
 								&& Utility.calledMethod(method, Reader.class.getCanonicalName(), "read", true));
 			}
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 
 		return ruleViolated;
@@ -81,7 +88,7 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "FIO08-J. Distinguish between characters or bytes read from a stream and -1";
+		return Globals.RuleNames.FIO08_J;
 	}
 
 	@Override
@@ -93,6 +100,32 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.FIO08_J;
+	}
+
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+		if (!violated(node))
+			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
+		
+		// Change "data = (cast)InputStream.read() or (cast)Reader.read()" to "InputStream.read() or Reader.read()"
+		AST ast = node.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
+		
+		CastExpression caseExpression = (CastExpression)node;
+		MethodInvocation oldMethodInvocation = (MethodInvocation)caseExpression.getExpression();
+		MethodInvocation newMethodInvocation = (MethodInvocation) rewrite.createCopyTarget(oldMethodInvocation);
+		rewrite.replace(caseExpression, newMethodInvocation, null);
+
+		TreeMap<String, ASTRewrite> map = new TreeMap<>();
+		map.putAll(super.getSolutions(node));
+		map.put("Remove cast", rewrite);
+		return map;
 	}
 
 }
