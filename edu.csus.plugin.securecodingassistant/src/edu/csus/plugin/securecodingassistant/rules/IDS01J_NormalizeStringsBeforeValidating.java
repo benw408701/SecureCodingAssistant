@@ -96,70 +96,76 @@ class IDS01J_NormalizeStringsBeforeValidating extends SecureCodingRule {
 	@SuppressWarnings("unchecked")
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node)) {
-			throw new IllegalArgumentException("This node doesn't violated " + getRuleID() + " " + getRuleName());
-		}
-		
-		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		//get ast and declare rewrite
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		//get the enclosing block
-		ASTNode blockAST = Utility.getEnclosingNode(node, Block.class);
-		if (blockAST != null && blockAST instanceof Block) {
-			Block block = (Block) blockAST;
-			
-			SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
-			block.accept(visitor);
-			
-			//find the methodInvocations: s = Normalizer.normalize(s, Form.NFKC)
-			ArrayList<String> arguments = new ArrayList<>();
-			arguments.add(String.class.getCanonicalName());
-			arguments.add(Normalizer.Form.NFKC.getClass().getCanonicalName());
-			ArrayList<MethodInvocation> normalizeMIs = visitor.getMethodInvocations("normalize", Normalizer.class.getCanonicalName(), 2, arguments);
-			
-			//create map to map argument name to methodInvocations
-			HashMap<String, MethodInvocation> arguToMI = new HashMap<>();
-			for (MethodInvocation mi: normalizeMIs) {
-				arguToMI.put(mi.arguments().get(0).toString(), mi);
-			}
-			
-			//find the method invocations: Matcher matcher = pattern.matcher(s);
-			ArrayList<String> matcherArgu = new ArrayList<>();
-			matcherArgu.add(String.class.getCanonicalName());
-			ArrayList<MethodInvocation> matchMIs = visitor.getMethodInvocations("matcher", Pattern.class.getCanonicalName(), 1, matcherArgu);
 
-			//find all normalizeMI after matchMI
-			for (MethodInvocation matchMI: matchMIs) {
-				String arg = matchMI.arguments().get(0).toString();
-				int position = matchMI.getStartPosition();
-				MethodInvocation normalizeMI = arguToMI.get(arg);
-				
-				// no normalize MI with this arg or this MI is after matchMI
-				if (normalizeMI == null || normalizeMI.getStartPosition() > position) {
-					if (normalizeMI != null) {
-						rewrite.remove(SecureCodingNodeVisitor.getStatement(normalizeMI), null);
-					} 
-					MethodInvocation newNormalizeMI = ast.newMethodInvocation();
-					newNormalizeMI.setName(ast.newSimpleName("normalize"));
-					newNormalizeMI.setExpression(ast.newSimpleName("Normalizer"));
-					newNormalizeMI.arguments().add(ast.newSimpleName(arg));
-					newNormalizeMI.arguments()
-							.add(ast.newQualifiedName(ast.newName("Form"), ast.newSimpleName("NFKC")));
-					Assignment assign = ast.newAssignment();
-					assign.setLeftHandSide(ast.newSimpleName(arg));
-					assign.setOperator(Operator.ASSIGN);
-					assign.setRightHandSide(newNormalizeMI);
-					ExpressionStatement expStmt = ast.newExpressionStatement(assign);
-					ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-					listRewrite.insertBefore(expStmt, SecureCodingNodeVisitor.getStatement(matchMI), null);
-				}
-			}
-			list.put("Add Normalizer.normalize before Pattern.matcher", rewrite);
-		}
-		
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
 		list.putAll(super.getSolutions(node));
+
+		try {
+			// get ast and declare rewrite
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// get the enclosing block
+			ASTNode blockAST = Utility.getEnclosingNode(node, Block.class);
+			if (blockAST != null && blockAST instanceof Block) {
+				Block block = (Block) blockAST;
+
+				SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
+				block.accept(visitor);
+
+				// find the methodInvocations: s = Normalizer.normalize(s,
+				// Form.NFKC)
+				ArrayList<String> arguments = new ArrayList<>();
+				arguments.add(String.class.getCanonicalName());
+				arguments.add(Normalizer.Form.NFKC.getClass().getCanonicalName());
+				ArrayList<MethodInvocation> normalizeMIs = visitor.getMethodInvocations("normalize",
+						Normalizer.class.getCanonicalName(), 2, arguments);
+
+				// create map to map argument name to methodInvocations
+				HashMap<String, MethodInvocation> arguToMI = new HashMap<>();
+				for (MethodInvocation mi : normalizeMIs) {
+					arguToMI.put(mi.arguments().get(0).toString(), mi);
+				}
+
+				// find the method invocations: Matcher matcher =
+				// pattern.matcher(s);
+				ArrayList<String> matcherArgu = new ArrayList<>();
+				matcherArgu.add(String.class.getCanonicalName());
+				ArrayList<MethodInvocation> matchMIs = visitor.getMethodInvocations("matcher",
+						Pattern.class.getCanonicalName(), 1, matcherArgu);
+
+				// find all normalizeMI after matchMI
+				for (MethodInvocation matchMI : matchMIs) {
+					String arg = matchMI.arguments().get(0).toString();
+					int position = matchMI.getStartPosition();
+					MethodInvocation normalizeMI = arguToMI.get(arg);
+
+					// no normalize MI with this arg or this MI is after matchMI
+					if (normalizeMI == null || normalizeMI.getStartPosition() > position) {
+						if (normalizeMI != null) {
+							rewrite.remove(SecureCodingNodeVisitor.getStatement(normalizeMI), null);
+						}
+						MethodInvocation newNormalizeMI = ast.newMethodInvocation();
+						newNormalizeMI.setName(ast.newSimpleName("normalize"));
+						newNormalizeMI.setExpression(ast.newSimpleName("Normalizer"));
+						newNormalizeMI.arguments().add(ast.newSimpleName(arg));
+						newNormalizeMI.arguments()
+								.add(ast.newQualifiedName(ast.newName("Form"), ast.newSimpleName("NFKC")));
+						Assignment assign = ast.newAssignment();
+						assign.setLeftHandSide(ast.newSimpleName(arg));
+						assign.setOperator(Operator.ASSIGN);
+						assign.setRightHandSide(newNormalizeMI);
+						ExpressionStatement expStmt = ast.newExpressionStatement(assign);
+						ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+						listRewrite.insertBefore(expStmt, SecureCodingNodeVisitor.getStatement(matchMI), null);
+					}
+				}
+				list.put("Add Normalizer.normalize before Pattern.matcher", rewrite);
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return list;
 	}
 

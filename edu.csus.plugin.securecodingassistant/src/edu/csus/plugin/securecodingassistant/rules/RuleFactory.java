@@ -19,7 +19,7 @@ public final class RuleFactory {
 	 * Creates a collection of all possible rules to test
 	 * @return A collection of all possible rules to test
 	 */
-	public static ArrayList<IRule> getAllRules() {
+	public static ArrayList<IRule> getAllCERTRules() {
 		ArrayList<IRule> rules = new ArrayList<IRule>();
 		
 		// 00. Input Validation and Data Sanitization
@@ -73,6 +73,12 @@ public final class RuleFactory {
 		// 49. Miscellaneous
 		rules.add(new MSC02J_GenerateStrongRandomNumbers());
 		
+		return rules;
+	}
+	
+	public static ArrayList<IRule> getAllContractRules() {
+		ArrayList<IRule> rules = new ArrayList<IRule>();
+
 		// PreCondition, PostCondition, Invariant check
 		rules.add(new PostConditionCheck());
 		rules.add(new PreConditionCheck());

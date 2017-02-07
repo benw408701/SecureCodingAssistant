@@ -81,35 +81,38 @@ class NUM07J_DoNotAttemptComparisonsWithNaN extends SecureCodingRule {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		//Double.isNaN(result)
-		MethodInvocation newMI = ast.newMethodInvocation();
-		newMI.setName(ast.newSimpleName("isNaN"));
-		
-		InfixExpression ife = (InfixExpression)node;
-		Expression leftExp = ife.getLeftOperand();
-		Expression rightExp = ife.getRightOperand();
-		if (leftExp instanceof QualifiedName && isNaN((QualifiedName)leftExp)) {
-			newMI.setExpression(ast.newSimpleName(((QualifiedName)leftExp).getQualifier().getFullyQualifiedName()));
-			newMI.arguments().add(rewrite.createCopyTarget(rightExp));
-		} else {
-			newMI.setExpression(ast.newSimpleName(((QualifiedName)rightExp).getQualifier().getFullyQualifiedName()));
-			newMI.arguments().add(rewrite.createCopyTarget(leftExp));
-		}
-		rewrite.replace(ife, newMI, null);
-		
-		list.put("Use .isNaN instead", rewrite);
-		
-		
 		list.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// Double.isNaN(result)
+			MethodInvocation newMI = ast.newMethodInvocation();
+			newMI.setName(ast.newSimpleName("isNaN"));
+
+			InfixExpression ife = (InfixExpression) node;
+			Expression leftExp = ife.getLeftOperand();
+			Expression rightExp = ife.getRightOperand();
+			if (leftExp instanceof QualifiedName && isNaN((QualifiedName) leftExp)) {
+				newMI.setExpression(
+						ast.newSimpleName(((QualifiedName) leftExp).getQualifier().getFullyQualifiedName()));
+				newMI.arguments().add(rewrite.createCopyTarget(rightExp));
+			} else {
+				newMI.setExpression(
+						ast.newSimpleName(((QualifiedName) rightExp).getQualifier().getFullyQualifiedName()));
+				newMI.arguments().add(rewrite.createCopyTarget(leftExp));
+			}
+			rewrite.replace(ife, newMI, null);
+
+			list.put("Use .isNaN instead", rewrite);
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return list;
 	}
 

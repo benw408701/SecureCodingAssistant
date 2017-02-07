@@ -106,63 +106,64 @@ class SEC07J_CallTheSuperclassGetPermissionsMethod extends SecureCodingRule {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		MethodDeclaration methodDeclaration = (MethodDeclaration)node;
-		
-		//get the method's arguments variable name CodeSource cs
-		List<?> paras = methodDeclaration.parameters();
-		SimpleName argu = null;
-		for (Object obj: paras) {
-			if (obj instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration svd = (SingleVariableDeclaration)obj;
-				if (svd.resolveBinding() != null && svd.resolveBinding().getType() != null
-						&& svd.resolveBinding().getType().getBinaryName().equals(CodeSource.class.getCanonicalName())) {
-					argu = svd.getName();
-					break;
+		list.putAll(super.getSolutions(node));
+
+		try {
+			MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+
+			// get the method's arguments variable name CodeSource cs
+			List<?> paras = methodDeclaration.parameters();
+			SimpleName argu = null;
+			for (Object obj : paras) {
+				if (obj instanceof SingleVariableDeclaration) {
+					SingleVariableDeclaration svd = (SingleVariableDeclaration) obj;
+					if (svd.resolveBinding() != null && svd.resolveBinding().getType() != null && svd.resolveBinding()
+							.getType().getBinaryName().equals(CodeSource.class.getCanonicalName())) {
+						argu = svd.getName();
+						break;
+					}
 				}
 			}
-		}
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		//replace all the new Permission with super.getPermissions(argu)
-		ClassInstanceCreationVisitor cicvisitor = new ClassInstanceCreationVisitor();
-		node.accept(cicvisitor);
-		HashSet<ClassInstanceCreation> set = cicvisitor.getClassInstanceCreation();
-		
-		//super.getPermission(argu)
-		SuperMethodInvocation newMI = ast.newSuperMethodInvocation();
-		newMI.setName(ast.newSimpleName("getPermissions"));
-		if (argu != null)
-			newMI.arguments().add(ast.newSimpleName(argu.getIdentifier()));
-		
-		
-		if (set.isEmpty()) {
-			// insert PermissionCollection pc = super.getPermission(argu);
-			VariableDeclarationFragment vdf = ast.newVariableDeclarationFragment();
-			vdf.setName(ast.newSimpleName("permissionCollection"));
-			vdf.setInitializer(newMI);
-			VariableDeclarationStatement vds = ast.newVariableDeclarationStatement(vdf);
-			vds.setType(ast.newSimpleType(ast.newName("PermissionCollection")));
-			
-			Block block = methodDeclaration.getBody();
-			ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertFirst(vds, null);
-		} else {
-			//replace new Permission with super.getPermission(argu)
-			for (ClassInstanceCreation cic: set) {
-				rewrite.replace(cic, newMI, null);
+
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// replace all the new Permission with super.getPermissions(argu)
+			ClassInstanceCreationVisitor cicvisitor = new ClassInstanceCreationVisitor();
+			node.accept(cicvisitor);
+			HashSet<ClassInstanceCreation> set = cicvisitor.getClassInstanceCreation();
+
+			// super.getPermission(argu)
+			SuperMethodInvocation newMI = ast.newSuperMethodInvocation();
+			newMI.setName(ast.newSimpleName("getPermissions"));
+			if (argu != null)
+				newMI.arguments().add(ast.newSimpleName(argu.getIdentifier()));
+
+			if (set.isEmpty()) {
+				// insert PermissionCollection pc = super.getPermission(argu);
+				VariableDeclarationFragment vdf = ast.newVariableDeclarationFragment();
+				vdf.setName(ast.newSimpleName("permissionCollection"));
+				vdf.setInitializer(newMI);
+				VariableDeclarationStatement vds = ast.newVariableDeclarationStatement(vdf);
+				vds.setType(ast.newSimpleType(ast.newName("PermissionCollection")));
+
+				Block block = methodDeclaration.getBody();
+				ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				listRewrite.insertFirst(vds, null);
+			} else {
+				// replace new Permission with super.getPermission(argu)
+				for (ClassInstanceCreation cic : set) {
+					rewrite.replace(cic, newMI, null);
+				}
 			}
+			list.put("Call super.getPermissions()", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		list.put("Call super.getPermissions()", rewrite);
-		
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 	

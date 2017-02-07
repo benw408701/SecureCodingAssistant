@@ -87,26 +87,30 @@ class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables extends SecureCodingRule 
 	@SuppressWarnings("unchecked")
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
 		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		MethodInvocation oldMethodInvocation = (MethodInvocation)node;
-		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
-		SimpleName name = ast.newSimpleName("System");
-		newMethodInvocation.setExpression(name);
-		newMethodInvocation.setName(ast.newSimpleName("getProperty"));
-		StringLiteral sl = ast.newStringLiteral();
-		sl.setLiteralValue("user.name");
-		newMethodInvocation.arguments().add(sl);
-	
-		rewrite.replace(oldMethodInvocation, newMethodInvocation, null);
-
-
 		TreeMap<String, ASTRewrite> map = new TreeMap<>();
 		map.putAll(super.getSolutions(node));
-		map.put("Change to System.getProperty(\"user.name\")", rewrite);
+		
+		try {
+
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+			MethodInvocation oldMethodInvocation = (MethodInvocation) node;
+			MethodInvocation newMethodInvocation = ast.newMethodInvocation();
+			SimpleName name = ast.newSimpleName("System");
+			newMethodInvocation.setExpression(name);
+			newMethodInvocation.setName(ast.newSimpleName("getProperty"));
+			StringLiteral sl = ast.newStringLiteral();
+			sl.setLiteralValue("user.name");
+			newMethodInvocation.arguments().add(sl);
+
+			rewrite.replace(oldMethodInvocation, newMethodInvocation, null);
+
+			map.put("Change to System.getProperty(\"user.name\")", rewrite);
+			
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return map;
 	}
 

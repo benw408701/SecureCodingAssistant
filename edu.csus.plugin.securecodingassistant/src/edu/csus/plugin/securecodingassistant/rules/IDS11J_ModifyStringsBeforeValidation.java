@@ -89,45 +89,49 @@ class IDS11J_ModifyStringsBeforeValidation extends SecureCodingRule {
 	}
 
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		AST ast = node.getAST();
-		
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		//find the argument's simple name
-		MethodInvocation mi = (MethodInvocation) node;
-		List<?> arguments = mi.arguments();
-		
-		if (arguments != null && mi.arguments().get(0) instanceof SimpleName) {
-			String name = mi.arguments().get(0).toString();
-			
-			//find whether there is assignment of with this simple name
-			ASTNode blockNode = Utility.getEnclosingNode(mi, Block.class);
-			if (blockNode != null && blockNode instanceof Block) {
-				Block block = (Block)blockNode;
-				SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
-				block.accept(visitor);
-				
-				HashSet<Assignment> assigns = visitor.getAssignement(name);
-				ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				for (Assignment assign: assigns) {
-					// if assignment is after patter.matches, move it before it. 
-					if (assign.getStartPosition() > mi.getStartPosition()) {
-						Statement stmt_assign = SecureCodingNodeVisitor.getStatement(assign);
-						Statement stmt_mi = SecureCodingNodeVisitor.getStatement(mi);
-						Statement stmt_assign_copy = (Statement) rewrite.createCopyTarget(stmt_assign);
-						rewrite.remove(stmt_assign, null);
-						listRewrite.insertBefore(stmt_assign_copy, stmt_mi, null);
-					}
-				}
-				list.put("Move modification before calling Pattern.matcher() method", rewrite);
-			}
-		}
 		list.putAll(super.getSolutions(node));
+
+		try {
+			AST ast = node.getAST();
+
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// find the argument's simple name
+			MethodInvocation mi = (MethodInvocation) node;
+			List<?> arguments = mi.arguments();
+
+			if (arguments != null && mi.arguments().get(0) instanceof SimpleName) {
+				String name = mi.arguments().get(0).toString();
+
+				// find whether there is assignment of with this simple name
+				ASTNode blockNode = Utility.getEnclosingNode(mi, Block.class);
+				if (blockNode != null && blockNode instanceof Block) {
+					Block block = (Block) blockNode;
+					SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
+					block.accept(visitor);
+
+					HashSet<Assignment> assigns = visitor.getAssignement(name);
+					ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+					for (Assignment assign : assigns) {
+						// if assignment is after patter.matches, move it before
+						// it.
+						if (assign.getStartPosition() > mi.getStartPosition()) {
+							Statement stmt_assign = SecureCodingNodeVisitor.getStatement(assign);
+							Statement stmt_mi = SecureCodingNodeVisitor.getStatement(mi);
+							Statement stmt_assign_copy = (Statement) rewrite.createCopyTarget(stmt_assign);
+							rewrite.remove(stmt_assign, null);
+							listRewrite.insertBefore(stmt_assign_copy, stmt_mi, null);
+						}
+					}
+					list.put("Move modification before calling Pattern.matcher() method", rewrite);
+				}
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return list;
 	}
 

@@ -117,50 +117,50 @@ class MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods extends SecureCodin
 	}
 
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		MethodDeclaration md = (MethodDeclaration)node;
-		
-		IMethodBinding parentMethod = Utility.getSuperClassDeclaration(md.resolveBinding());
-		IMethod parentIM = (IMethod) parentMethod.getJavaElement();
-		icu = parentIM.getCompilationUnit();
-		
-		
-		ASTParser parser= ASTParser.newParser(AST.JLS8); 
-		parser.setSource(icu); 
-		parser.setResolveBindings(true); 
-		//parser.setStatementsRecovery(statementsRecovery); 
-		CompilationUnit cu =  (CompilationUnit) parser.createAST(null);
-		TypeDeclaration typeDeclaration = (TypeDeclaration) cu.types().get(0);
-		MethodDeclaration[] parentMDs = typeDeclaration.getMethods();
-		for (MethodDeclaration parentMD: parentMDs) {
-			if (md.getName().getIdentifier().equals(parentMD.getName().getIdentifier())
-					&& equals(md.parameters(),parentMD.parameters())) {
-				for (Object obj : parentMD.modifiers()) {
-					if (obj instanceof Modifier) {
-						Modifier m = (Modifier) obj;
-						if (m.isProtected()) {
-							AST ast = cu.getAST();
-							ASTRewrite rewrite = ASTRewrite.create(ast);
-							ListRewrite listRewrite = rewrite.getListRewrite(parentMD, MethodDeclaration.MODIFIERS2_PROPERTY);
-							listRewrite.insertAfter(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), m, null);
-							list.put("Add final to super class method", rewrite);
-														
-							break;
+		list.putAll(super.getSolutions(node));
+
+		try {
+			MethodDeclaration md = (MethodDeclaration) node;
+
+			IMethodBinding parentMethod = Utility.getSuperClassDeclaration(md.resolveBinding());
+			IMethod parentIM = (IMethod) parentMethod.getJavaElement();
+			icu = parentIM.getCompilationUnit();
+
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			parser.setSource(icu);
+			parser.setResolveBindings(true);
+			// parser.setStatementsRecovery(statementsRecovery);
+			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+			TypeDeclaration typeDeclaration = (TypeDeclaration) cu.types().get(0);
+			MethodDeclaration[] parentMDs = typeDeclaration.getMethods();
+			for (MethodDeclaration parentMD : parentMDs) {
+				if (md.getName().getIdentifier().equals(parentMD.getName().getIdentifier())
+						&& equals(md.parameters(), parentMD.parameters())) {
+					for (Object obj : parentMD.modifiers()) {
+						if (obj instanceof Modifier) {
+							Modifier m = (Modifier) obj;
+							if (m.isProtected()) {
+								AST ast = cu.getAST();
+								ASTRewrite rewrite = ASTRewrite.create(ast);
+								ListRewrite listRewrite = rewrite.getListRewrite(parentMD,
+										MethodDeclaration.MODIFIERS2_PROPERTY);
+								listRewrite.insertAfter(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), m, null);
+								list.put("Add final to super class method", rewrite);
+
+								break;
+							}
 						}
 					}
+
 				}
-				
 			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		
-		
-	
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 	

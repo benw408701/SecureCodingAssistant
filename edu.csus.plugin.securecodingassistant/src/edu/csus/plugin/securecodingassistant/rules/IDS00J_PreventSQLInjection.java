@@ -142,11 +142,11 @@ class IDS00J_PreventSQLInjection extends SecureCodingRule {
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
 		
 		TreeMap<String, ASTRewrite> list = new TreeMap<String, ASTRewrite>();
-
+		list.putAll(super.getSolutions(node));
+		
+		try {
 		//stmt.executeQuery(sqlString or null)
 		MethodInvocation method = (MethodInvocation)node;
 		AST ast = node.getAST();
@@ -258,27 +258,30 @@ class IDS00J_PreventSQLInjection extends SecureCodingRule {
 						
 						VariableDeclarationFragment sqlStringVDF = visitor.getVariableDeclarationFragment(sqlString);
 						StringLiteral sl = ast.newStringLiteral();
-						sl.setLiteralValue("select * from db_user where username=? and password=?");
-						
-						if (sqlStringVDF != null && sqlStringVDF.getInitializer() != null) {
-							rewrite2.replace(sqlStringVDF.getInitializer(), sl, null);
-						} else {
-							Assignment sqlStringAssign = ast.newAssignment();
-							sqlStringAssign.setLeftHandSide(ast.newSimpleName(sqlString));
-							sqlStringAssign.setOperator(Operator.ASSIGN);
-							sqlStringAssign.setRightHandSide(sl);
-							ExpressionStatement expStmt = ast.newExpressionStatement(sqlStringAssign);
-							ListRewrite listRewrite2 = rewrite2.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-							listRewrite2.insertBefore(expStmt, SecureCodingNodeVisitor.getStatement(mi), null);
+							sl.setLiteralValue("select * from db_user where username=? and password=?");
+
+							if (sqlStringVDF != null && sqlStringVDF.getInitializer() != null) {
+								rewrite2.replace(sqlStringVDF.getInitializer(), sl, null);
+							} else {
+								Assignment sqlStringAssign = ast.newAssignment();
+								sqlStringAssign.setLeftHandSide(ast.newSimpleName(sqlString));
+								sqlStringAssign.setOperator(Operator.ASSIGN);
+								sqlStringAssign.setRightHandSide(sl);
+								ExpressionStatement expStmt = ast.newExpressionStatement(sqlStringAssign);
+								ListRewrite listRewrite2 = rewrite2.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+								listRewrite2.insertBefore(expStmt, SecureCodingNodeVisitor.getStatement(mi), null);
+							}
+							break;
 						}
-						break;
 					}
 				}
+				list.put("Using setString() to pass in user input", rewrite2);
+
 			}
-			list.put("Using setString() to pass in user input", rewrite2);
-			
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 }

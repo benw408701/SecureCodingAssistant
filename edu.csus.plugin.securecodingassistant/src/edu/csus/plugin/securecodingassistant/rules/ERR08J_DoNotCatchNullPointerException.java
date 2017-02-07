@@ -88,16 +88,18 @@ class ERR08J_DoNotCatchNullPointerException extends SecureCodingRule {
 
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
-				
-		AST ast = node.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		rewrite.remove(node, null);
-
 		TreeMap<String, ASTRewrite> list = new TreeMap<String, ASTRewrite>();
 		list.putAll(super.getSolutions(node));
-		list.put("Remove Catch Clause", rewrite);
+
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+			rewrite.remove(node, null);
+
+			list.put("Remove Catch Clause", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return list;
 	}
 

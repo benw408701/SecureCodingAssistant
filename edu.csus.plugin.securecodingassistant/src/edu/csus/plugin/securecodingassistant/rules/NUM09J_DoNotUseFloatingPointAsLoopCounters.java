@@ -79,29 +79,32 @@ class NUM09J_DoNotUseFloatingPointAsLoopCounters extends SecureCodingRule {
 	}
 	
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		ForStatement fs = (ForStatement)node;
-		for (Object obj: fs.initializers()) {
-			if (obj instanceof VariableDeclarationExpression) {
-				VariableDeclarationExpression vde = (VariableDeclarationExpression)obj;
-				if (vde.getType() != null && ("Double".equalsIgnoreCase(vde.getType().toString()) || "Float".equalsIgnoreCase(vde.getType().toString()))) {
-					Type newType = ast.newPrimitiveType(PrimitiveType.INT);
-					Type oldType = vde.getType();
-					rewrite.replace(oldType, newType, null);
-					list.put("Change type to int", rewrite);
+		list.putAll(super.getSolutions(node));
+
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			ForStatement fs = (ForStatement) node;
+			for (Object obj : fs.initializers()) {
+				if (obj instanceof VariableDeclarationExpression) {
+					VariableDeclarationExpression vde = (VariableDeclarationExpression) obj;
+					if (vde.getType() != null && ("Double".equalsIgnoreCase(vde.getType().toString())
+							|| "Float".equalsIgnoreCase(vde.getType().toString()))) {
+						Type newType = ast.newPrimitiveType(PrimitiveType.INT);
+						Type oldType = vde.getType();
+						rewrite.replace(oldType, newType, null);
+						list.put("Change type to int", rewrite);
+					}
 				}
 			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 

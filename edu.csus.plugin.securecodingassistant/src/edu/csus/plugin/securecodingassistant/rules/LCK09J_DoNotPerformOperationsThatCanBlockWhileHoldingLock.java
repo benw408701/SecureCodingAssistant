@@ -117,42 +117,46 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock extends SecureCo
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> map = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		MethodInvocation mi = (MethodInvocation)node;
-		if ("Thread".equals(mi.getExpression().toString()) && "sleep".equals(mi.getName().getIdentifier())) {
-			//get the sleep(time) stmt
-			Statement stmt = SecureCodingNodeVisitor.getStatement(node);
-			//get argument simple name
-			String arg = "";
-			if (mi.arguments() != null && mi.arguments().get(0) != null) {
-				arg = mi.arguments().get(0).toString();
-			}
-			
-			// wait(time)
-			MethodInvocation wait = ast.newMethodInvocation();
-			wait.setName(ast.newSimpleName("wait"));
-			wait.arguments().add(ast.newSimpleName(arg));
-			ExpressionStatement expstmt = ast.newExpressionStatement(wait);
-			
-			SimpleName sn = (SimpleName) rewrite.createStringPlaceholder("/*condition does not hold*/", ASTNode.SIMPLE_NAME);
-			
-			//while(<>) {wait(time);}
-			WhileStatement wstmt = ast.newWhileStatement();
-			wstmt.setExpression(sn);
-			wstmt.setBody(expstmt);
-			
-			rewrite.replace(stmt, wstmt, null);
-			map.put("Remove Thread.sleep", rewrite);
-		}
 		map.putAll(super.getSolutions(node));
+
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			MethodInvocation mi = (MethodInvocation) node;
+			if ("Thread".equals(mi.getExpression().toString()) && "sleep".equals(mi.getName().getIdentifier())) {
+				// get the sleep(time) stmt
+				Statement stmt = SecureCodingNodeVisitor.getStatement(node);
+				// get argument simple name
+				String arg = "";
+				if (mi.arguments() != null && mi.arguments().get(0) != null) {
+					arg = mi.arguments().get(0).toString();
+				}
+
+				// wait(time)
+				MethodInvocation wait = ast.newMethodInvocation();
+				wait.setName(ast.newSimpleName("wait"));
+				wait.arguments().add(ast.newSimpleName(arg));
+				ExpressionStatement expstmt = ast.newExpressionStatement(wait);
+
+				SimpleName sn = (SimpleName) rewrite.createStringPlaceholder("/*condition does not hold*/",
+						ASTNode.SIMPLE_NAME);
+
+				// while(<>) {wait(time);}
+				WhileStatement wstmt = ast.newWhileStatement();
+				wstmt.setExpression(sn);
+				wstmt.setBody(expstmt);
+
+				rewrite.replace(stmt, wstmt, null);
+				map.put("Remove Thread.sleep", rewrite);
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return map;
 	}
 }

@@ -109,9 +109,9 @@ class FIO08J_DistinguishBetweenCharactersOrBytes extends SecureCodingRule {
 
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
-		
+		TreeMap<String, ASTRewrite> map = new TreeMap<>();
+		map.putAll(super.getSolutions(node));
+		try {
 		// Change "data = (cast)InputStream.read() or (cast)Reader.read()" to "InputStream.read() or Reader.read()"
 		AST ast = node.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
@@ -121,10 +121,11 @@ class FIO08J_DistinguishBetweenCharactersOrBytes extends SecureCodingRule {
 		MethodInvocation oldMethodInvocation = (MethodInvocation)caseExpression.getExpression();
 		MethodInvocation newMethodInvocation = (MethodInvocation) rewrite.createCopyTarget(oldMethodInvocation);
 		rewrite.replace(caseExpression, newMethodInvocation, null);
-
-		TreeMap<String, ASTRewrite> map = new TreeMap<>();
-		map.putAll(super.getSolutions(node));
+		
 		map.put("Remove cast", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return map;
 	}
 

@@ -3,6 +3,8 @@ package edu.csus.plugin.securecodingassistant.compilation;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.State;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -11,9 +13,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
+import edu.csus.plugin.securecodingassistant.rules.InvariantCheck;
+import edu.csus.plugin.securecodingassistant.rules.PostConditionCheck;
+import edu.csus.plugin.securecodingassistant.rules.PreConditionCheck;
 import edu.csus.plugin.securecodingassistant.rules.RuleFactory;
 
 /**
@@ -43,7 +50,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	public SecureCompilationParticipant() {
 		super();
 		
-		m_rules = RuleFactory.getAllRules();
+		m_rules = RuleFactory.getAllCERTRules();
 		m_insecureCodeSegments = new ArrayList<InsecureCodeSegment>();
 	}
 	
@@ -87,8 +94,15 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 			// Empty all existing solutions
 			Globals.RULE_SOLUTIONS.clear();
 			
+			if (isContractCheckDisable(compilation)) {
+				removeContractRule();
+				
+			} else {
+				addContractRule();
+			}
+			
 			if (compilation != null) {
-
+				
 				// Create a new NodeVisitor to go through the AST and look for violated rules
 				SecureNodeAnalyzer visitor = new SecureNodeAnalyzer(m_rules, context);
 				compilation.accept(visitor);
@@ -104,6 +118,39 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 
 	}
 	
+	private void addContractRule() {
+		Iterator<IRule> itor = m_rules.iterator();
+		boolean containContractRule = false;
+		while(itor.hasNext()) {
+			IRule rule = itor.next();
+			if (rule instanceof PostConditionCheck || rule instanceof PreConditionCheck || rule instanceof InvariantCheck) {
+				containContractRule = true;
+				break;
+			}
+		}	
+		if (!containContractRule) {
+			m_rules.addAll(RuleFactory.getAllContractRules());
+		}
+	}
+
+	private void removeContractRule() {
+		Iterator<IRule> itor = m_rules.iterator();
+		while(itor.hasNext()) {
+			IRule rule = itor.next();
+			if (rule instanceof PostConditionCheck || rule instanceof PreConditionCheck || rule instanceof InvariantCheck) {
+				itor.remove();
+			}
+		}
+	}
+
+	private boolean isContractCheckDisable(CompilationUnit compilation) {
+		ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+		Command command = service.getCommand("edu.csus.plugin.securecodingassistant.enablecontractchecking");
+		State state = command.getState("org.eclipse.ui.commands.toggleState");
+		boolean isDisable =  (boolean) state.getValue();
+		return isDisable;
+	}
+
 	private void clearMarkers(IResource resource) {
 		Iterator<InsecureCodeSegment> csItr = m_insecureCodeSegments.iterator();
 		while (csItr.hasNext()) {

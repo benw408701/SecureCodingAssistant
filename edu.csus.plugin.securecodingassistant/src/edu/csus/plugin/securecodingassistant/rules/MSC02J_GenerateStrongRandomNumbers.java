@@ -88,23 +88,24 @@ class MSC02J_GenerateStrongRandomNumbers extends SecureCodingRule {
 	}
 	
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		ClassInstanceCreation cic = (ClassInstanceCreation)node;
-		ClassInstanceCreation newCic = ast.newClassInstanceCreation();
-		newCic.setType(ast.newSimpleType(ast.newName(SecureRandom.class.getSimpleName())));
-		
-		rewrite.replace(cic, newCic, null);
-		list.put("Use SecureRandom instead of Random", rewrite);
-		
 		list.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			ClassInstanceCreation cic = (ClassInstanceCreation) node;
+			ClassInstanceCreation newCic = ast.newClassInstanceCreation();
+			newCic.setType(ast.newSimpleType(ast.newName(SecureRandom.class.getSimpleName())));
+
+			rewrite.replace(cic, newCic, null);
+			list.put("Use SecureRandom instead of Random", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return list;
 	}
 

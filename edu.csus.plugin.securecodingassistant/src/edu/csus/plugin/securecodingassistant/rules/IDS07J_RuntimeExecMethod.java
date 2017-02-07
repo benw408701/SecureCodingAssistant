@@ -85,55 +85,57 @@ class IDS07J_RuntimeExecMethod extends SecureCodingRule {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		
-		//solution: remove runtime.exec()
-		ASTRewrite rewrite1 = ASTRewrite.create(ast);
-		rewrite1.remove(node, null);
-		list.put("Remove Runtime.exec()", rewrite1);
-		
-		//solution 2: sanitizes the untrusted user input
-		ASTNode blockAST = Utility.getEnclosingNode(node, Block.class);
-		ASTRewrite rewirte2 = ASTRewrite.create(ast);
-		if (blockAST != null && blockAST instanceof Block) {
-			Block block = (Block) blockAST;
-			
-			//find out the argument
-			List<?> arguments = ((MethodInvocation)node).arguments();
-			if (arguments != null && arguments.get(0) instanceof ASTNode) {
-				ASTNode argument = (ASTNode) arguments.get(0);
-				SimpleNameVisitor smVisitor = new SimpleNameVisitor();
-				argument.accept(smVisitor);
-				HashSet<SimpleName> names = smVisitor.getSimpleNames();
-				if (!names.isEmpty()) {
-					for (SimpleName sn: names) {
-						if (Character.isUpperCase(sn.toString().charAt(0)))
-							continue;
-						MethodInvocation mi = ast.newMethodInvocation();
-						mi.setName(ast.newSimpleName("matches"));
-						mi.setExpression(ast.newSimpleName("Pattern"));
-						mi.arguments().add(ast.newSimpleName("regex"));
-						mi.arguments().add(ast.newSimpleName(sn.getIdentifier()));
-						PrefixExpression pfexp = ast.newPrefixExpression();
-						pfexp.setOperator(Operator.NOT);
-						pfexp.setOperand(mi);
-						IfStatement ifstmt = ast.newIfStatement();
-						ifstmt.setExpression(pfexp);
-						ListRewrite listRewrite = rewirte2.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-						listRewrite.insertBefore(ifstmt, SecureCodingNodeVisitor.getStatement(sn), null);
-					}
-					
-				}
-			}
-			list.put("Sanitizes the untrusted user input", rewirte2);	
-		}
 		list.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+
+			// solution: remove runtime.exec()
+			ASTRewrite rewrite1 = ASTRewrite.create(ast);
+			rewrite1.remove(node, null);
+			list.put("Remove Runtime.exec()", rewrite1);
+
+			// solution 2: sanitizes the untrusted user input
+			ASTNode blockAST = Utility.getEnclosingNode(node, Block.class);
+			ASTRewrite rewirte2 = ASTRewrite.create(ast);
+			if (blockAST != null && blockAST instanceof Block) {
+				Block block = (Block) blockAST;
+
+				// find out the argument
+				List<?> arguments = ((MethodInvocation) node).arguments();
+				if (arguments != null && arguments.get(0) instanceof ASTNode) {
+					ASTNode argument = (ASTNode) arguments.get(0);
+					SimpleNameVisitor smVisitor = new SimpleNameVisitor();
+					argument.accept(smVisitor);
+					HashSet<SimpleName> names = smVisitor.getSimpleNames();
+					if (!names.isEmpty()) {
+						for (SimpleName sn : names) {
+							if (Character.isUpperCase(sn.toString().charAt(0)))
+								continue;
+							MethodInvocation mi = ast.newMethodInvocation();
+							mi.setName(ast.newSimpleName("matches"));
+							mi.setExpression(ast.newSimpleName("Pattern"));
+							mi.arguments().add(ast.newSimpleName("regex"));
+							mi.arguments().add(ast.newSimpleName(sn.getIdentifier()));
+							PrefixExpression pfexp = ast.newPrefixExpression();
+							pfexp.setOperator(Operator.NOT);
+							pfexp.setOperand(mi);
+							IfStatement ifstmt = ast.newIfStatement();
+							ifstmt.setExpression(pfexp);
+							ListRewrite listRewrite = rewirte2.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+							listRewrite.insertBefore(ifstmt, SecureCodingNodeVisitor.getStatement(sn), null);
+						}
+
+					}
+				}
+				list.put("Sanitizes the untrusted user input", rewirte2);
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return list;
 	}
 

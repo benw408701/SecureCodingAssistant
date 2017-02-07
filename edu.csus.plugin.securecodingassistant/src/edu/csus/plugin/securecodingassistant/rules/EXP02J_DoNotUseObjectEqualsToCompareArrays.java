@@ -98,39 +98,42 @@ class EXP02J_DoNotUseObjectEqualsToCompareArrays extends SecureCodingRule {
 	@SuppressWarnings("unchecked")
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
-
-		AST ast = node.getAST();
-
-		MethodInvocation methodInvocation = (MethodInvocation) node;
-
-		// Solution 1: Arrays.equals(array1, array2);
-		ASTRewrite rewrite1 = ASTRewrite.create(ast);
-		MethodInvocation newMethodInvocation1 = ast.newMethodInvocation();
-		newMethodInvocation1.setExpression(ast.newName("Arrays"));
-		newMethodInvocation1.setName(ast.newSimpleName("equals"));
-
-		newMethodInvocation1.arguments().add((Expression) rewrite1.createCopyTarget(methodInvocation.getExpression()));
-		newMethodInvocation1.arguments()
-				.add((Expression) rewrite1.createCopyTarget((ASTNode) methodInvocation.arguments().get(0)));
-
-		rewrite1.replace(methodInvocation, newMethodInvocation1, null);
-
-		// Solution 2: array1 == array2;
-		ASTRewrite rewrite2 = ASTRewrite.create(ast);
-		InfixExpression infixExpression = ast.newInfixExpression();
-		infixExpression.setLeftOperand((Expression) rewrite2.createCopyTarget(methodInvocation.getExpression()));
-		infixExpression.setOperator(InfixExpression.Operator.EQUALS);
-		infixExpression.setRightOperand(ast.newSimpleName(methodInvocation.arguments().get(0).toString()));
-
-		rewrite2.replace(methodInvocation, infixExpression, null);
-
 		// Add solutions to list;
 		TreeMap<String, ASTRewrite> map = new TreeMap<String, ASTRewrite>();
 		map.putAll(super.getSolutions(node));
-		map.put("Use Arrays.equals() to compare", rewrite1);
-		map.put("Use == to compare", rewrite2);
+		try {
+			AST ast = node.getAST();
+
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+
+			// Solution 1: Arrays.equals(array1, array2);
+			ASTRewrite rewrite1 = ASTRewrite.create(ast);
+			MethodInvocation newMethodInvocation1 = ast.newMethodInvocation();
+			newMethodInvocation1.setExpression(ast.newName("Arrays"));
+			newMethodInvocation1.setName(ast.newSimpleName("equals"));
+
+			newMethodInvocation1.arguments()
+					.add((Expression) rewrite1.createCopyTarget(methodInvocation.getExpression()));
+			newMethodInvocation1.arguments()
+					.add((Expression) rewrite1.createCopyTarget((ASTNode) methodInvocation.arguments().get(0)));
+
+			rewrite1.replace(methodInvocation, newMethodInvocation1, null);
+
+			// Solution 2: array1 == array2;
+			ASTRewrite rewrite2 = ASTRewrite.create(ast);
+			InfixExpression infixExpression = ast.newInfixExpression();
+			infixExpression.setLeftOperand((Expression) rewrite2.createCopyTarget(methodInvocation.getExpression()));
+			infixExpression.setOperator(InfixExpression.Operator.EQUALS);
+			infixExpression.setRightOperand(ast.newSimpleName(methodInvocation.arguments().get(0).toString()));
+
+			rewrite2.replace(methodInvocation, infixExpression, null);
+
+			map.put("Use Arrays.equals() to compare", rewrite1);
+			map.put("Use == to compare", rewrite2);
+			
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return map;
 	}
 

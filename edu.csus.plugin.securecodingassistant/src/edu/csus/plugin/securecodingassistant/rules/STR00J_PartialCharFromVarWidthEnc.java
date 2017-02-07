@@ -94,64 +94,68 @@ class STR00J_PartialCharFromVarWidthEnc extends SecureCodingRule {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		//get argument variable name bytesRead = in.read(data, offset, data.length - offset)
-		MethodInvocation methodInvocation = (MethodInvocation)node;
-		SimpleName data = methodInvocation.arguments().size() < 1 ? null : (SimpleName) methodInvocation.arguments().get(0);
-		
-		//get while loop stmt
-		ASTNode whileNode = Utility.getEnclosingNode(node, WhileStatement.class);
-		WhileStatement whilestmt = (WhileStatement)whileNode;
-		
-		//find all new String with data as argument
-		StringInstanceCreationVisitor sicvisitor = new StringInstanceCreationVisitor(data);
-		whilestmt.accept(sicvisitor);
-		
-		HashSet<ClassInstanceCreation> set = sicvisitor.getClassInstanceCreation();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		if (!set.isEmpty()) {
-			//delete all class instance creation
-			for (ClassInstanceCreation cic : set) {
-				Statement stmt = (Statement) SecureCodingNodeVisitor.getStatement(cic);
-				if (stmt != null) {
-					rewrite.remove(stmt, null);
+		list.putAll(super.getSolutions(node));
+
+		try {
+			// get argument variable name bytesRead = in.read(data, offset,
+			// data.length - offset)
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			SimpleName data = methodInvocation.arguments().size() < 1 ? null
+					: (SimpleName) methodInvocation.arguments().get(0);
+
+			// get while loop stmt
+			ASTNode whileNode = Utility.getEnclosingNode(node, WhileStatement.class);
+			WhileStatement whilestmt = (WhileStatement) whileNode;
+
+			// find all new String with data as argument
+			StringInstanceCreationVisitor sicvisitor = new StringInstanceCreationVisitor(data);
+			whilestmt.accept(sicvisitor);
+
+			HashSet<ClassInstanceCreation> set = sicvisitor.getClassInstanceCreation();
+
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			if (!set.isEmpty()) {
+				// delete all class instance creation
+				for (ClassInstanceCreation cic : set) {
+					Statement stmt = (Statement) SecureCodingNodeVisitor.getStatement(cic);
+					if (stmt != null) {
+						rewrite.remove(stmt, null);
+					}
 				}
 			}
+
+			// insert String str = new String(data, 0, offset, "UTF-8");
+			VariableDeclarationFragment vdf = ast.newVariableDeclarationFragment();
+			vdf.setName(ast.newSimpleName("input"));
+			// new String (data, 0, offset, "UTF-8");
+			ClassInstanceCreation cic = ast.newClassInstanceCreation();
+			cic.setType(ast.newSimpleType(ast.newName(String.class.getSimpleName())));
+			if (data != null)
+				cic.arguments().add(ast.newSimpleName(data.getIdentifier()));
+			cic.arguments().add(ast.newNumberLiteral("0"));
+			cic.arguments().add(ast.newName("offset"));
+			StringLiteral sl = ast.newStringLiteral();
+			sl.setLiteralValue("UTF-8");
+			cic.arguments().add(sl);
+			vdf.setInitializer(cic);
+			VariableDeclarationStatement vds = ast.newVariableDeclarationStatement(vdf);
+			vds.setType(ast.newSimpleType(ast.newName(String.class.getSimpleName())));
+
+			ASTNode blockAST = Utility.getEnclosingNode(whileNode, Block.class);
+			if (blockAST instanceof Block) {
+				ListRewrite listRewrite = rewrite.getListRewrite(blockAST, Block.STATEMENTS_PROPERTY);
+				listRewrite.insertAfter(vds, whilestmt, null);
+				list.put("Create String after while loop", rewrite);
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		
-		// insert String str = new String(data, 0, offset, "UTF-8");
-		VariableDeclarationFragment vdf = ast.newVariableDeclarationFragment();
-		vdf.setName(ast.newSimpleName("input"));
-		//new String (data, 0, offset, "UTF-8");
-		ClassInstanceCreation cic = ast.newClassInstanceCreation();
-		cic.setType(ast.newSimpleType(ast.newName(String.class.getSimpleName())));
-		if (data != null )
-			cic.arguments().add(ast.newSimpleName(data.getIdentifier()));
-		cic.arguments().add(ast.newNumberLiteral("0"));
-		cic.arguments().add(ast.newName("offset"));
-		StringLiteral sl = ast.newStringLiteral();
-		sl.setLiteralValue("UTF-8");
-		cic.arguments().add(sl);
-		vdf.setInitializer(cic);
-		VariableDeclarationStatement vds = ast.newVariableDeclarationStatement(vdf);
-		vds.setType(ast.newSimpleType(ast.newName(String.class.getSimpleName())));
-		
-		ASTNode blockAST = Utility.getEnclosingNode(whileNode, Block.class);
-		if (blockAST instanceof Block) {
-			ListRewrite listRewrite = rewrite.getListRewrite(blockAST, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertAfter(vds, whilestmt, null);
-			list.put("Create String after while loop", rewrite);
-		}
-		
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 	

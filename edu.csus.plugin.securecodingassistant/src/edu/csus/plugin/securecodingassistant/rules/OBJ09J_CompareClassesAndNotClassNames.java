@@ -110,54 +110,56 @@ class OBJ09J_CompareClassesAndNotClassNames extends SecureCodingRule {
 	}
 	
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		//x.getClass().getName().equals(y.getClass.getName());
-		MethodInvocation methodInvocation = (MethodInvocation) node;
-		if (methodInvocation.arguments() != null && methodInvocation.arguments().size() == 1) {
-			AST ast = node.getAST();
-			ASTRewrite rewrite = ASTRewrite.create(ast);
-			
-			//x.getClass().getName()
-			MethodInvocation leftMethodInvocation = (MethodInvocation)methodInvocation.getExpression();
-			//x.getClass()
-			Expression exp = leftMethodInvocation.getExpression();
-			
-			//x.getClass() ==
-			InfixExpression ife = ast.newInfixExpression();
-			MethodInvocation newLeftMI = (MethodInvocation) rewrite.createCopyTarget(exp);
-			ife.setOperator(Operator.EQUALS);
-			ife.setLeftOperand(newLeftMI);
-			
-			//y.getClass().getName()  or "com.init.y"
-			Object obj = methodInvocation.arguments().get(0);
-			if (obj instanceof MethodInvocation) {
-				//y.getClass().getName()
-				MethodInvocation argu = (MethodInvocation)obj;
-				
-				//y.getClass()
-				Expression rExp = argu.getExpression();
-				MethodInvocation newRightMI = (MethodInvocation) rewrite.createCopyTarget(rExp);
-				ife.setRightOperand(newRightMI);
-				
-			} else if (obj instanceof StringLiteral) {
-				String rightOp = ((StringLiteral)obj).getLiteralValue();
-				String[] rightOps = rightOp.split("\\.");
-				TypeLiteral tl = ast.newTypeLiteral();
-				tl.setType(ast.newSimpleType(ast.newName(rightOps)));
-				ife.setRightOperand(tl);
-			}
-			rewrite.replace(methodInvocation, ife, null);
-			list.put("Use == to compare class", rewrite);
-			
-		}
-		
-		
 		list.putAll(super.getSolutions(node));
+
+		try {
+			// x.getClass().getName().equals(y.getClass.getName());
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			if (methodInvocation.arguments() != null && methodInvocation.arguments().size() == 1) {
+				AST ast = node.getAST();
+				ASTRewrite rewrite = ASTRewrite.create(ast);
+
+				// x.getClass().getName()
+				MethodInvocation leftMethodInvocation = (MethodInvocation) methodInvocation.getExpression();
+				// x.getClass()
+				Expression exp = leftMethodInvocation.getExpression();
+
+				// x.getClass() ==
+				InfixExpression ife = ast.newInfixExpression();
+				MethodInvocation newLeftMI = (MethodInvocation) rewrite.createCopyTarget(exp);
+				ife.setOperator(Operator.EQUALS);
+				ife.setLeftOperand(newLeftMI);
+
+				// y.getClass().getName() or "com.init.y"
+				Object obj = methodInvocation.arguments().get(0);
+				if (obj instanceof MethodInvocation) {
+					// y.getClass().getName()
+					MethodInvocation argu = (MethodInvocation) obj;
+
+					// y.getClass()
+					Expression rExp = argu.getExpression();
+					MethodInvocation newRightMI = (MethodInvocation) rewrite.createCopyTarget(rExp);
+					ife.setRightOperand(newRightMI);
+
+				} else if (obj instanceof StringLiteral) {
+					String rightOp = ((StringLiteral) obj).getLiteralValue();
+					String[] rightOps = rightOp.split("\\.");
+					TypeLiteral tl = ast.newTypeLiteral();
+					tl.setType(ast.newSimpleType(ast.newName(rightOps)));
+					ife.setRightOperand(tl);
+				}
+				rewrite.replace(methodInvocation, ife, null);
+				list.put("Use == to compare class", rewrite);
+
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return list;
 	}
 

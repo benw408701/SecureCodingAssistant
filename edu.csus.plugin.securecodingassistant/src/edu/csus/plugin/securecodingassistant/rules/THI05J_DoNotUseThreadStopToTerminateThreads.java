@@ -89,26 +89,27 @@ class THI05J_DoNotUseThreadStopToTerminateThreads extends SecureCodingRule {
 	}
 	
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
-		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		//change thread.stop() to thread.interrupt()
-		MethodInvocation mi = (MethodInvocation)node;
-		MethodInvocation newMI = ast.newMethodInvocation();
-		newMI.setName(ast.newSimpleName("interrupt"));
-		newMI.setExpression(ast.newSimpleName(mi.getExpression().toString()));
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
 
-		rewrite.replace(mi, newMI, null);
-		
-		list.put("Use Thread.interrupt instead of stop", rewrite);
-		
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
 		list.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// change thread.stop() to thread.interrupt()
+			MethodInvocation mi = (MethodInvocation) node;
+			MethodInvocation newMI = ast.newMethodInvocation();
+			newMI.setName(ast.newSimpleName("interrupt"));
+			newMI.setExpression(ast.newSimpleName(mi.getExpression().toString()));
+
+			rewrite.replace(mi, newMI, null);
+
+			list.put("Use Thread.interrupt instead of stop", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return list;
 	}
 	

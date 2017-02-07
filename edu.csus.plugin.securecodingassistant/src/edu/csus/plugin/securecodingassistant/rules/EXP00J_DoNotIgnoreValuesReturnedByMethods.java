@@ -92,30 +92,34 @@ class EXP00J_DoNotIgnoreValuesReturnedByMethods extends SecureCodingRule {
 
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-
-		MethodInvocation methodInvocation = (MethodInvocation) node;
-		Type type = null;
-		if (methodInvocation.resolveMethodBinding().getReturnType().isPrimitive()) {
-			type = ast.newPrimitiveType(PrimitiveType.toCode(methodInvocation.resolveMethodBinding().getReturnType().getName()));
-		} else {
-			type = ast.newSimpleType(ast.newName(methodInvocation.resolveMethodBinding().getReturnType().getName()));
-		}
-		
-		SingleVariableDeclaration newVariableDeclaration = ast.newSingleVariableDeclaration();
-		newVariableDeclaration.setName(ast.newSimpleName("returnValue"));
-		newVariableDeclaration.setType(type);
-		newVariableDeclaration.setInitializer((Expression) rewrite.createCopyTarget(methodInvocation));
-
-		rewrite.replace(methodInvocation, newVariableDeclaration, null);
-
 		TreeMap<String, ASTRewrite> map = new TreeMap<String, ASTRewrite>();
 		map.putAll(super.getSolutions(node));
-		map.put("Store return value in variable returnValue", rewrite);
+
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			Type type = null;
+			if (methodInvocation.resolveMethodBinding().getReturnType().isPrimitive()) {
+				type = ast.newPrimitiveType(
+						PrimitiveType.toCode(methodInvocation.resolveMethodBinding().getReturnType().getName()));
+			} else {
+				type = ast
+						.newSimpleType(ast.newName(methodInvocation.resolveMethodBinding().getReturnType().getName()));
+			}
+
+			SingleVariableDeclaration newVariableDeclaration = ast.newSingleVariableDeclaration();
+			newVariableDeclaration.setName(ast.newSimpleName("returnValue"));
+			newVariableDeclaration.setType(type);
+			newVariableDeclaration.setInitializer((Expression) rewrite.createCopyTarget(methodInvocation));
+
+			rewrite.replace(methodInvocation, newVariableDeclaration, null);
+
+			map.put("Store return value in variable returnValue", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return map;
 	}
 

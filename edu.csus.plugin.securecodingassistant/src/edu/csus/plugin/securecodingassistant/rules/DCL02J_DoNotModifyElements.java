@@ -97,22 +97,24 @@ class DCL02J_DoNotModifyElements extends SecureCodingRule {
 
 	@Override
 	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
-		if (!violated(node))
-			throw new IllegalArgumentException("This node doesn't violate rule, so no suggest solution");
-				
+
 		TreeMap<String, ASTRewrite> map = new TreeMap<String, ASTRewrite>();
 		map.putAll(super.getSolutions(node));
-		
-		AST ast = node.getAST();
-		EnhancedForStatement statement = (EnhancedForStatement)node;
-		
-		//Solution 1 add "final" before variable
-		ASTRewrite rewrite1= ASTRewrite.create(ast);
-		SingleVariableDeclaration oldSingleVariableDeclaration = statement.getParameter();
-		ListRewrite listRewrite= rewrite1.getListRewrite(oldSingleVariableDeclaration, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-		listRewrite.insertFirst(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
-		
-		map.put("Add final before variable", rewrite1);
+		try {
+			AST ast = node.getAST();
+			EnhancedForStatement statement = (EnhancedForStatement) node;
+
+			// Solution 1 add "final" before variable
+			ASTRewrite rewrite1 = ASTRewrite.create(ast);
+			SingleVariableDeclaration oldSingleVariableDeclaration = statement.getParameter();
+			ListRewrite listRewrite = rewrite1.getListRewrite(oldSingleVariableDeclaration,
+					SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			listRewrite.insertFirst(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
+
+			map.put("Add final before variable", rewrite1);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 		return map;
 	}
 

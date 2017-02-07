@@ -108,48 +108,51 @@ class MET06J_DoNotInvokeOverridableMethodsInClone extends SecureCodingRule {
 	}
 
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		//get methodDeclaration and typeDeclaration
-		ASTNode mdNode = Utility.getEnclosingNode(node, MethodDeclaration.class);
-		ASTNode tdNode = Utility.getEnclosingNode(node, TypeDeclaration.class);
-		if (mdNode != null && tdNode != null) {
-			AST ast = node.getAST();
-			ASTRewrite rewrite = ASTRewrite.create(ast);
-			
-			SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
-			mdNode.accept(visitor);
-			
-			//get all the methodDeclaration in the class
-			MethodDeclaration[] mds = ((TypeDeclaration)tdNode).getMethods();
-			
-			//find whether the method has been invoked in the clone method
-			for (MethodDeclaration md: mds) {
-				if ((md.getModifiers() & Modifier.FINAL) == 0 && (md.getModifiers() & Modifier.PRIVATE) == 0) {
-					ArrayList<String> arguType = new ArrayList<>();
-					for (Object obj :md.parameters()) {
-						if (obj instanceof SingleVariableDeclaration) {
-							SingleVariableDeclaration svd = (SingleVariableDeclaration)obj;
-							arguType.add(svd.getType().toString());
+		list.putAll(super.getSolutions(node));
+
+		try {
+			// get methodDeclaration and typeDeclaration
+			ASTNode mdNode = Utility.getEnclosingNode(node, MethodDeclaration.class);
+			ASTNode tdNode = Utility.getEnclosingNode(node, TypeDeclaration.class);
+			if (mdNode != null && tdNode != null) {
+				AST ast = node.getAST();
+				ASTRewrite rewrite = ASTRewrite.create(ast);
+
+				SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
+				mdNode.accept(visitor);
+
+				// get all the methodDeclaration in the class
+				MethodDeclaration[] mds = ((TypeDeclaration) tdNode).getMethods();
+
+				// find whether the method has been invoked in the clone method
+				for (MethodDeclaration md : mds) {
+					if ((md.getModifiers() & Modifier.FINAL) == 0 && (md.getModifiers() & Modifier.PRIVATE) == 0) {
+						ArrayList<String> arguType = new ArrayList<>();
+						for (Object obj : md.parameters()) {
+							if (obj instanceof SingleVariableDeclaration) {
+								SingleVariableDeclaration svd = (SingleVariableDeclaration) obj;
+								arguType.add(svd.getType().toString());
+							}
+						}
+						ArrayList<MethodInvocation> mis = visitor.getMethodInvocations(md.getName().getIdentifier(),
+								md.resolveBinding().getDeclaringClass().getBinaryName(), md.parameters().size(),
+								arguType);
+						if (!mis.isEmpty()) {
+							ListRewrite listRewrite = rewrite.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
+							listRewrite.insertLast(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
+							list.put("Add final to the invoked method", rewrite);
 						}
 					}
-					ArrayList<MethodInvocation> mis = visitor.getMethodInvocations(md.getName().getIdentifier(),
-							md.resolveBinding().getDeclaringClass().getBinaryName(), md.parameters().size(), arguType);
-					if (!mis.isEmpty()) {
-						ListRewrite listRewrite = rewrite.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
-						listRewrite.insertLast(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
-						list.put("Add final to the invoked method", rewrite);
-					}
 				}
+
 			}
-			
-			
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		list.putAll(super.getSolutions(node));
+
 		return list;
 	}
 }

@@ -114,54 +114,58 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods extends S
 	}
 	
 	@Override
-	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node){
-		if (!violated(node))
-			throw new IllegalArgumentException("Doesn't violate rule " + getRuleID());
-		
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
 		TreeMap<String, ASTRewrite> list = new TreeMap<>();
-		
-		AST ast = node.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		
-		MethodDeclaration methodDeclaration = (MethodDeclaration)node;
-		String methodName = methodDeclaration.getName().getIdentifier();
-		if (methodName.equals("writeObject") || methodName.equals("readObject") || methodName.equals("readObjectNoData")) {
-			for (Object obj: methodDeclaration.modifiers()) {
-				if (obj instanceof Modifier) {
-					Modifier m = (Modifier)obj;
-					if (m.isProtected() || m.isPublic() || m.isStatic()) {
-						rewrite.remove(m, null);
-					}
-				}
-			}
-			if ((methodDeclaration.getModifiers() & Modifier.PRIVATE) != Modifier.PRIVATE) {
-				Modifier priM = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
-				ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
-				listRewrite.insertFirst(priM, null);
-			}
-			
-			list.put("Change method to private", rewrite);
-			
-		} else if (methodName.equals("readResolve") || methodName.equals("writeReplace")) {
-			for (Object obj: methodDeclaration.modifiers()) {
-				if (obj instanceof Modifier) {
-					Modifier m = (Modifier)obj;
-					if (m.isStatic() || m.isPublic() || m.isPrivate()) {
-						rewrite.remove(m, null);
-					}
-				}
-			}
-			if ((methodDeclaration.getModifiers() & Modifier.PROTECTED) != Modifier.PROTECTED) {
-				Modifier priM = ast.newModifier(ModifierKeyword.PROTECTED_KEYWORD);
-				ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
-				listRewrite.insertFirst(priM, null);
-			}
-			
-			list.put("Change to protected and nonstatic method", rewrite);
-		}
-		
-		
 		list.putAll(super.getSolutions(node));
+
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+			String methodName = methodDeclaration.getName().getIdentifier();
+			if (methodName.equals("writeObject") || methodName.equals("readObject")
+					|| methodName.equals("readObjectNoData")) {
+				for (Object obj : methodDeclaration.modifiers()) {
+					if (obj instanceof Modifier) {
+						Modifier m = (Modifier) obj;
+						if (m.isProtected() || m.isPublic() || m.isStatic()) {
+							rewrite.remove(m, null);
+						}
+					}
+				}
+				if ((methodDeclaration.getModifiers() & Modifier.PRIVATE) != Modifier.PRIVATE) {
+					Modifier priM = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+					ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration,
+							MethodDeclaration.MODIFIERS2_PROPERTY);
+					listRewrite.insertFirst(priM, null);
+				}
+
+				list.put("Change method to private", rewrite);
+
+			} else if (methodName.equals("readResolve") || methodName.equals("writeReplace")) {
+				for (Object obj : methodDeclaration.modifiers()) {
+					if (obj instanceof Modifier) {
+						Modifier m = (Modifier) obj;
+						if (m.isStatic() || m.isPublic() || m.isPrivate()) {
+							rewrite.remove(m, null);
+						}
+					}
+				}
+				if ((methodDeclaration.getModifiers() & Modifier.PROTECTED) != Modifier.PROTECTED) {
+					Modifier priM = ast.newModifier(ModifierKeyword.PROTECTED_KEYWORD);
+					ListRewrite listRewrite = rewrite.getListRewrite(methodDeclaration,
+							MethodDeclaration.MODIFIERS2_PROPERTY);
+					listRewrite.insertFirst(priM, null);
+				}
+
+				list.put("Change to protected and nonstatic method", rewrite);
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
 		return list;
 	}
 
