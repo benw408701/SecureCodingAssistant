@@ -3,7 +3,10 @@ The Secure Coding Assistant is a plugin for the Eclipse Development Environment 
 
 To install the Secure Coding Assistant in Eclipse, go to the Help menu and click on "Install New Software." The update site is http://bwprojects.org/SecureCodingPlugin (do not click the link, it only works in Eclipse).
 
-If you are planning on downloading the source code you will want to use Eclipse IDE for Java Developers 4.5.1 or later with the Plugin Development Environment (PDE) module loaded.
+If you are planning on downloading the source code you will want to use Eclipse IDE for Committers with the Plugin Development Environment (PDE) module loaded.
+
+### Version 2
+Version 2 development branch now available with work from Chen Li supporting "Design by Contract" and quick-correction feature on detected rules violations.
 
 ### Project Documentation
 The following additional project documentation is available at this time
@@ -13,3 +16,4 @@ The following additional project documentation is available at this time
 
 ### Contact Information
 Ben White, ben_white@att.net
+Chen Li, li3@csus.edu
