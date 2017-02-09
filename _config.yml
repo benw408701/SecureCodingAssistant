@@ -1,0 +1,8 @@
+title: Secure Coding Assistant
+description: Eclipse Plugin for Secure Coding Pracitcies
+google_analytics: UA-55219725-2
+show_downloads: true
+theme: jekyll-theme-slate
+
+gems:
+  - jekyll-mentions
