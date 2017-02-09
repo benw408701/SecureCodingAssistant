@@ -10,10 +10,10 @@ Version 2 development branch now available with work from Chen Li supporting "De
 
 ### Project Documentation
 The following additional project documentation is available at this time
-- [Javadoc](http://bwprojects.org/SecureCodingPlugin/doc)
-- [Product Demo](https://youtu.be/-4MC8jB_qwk)
-- [Publication in Conference Proceedings: 2016 National Cyber Summit, Huntsville, AL](http://bwprojects.org/SecureCodingPlugin/NCS16_paper_5.pdf)
+* [Javadoc](http://bwprojects.org/SecureCodingPlugin/doc)
+* [Product Demo](https://youtu.be/-4MC8jB_qwk)
+* [Publication in Conference Proceedings: 2016 National Cyber Summit, Huntsville, AL](http://bwprojects.org/SecureCodingPlugin/NCS16_paper_5.pdf)
 
 ### Contact Information
 Ben White, ben_white@att.net
-Chen Li, li3@csus.edu
+| Chen Li, li3@csus.edu
