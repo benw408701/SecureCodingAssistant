@@ -71,4 +71,9 @@ class ENV02J_DoNotTurstTheValuesOfEnvironmentVariables implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/ENV02-J.+Do+not+trust+the+values+of+environment+variables";
+	}
+
 }

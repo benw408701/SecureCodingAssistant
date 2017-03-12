@@ -94,4 +94,9 @@ class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/OBJ09-J.+Compare+classes+and+not+class+names";
+	}
+
 }

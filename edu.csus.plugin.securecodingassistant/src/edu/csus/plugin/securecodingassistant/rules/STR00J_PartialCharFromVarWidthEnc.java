@@ -72,4 +72,9 @@ class STR00J_PartialCharFromVarWidthEnc implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/STR00-J.+Don%27t+form+strings+containing+partial+characters+from+variable-width+encodings";
+	}
+
 }

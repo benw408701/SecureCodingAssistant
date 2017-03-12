@@ -72,4 +72,9 @@ class NUM07J_DoNotAttemptComparisonsWithNaN implements IRule {
 				&& name.getName().getFullyQualifiedName().equals("NaN");
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/NUM07-J.+Do+not+attempt+comparisons+with+NaN";
+	}
+
 }

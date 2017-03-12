@@ -75,4 +75,9 @@ class EXP00J_DoNotIgnoreValuesReturnedByMethods implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/EXP00-J.+Do+not+ignore+values+returned+by+methods";
+	}
+
 }

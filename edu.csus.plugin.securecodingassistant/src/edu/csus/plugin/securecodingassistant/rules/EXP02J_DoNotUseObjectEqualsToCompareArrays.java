@@ -84,4 +84,9 @@ class EXP02J_DoNotUseObjectEqualsToCompareArrays implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/EXP02-J.+Do+not+use+the+Object.equals%28%29+method+to+compare+two+arrays";
+	}
+
 }

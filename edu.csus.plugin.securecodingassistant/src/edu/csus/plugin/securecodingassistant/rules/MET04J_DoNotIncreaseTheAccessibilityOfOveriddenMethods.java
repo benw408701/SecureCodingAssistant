@@ -89,4 +89,9 @@ class MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/MET04-J.+Do+not+increase+the+accessibility+of+overridden+or+hidden+methods";
+	}
+
 }

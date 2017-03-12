@@ -41,4 +41,10 @@ public interface IRule {
 	 * @see Globals.Markers
 	 */
 	public int securityLevel();
+	
+	/**
+	 * The URL for accessing the rule
+	 * @return The URL for where the rule is defined
+	 */
+	public String getRuleURL();
 }

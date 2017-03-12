@@ -99,4 +99,9 @@ class SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods implement
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/SER01-J.+Do+not+deviate+from+the+proper+signatures+of+serialization+methods";
+	}
+
 }

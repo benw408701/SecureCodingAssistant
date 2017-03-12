@@ -57,4 +57,9 @@ class IDS07J_RuntimeExecMethod implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
+
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/IDS07-J.+Sanitize+untrusted+data+passed+to+the+Runtime.exec%28%29+method";
+	}
 }

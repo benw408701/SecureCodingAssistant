@@ -95,4 +95,9 @@ class FIO08J_DistinguishBetweenCharactersOrBytes implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1";
+	}
+
 }

@@ -74,4 +74,9 @@ class THI05J_DoNotUseThreadStopToTerminateThreads implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
+
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/THI05-J.+Do+not+use+Thread.stop%28%29+to+terminate+threads";
+	}
 }

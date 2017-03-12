@@ -66,9 +66,9 @@ class InsecureCodeSegment {
 			m_marker.setAttribute(IMarker.MESSAGE,
 					String.format("Rule violated: %s%nSeverity: %s%n%n"
 							+ "NOTE: The text and/or code below is from the "
-							+ "CERT website https://www.securecoding.cert.org%n%n"
-							+ "Rule description: %s%n"
-							+ "Rule Solution: %s", rule.getRuleName(), severity,
+							+ "CERT website %s%n%n"
+							+ "Rule description: %s%n%n"
+							+ "Rule Solution: %s", rule.getRuleName(), severity, rule.getRuleURL(),
 							rule.getRuleText(), rule.getRuleRecommendation()));
 			m_marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 			m_marker.setAttribute(Globals.Markers.SECURITY_LEVEL, rule.securityLevel());

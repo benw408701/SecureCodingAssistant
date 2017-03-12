@@ -63,4 +63,9 @@ class NUM09J_DoNotUseFloatingPointAsLoopCounters implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/NUM09-J.+Do+not+use+floating-point+variables+as+loop+counters";
+	}
+
 }

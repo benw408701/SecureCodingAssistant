@@ -119,4 +119,9 @@ class IDS00J_PreventSQLInjection implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
+
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/IDS00-J.+Prevent+SQL+injection";
+	}
 }

@@ -81,4 +81,9 @@ class DCL02J_DoNotModifyElements implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/DCL02-J.+Do+not+modify+the+collection%27s+elements+during+an+enhanced+for+statement";
+	}
+
 }

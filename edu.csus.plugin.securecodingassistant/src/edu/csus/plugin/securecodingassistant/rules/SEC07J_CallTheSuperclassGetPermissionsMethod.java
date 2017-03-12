@@ -80,4 +80,9 @@ class SEC07J_CallTheSuperclassGetPermissionsMethod implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/SEC07-J.+Call+the+superclass%27s+getPermissions%28%29+method+when+writing+a+custom+class+loader";
+	}
+
 }

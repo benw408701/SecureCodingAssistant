@@ -90,4 +90,9 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=34668550";
+	}
+
 }

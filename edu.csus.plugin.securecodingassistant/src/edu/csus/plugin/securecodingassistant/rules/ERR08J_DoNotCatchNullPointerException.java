@@ -75,4 +75,9 @@ class ERR08J_DoNotCatchNullPointerException implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/ERR08-J.+Do+not+catch+NullPointerException+or+any+of+its+ancestors";
+	}
+
 }

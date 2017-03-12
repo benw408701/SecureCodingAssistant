@@ -74,4 +74,9 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them";
+	}
+
 }

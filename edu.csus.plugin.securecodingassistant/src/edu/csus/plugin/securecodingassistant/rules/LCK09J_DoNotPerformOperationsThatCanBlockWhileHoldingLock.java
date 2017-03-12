@@ -99,4 +99,9 @@ class LCK09J_DoNotPerformOperationsThatCanBlockWhileHoldingLock implements IRule
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
 
+	@Override
+	public String getRuleURL() {
+		return "https://www.securecoding.cert.org/confluence/display/java/LCK09-J.+Do+not+perform+operations+that+can+block+while+holding+a+lock";
+	}
+
 }
