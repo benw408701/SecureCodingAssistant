@@ -1,9 +1,16 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -27,15 +34,18 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/DCL02-J.+Do+not+modify+the+collection%27s+elements+during+an+enhanced+for+statement">DCL02-J</a>
  */
-class DCL02J_DoNotModifyElements implements IRule {
-
+class DCL02J_DoNotModifyElements extends SecureCodingRule {
+	
 	@Override
 	public boolean violated(ASTNode node) {
+		
 		boolean ruleViolated = false;
 		
 		if(node instanceof EnhancedForStatement) {
-			ruleViolated = true;
+			
 			EnhancedForStatement statement = (EnhancedForStatement)node;
+			
+			ruleViolated = true;
 			SingleVariableDeclaration dec = statement.getParameter();
 			// Look to see if they declared as final
 			for (Object o : dec.modifiers()) {
@@ -45,6 +55,11 @@ class DCL02J_DoNotModifyElements implements IRule {
 					ruleViolated = false;
 					break;
 				}
+			}
+			
+			//if node violates rule, check whether method contains skip rule check
+			if (ruleViolated) {
+				ruleViolated = super.violated(node);
 			}
 		}
 		
@@ -65,8 +80,7 @@ class DCL02J_DoNotModifyElements implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "DCL02-J. Do not modify the collection's elements during an enhanced for"
-				+ " statement";
+		return Globals.RuleNames.DCL02_J;
 	}
 
 	@Override
@@ -80,6 +94,35 @@ class DCL02J_DoNotModifyElements implements IRule {
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_LOW;
 	}
+
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
+		TreeMap<String, ASTRewrite> map = new TreeMap<String, ASTRewrite>();
+		map.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+			EnhancedForStatement statement = (EnhancedForStatement) node;
+
+			// Solution 1 add "final" before variable
+			ASTRewrite rewrite1 = ASTRewrite.create(ast);
+			SingleVariableDeclaration oldSingleVariableDeclaration = statement.getParameter();
+			ListRewrite listRewrite = rewrite1.getListRewrite(oldSingleVariableDeclaration,
+					SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			listRewrite.insertFirst(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
+
+			map.put("Add final before variable", rewrite1);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+		return map;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.DCL02_J;
+	}
+	
 
 	@Override
 	public String getRuleURL() {

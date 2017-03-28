@@ -1,10 +1,22 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Assignment.Operator;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -26,7 +38,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">IDS01-J</a>
  *
  */
-class IDS01J_NormalizeStringsBeforeValidating implements IRule {
+class IDS01J_NormalizeStringsBeforeValidating extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -42,6 +54,8 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 					argument = (SimpleName)method.arguments().get(0);
 				ruleViolated = Utility.calledPrior(method, Pattern.class.getCanonicalName(), "matcher", argument);
 			}
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		
 		return ruleViolated;
@@ -59,7 +73,7 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "IDS01-J. Normalize strings before validating them";
+		return Globals.RuleNames.IDS01_J;
 	}
 
 	@Override
@@ -72,6 +86,87 @@ class IDS01J_NormalizeStringsBeforeValidating implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.IDS01_J;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		list.putAll(super.getSolutions(node));
+
+		try {
+			// get ast and declare rewrite
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			// get the enclosing block
+			ASTNode blockAST = Utility.getEnclosingNode(node, Block.class);
+			if (blockAST != null && blockAST instanceof Block) {
+				Block block = (Block) blockAST;
+
+				SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
+				block.accept(visitor);
+
+				// find the methodInvocations: s = Normalizer.normalize(s,
+				// Form.NFKC)
+				ArrayList<String> arguments = new ArrayList<>();
+				arguments.add(String.class.getCanonicalName());
+				arguments.add(Normalizer.Form.NFKC.getClass().getCanonicalName());
+				ArrayList<MethodInvocation> normalizeMIs = visitor.getMethodInvocations("normalize",
+						Normalizer.class.getCanonicalName(), 2, arguments);
+
+				// create map to map argument name to methodInvocations
+				HashMap<String, MethodInvocation> arguToMI = new HashMap<>();
+				for (MethodInvocation mi : normalizeMIs) {
+					arguToMI.put(mi.arguments().get(0).toString(), mi);
+				}
+
+				// find the method invocations: Matcher matcher =
+				// pattern.matcher(s);
+				ArrayList<String> matcherArgu = new ArrayList<>();
+				matcherArgu.add(String.class.getCanonicalName());
+				ArrayList<MethodInvocation> matchMIs = visitor.getMethodInvocations("matcher",
+						Pattern.class.getCanonicalName(), 1, matcherArgu);
+
+				// find all normalizeMI after matchMI
+				for (MethodInvocation matchMI : matchMIs) {
+					String arg = matchMI.arguments().get(0).toString();
+					int position = matchMI.getStartPosition();
+					MethodInvocation normalizeMI = arguToMI.get(arg);
+
+					// no normalize MI with this arg or this MI is after matchMI
+					if (normalizeMI == null || normalizeMI.getStartPosition() > position) {
+						if (normalizeMI != null) {
+							rewrite.remove(SecureCodingNodeVisitor.getStatement(normalizeMI), null);
+						}
+						MethodInvocation newNormalizeMI = ast.newMethodInvocation();
+						newNormalizeMI.setName(ast.newSimpleName("normalize"));
+						newNormalizeMI.setExpression(ast.newSimpleName("Normalizer"));
+						newNormalizeMI.arguments().add(ast.newSimpleName(arg));
+						newNormalizeMI.arguments()
+								.add(ast.newQualifiedName(ast.newName("Form"), ast.newSimpleName("NFKC")));
+						Assignment assign = ast.newAssignment();
+						assign.setLeftHandSide(ast.newSimpleName(arg));
+						assign.setOperator(Operator.ASSIGN);
+						assign.setRightHandSide(newNormalizeMI);
+						ExpressionStatement expStmt = ast.newExpressionStatement(assign);
+						ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+						listRewrite.insertBefore(expStmt, SecureCodingNodeVisitor.getStatement(matchMI), null);
+					}
+				}
+				list.put("Add Normalizer.normalize before Pattern.matcher", rewrite);
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+		return list;
 	}
 
 	@Override

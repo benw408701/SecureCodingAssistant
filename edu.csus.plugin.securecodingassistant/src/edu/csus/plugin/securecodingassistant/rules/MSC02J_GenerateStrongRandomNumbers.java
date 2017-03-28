@@ -1,8 +1,14 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.security.SecureRandom;
 import java.util.Random;
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -30,7 +36,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers">MSC02-J</a>
  */
-class MSC02J_GenerateStrongRandomNumbers implements IRule {
+class MSC02J_GenerateStrongRandomNumbers extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -41,6 +47,8 @@ class MSC02J_GenerateStrongRandomNumbers implements IRule {
 			ruleViolated = instance.getType() != null &&
 					instance.getType().resolveBinding() != null &&
 					instance.getType().resolveBinding().getQualifiedName().equals(Random.class.getCanonicalName());
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
 		return ruleViolated;
 	}
@@ -60,7 +68,7 @@ class MSC02J_GenerateStrongRandomNumbers implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "MSC02-J. Generate strong random numbers";
+		return Globals.RuleNames.MSC02_J;
 	}
 
 	@Override
@@ -72,6 +80,33 @@ class MSC02J_GenerateStrongRandomNumbers implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_HIGH;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.MSC02_J;
+	}
+	
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		list.putAll(super.getSolutions(node));
+		try {
+			AST ast = node.getAST();
+			ASTRewrite rewrite = ASTRewrite.create(ast);
+
+			ClassInstanceCreation cic = (ClassInstanceCreation) node;
+			ClassInstanceCreation newCic = ast.newClassInstanceCreation();
+			newCic.setType(ast.newSimpleType(ast.newName(SecureRandom.class.getSimpleName())));
+
+			rewrite.replace(cic, newCic, null);
+			list.put("Use SecureRandom instead of Random", rewrite);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		return list;
 	}
 
 	@Override

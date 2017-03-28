@@ -28,6 +28,76 @@
       <attribute
             name="edu.csus.plugin.securecodingassistant.securecodingmarker.securityLevel">
       </attribute>
+      <attribute
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.hashCode">
+      </attribute>
+      <attribute
+            name="edu.csus.plugin.securecodingassistant.securecodingmarker.ruleId">
+      </attribute>
    </extension>
+   
+   <extension
+         id="edu.csus.plugin.securecodingassistant.marker.resolution"
+         name="Secure Coding Marker Resolution"
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            class="edu.csus.plugin.securecodingassistant.markerresolution.SecureCodingAssistantMarkerResolutiongenerator"
+            markerType="edu.csus.plugin.securecodingassistant.securecodingmarker">
+      </markerResolutionGenerator>
+   </extension>
+   <extension
+         id="edu.csus.plugin.securecodingassistant.menus"
+         name="Secure Coding Assistant Menus"
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="edu.csus.plugin.securecodingassistant.menu"
+               label="SecureCodingAssistant">
+            <command
+                  commandId="edu.csus.plugin.securecodingassistant.exportannotation"
+                  id="edu.csus.plugin.securecodingassistant.exportannotationbutton"
+                  label="Export Contract Annotation"
+                  tooltip="Export the method signature and contract annotation to project output">
+            </command>
+            <command
+                  commandId="edu.csus.plugin.securecodingassistant.enablecontractchecking"
+                  id="edu.csus.plugin.securecodingassistant.enablecontractcheckingbutton"
+                  label="Disable Design by Contract Enforcemant"
+                  style="toggle"
+                  tooltip="Disable the requirement of applying Design by Contract Methodology to source code. However, Contracts will be checked if not removed ">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         id="edu.csus.plugin.securecodingassistant.command"
+         point="org.eclipse.ui.commands">
+      <command
+            id="edu.csus.plugin.securecodingassistant.exportannotation"
+            name="Export Annotation Command">
+      </command>
+      <command
+            id="edu.csus.plugin.securecodingassistant.enablecontractchecking"
+            name="Disable Design by Contract Enforcemant Command">
+         <state
+               class="org.eclipse.ui.handlers.RegistryToggleState:false"
+               id="org.eclipse.ui.commands.toggleState">
+         </state>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="edu.csus.plugin.securecodingassistant.commandhandler.ExportContractCommandHandler"
+            commandId="edu.csus.plugin.securecodingassistant.exportannotation">
+      </handler>
+      <handler
+            class="edu.csus.plugin.securecodingassistant.commandhandler.EnableContractCheckingCommandHandler"
+            commandId="edu.csus.plugin.securecodingassistant.enablecontractchecking">
+      </handler>
+   </extension>
+   
 
 </plugin>

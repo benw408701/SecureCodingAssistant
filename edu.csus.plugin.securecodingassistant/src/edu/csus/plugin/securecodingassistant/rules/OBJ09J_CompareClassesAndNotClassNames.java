@@ -1,8 +1,17 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -44,7 +53,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/display/java/OBJ09-J.+Compare+classes+and+not+class+names">OBJ09-J</a>
  */
-class OBJ09J_CompareClassesAndNotClassNames implements IRule {
+class OBJ09J_CompareClassesAndNotClassNames extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -64,10 +73,11 @@ class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 					ruleViolated = Utility.calledMethod(outerMethod, Class.class.getCanonicalName(), "getName");
 				}
 			}
+			
+			if (ruleViolated)
+				ruleViolated = super.violated(node);
 		}
-		
 
-		
 		int.class.getName().equals(Integer.class.getName());
 		return ruleViolated;
 	}
@@ -80,7 +90,7 @@ class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "OBJ09-J. Compare classes and not class names";
+		return Globals.RuleNames.OBJ09_J;
 	}
 
 	@Override
@@ -92,6 +102,65 @@ class OBJ09J_CompareClassesAndNotClassNames implements IRule {
 	@Override
 	public int securityLevel() {
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
+	}
+
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.OBJ09_J;
+	}
+	
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		list.putAll(super.getSolutions(node));
+
+		try {
+			// x.getClass().getName().equals(y.getClass.getName());
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			if (methodInvocation.arguments() != null && methodInvocation.arguments().size() == 1) {
+				AST ast = node.getAST();
+				ASTRewrite rewrite = ASTRewrite.create(ast);
+
+				// x.getClass().getName()
+				MethodInvocation leftMethodInvocation = (MethodInvocation) methodInvocation.getExpression();
+				// x.getClass()
+				Expression exp = leftMethodInvocation.getExpression();
+
+				// x.getClass() ==
+				InfixExpression ife = ast.newInfixExpression();
+				MethodInvocation newLeftMI = (MethodInvocation) rewrite.createCopyTarget(exp);
+				ife.setOperator(Operator.EQUALS);
+				ife.setLeftOperand(newLeftMI);
+
+				// y.getClass().getName() or "com.init.y"
+				Object obj = methodInvocation.arguments().get(0);
+				if (obj instanceof MethodInvocation) {
+					// y.getClass().getName()
+					MethodInvocation argu = (MethodInvocation) obj;
+
+					// y.getClass()
+					Expression rExp = argu.getExpression();
+					MethodInvocation newRightMI = (MethodInvocation) rewrite.createCopyTarget(rExp);
+					ife.setRightOperand(newRightMI);
+
+				} else if (obj instanceof StringLiteral) {
+					String rightOp = ((StringLiteral) obj).getLiteralValue();
+					String[] rightOps = rightOp.split("\\.");
+					TypeLiteral tl = ast.newTypeLiteral();
+					tl.setType(ast.newSimpleType(ast.newName(rightOps)));
+					ife.setRightOperand(tl);
+				}
+				rewrite.replace(methodInvocation, ife, null);
+				list.put("Use == to compare class", rewrite);
+
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		return list;
 	}
 
 	@Override

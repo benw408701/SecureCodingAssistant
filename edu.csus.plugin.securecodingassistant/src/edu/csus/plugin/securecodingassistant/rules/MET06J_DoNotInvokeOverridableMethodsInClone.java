@@ -1,10 +1,20 @@
 package edu.csus.plugin.securecodingassistant.rules;
 
+import java.util.ArrayList;
+import java.util.TreeMap;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 
 /**
@@ -25,7 +35,7 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * @author Ben White (Plugin Logic), CERT (Rule Definition)
  * @see Java Secure Coding Rule defined by CERT: <a target="_blank" href="https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=34668550">MET06-J</a>
  */
-class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
+class MET06J_DoNotInvokeOverridableMethodsInClone extends SecureCodingRule {
 
 	@Override
 	public boolean violated(ASTNode node) {
@@ -56,6 +66,8 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 							(method.resolveMethodBinding().getModifiers() & Modifier.FINAL) == 0 &&
 							(method.resolveMethodBinding().getModifiers() & Modifier.PRIVATE) == 0;
 				}
+				if (ruleViolated)
+					ruleViolated = super.violated(node);
 			}
 		}
 		
@@ -76,7 +88,7 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 
 	@Override
 	public String getRuleName() {
-		return "MET06-J. Do not invoke overridable methods in clone()";
+		return Globals.RuleNames.MET06_J;
 	}
 
 	@Override
@@ -94,5 +106,59 @@ class MET06J_DoNotInvokeOverridableMethodsInClone implements IRule {
 	public String getRuleURL() {
 		return "https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=34668550";
 	}
+	
+	@Override
+	public String getRuleID() {
+		return Globals.RuleID.MET06_J;
+	}
 
+
+	@Override
+	public TreeMap<String, ASTRewrite> getSolutions(ASTNode node) {
+
+		TreeMap<String, ASTRewrite> list = new TreeMap<>();
+		list.putAll(super.getSolutions(node));
+
+		try {
+			// get methodDeclaration and typeDeclaration
+			ASTNode mdNode = Utility.getEnclosingNode(node, MethodDeclaration.class);
+			ASTNode tdNode = Utility.getEnclosingNode(node, TypeDeclaration.class);
+			if (mdNode != null && tdNode != null) {
+				AST ast = node.getAST();
+				ASTRewrite rewrite = ASTRewrite.create(ast);
+
+				SecureCodingNodeVisitor visitor = new SecureCodingNodeVisitor();
+				mdNode.accept(visitor);
+
+				// get all the methodDeclaration in the class
+				MethodDeclaration[] mds = ((TypeDeclaration) tdNode).getMethods();
+
+				// find whether the method has been invoked in the clone method
+				for (MethodDeclaration md : mds) {
+					if ((md.getModifiers() & Modifier.FINAL) == 0 && (md.getModifiers() & Modifier.PRIVATE) == 0) {
+						ArrayList<String> arguType = new ArrayList<>();
+						for (Object obj : md.parameters()) {
+							if (obj instanceof SingleVariableDeclaration) {
+								SingleVariableDeclaration svd = (SingleVariableDeclaration) obj;
+								arguType.add(svd.getType().toString());
+							}
+						}
+						ArrayList<MethodInvocation> mis = visitor.getMethodInvocations(md.getName().getIdentifier(),
+								md.resolveBinding().getDeclaringClass().getBinaryName(), md.parameters().size(),
+								arguType);
+						if (!mis.isEmpty()) {
+							ListRewrite listRewrite = rewrite.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
+							listRewrite.insertLast(ast.newModifier(ModifierKeyword.FINAL_KEYWORD), null);
+							list.put("Add final to the invoked method", rewrite);
+						}
+					}
+				}
+
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		return list;
+	}
 }
