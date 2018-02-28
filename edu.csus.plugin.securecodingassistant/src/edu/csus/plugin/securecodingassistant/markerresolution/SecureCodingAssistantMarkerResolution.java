@@ -2,10 +2,13 @@ package edu.csus.plugin.securecodingassistant.markerresolution;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+
+//JDT imports
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;

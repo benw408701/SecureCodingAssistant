@@ -3,10 +3,19 @@ package edu.csus.plugin.securecodingassistant.compilation;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
+//JDT imports
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+//CDT imports
+//import org.eclipse.jdt.core.compiler.ReconcileContext;
+//import org.eclipse.cdt.core.dom.ast.IASTNode;
+//import org.eclipse.jdt.core.dom.MethodDeclaration;
+//import org.eclipse.jdt.core.dom.TypeDeclaration;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.rules.IRule;
 import edu.csus.plugin.securecodingassistant.rules.SecureCodingRule;

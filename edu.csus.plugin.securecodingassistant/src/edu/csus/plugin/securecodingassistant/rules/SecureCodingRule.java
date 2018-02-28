@@ -126,6 +126,7 @@ public abstract class SecureCodingRule implements IRule{
 		return null;
 	}
 	
+	
 	/**
 	 * The URL for accessing the rule
 	 * @return The URL for where the rule is defined

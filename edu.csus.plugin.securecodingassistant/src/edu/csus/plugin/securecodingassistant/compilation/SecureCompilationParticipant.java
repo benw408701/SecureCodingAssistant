@@ -60,6 +60,7 @@ public class SecureCompilationParticipant extends CompilationParticipant {
 	 * @return Always returns <code>true</code>
 	 */
 	public boolean isActive(IJavaProject project) {
+		System.out.println("I am inside isActive");
 		return true;
 	}
 	

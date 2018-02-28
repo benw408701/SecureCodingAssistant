@@ -39,6 +39,8 @@ public class ExportContractCommandHandler extends AbstractHandler {
 		
 			IEditorInput editorInput = HandlerUtil.getActiveEditorInput(event);
 			ICompilationUnit compilationUnit = JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput);
+			
+			//ITranslationUnit translationUnit =
 
 			ASTParser parser = ASTParser.newParser(AST.JLS8);
 			parser.setSource(compilationUnit);

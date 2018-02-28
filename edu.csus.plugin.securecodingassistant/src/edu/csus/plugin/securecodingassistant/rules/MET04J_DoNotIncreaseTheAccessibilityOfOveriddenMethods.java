@@ -1,5 +1,4 @@
 package edu.csus.plugin.securecodingassistant.rules;
-
 import java.util.List;
 import java.util.TreeMap;
 

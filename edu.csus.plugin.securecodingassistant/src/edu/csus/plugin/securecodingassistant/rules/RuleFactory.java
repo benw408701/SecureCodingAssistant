@@ -46,6 +46,7 @@ public final class RuleFactory {
 		rules.add(new OBJ09J_CompareClassesAndNotClassNames());
 		
 		// 06. Methods
+		
 		rules.add(new MET04J_DoNotIncreaseTheAccessibilityOfOveriddenMethods());
 		rules.add(new MET06J_DoNotInvokeOverridableMethodsInClone());
 		
@@ -62,7 +63,7 @@ public final class RuleFactory {
 		rules.add(new FIO08J_DistinguishBetweenCharactersOrBytes());
 		
 		// 14. Serialization
-		rules.add(new SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods());
+		//rules.add(new SER01J_DoNotDeviateFromTheProperSignaturesOfSerializationMethods());
 		
 		// 15. Platform Security
 		rules.add(new SEC07J_CallTheSuperclassGetPermissionsMethod());
@@ -73,6 +74,7 @@ public final class RuleFactory {
 		// 49. Miscellaneous
 		rules.add(new MSC02J_GenerateStrongRandomNumbers());
 		
+				
 		return rules;
 	}
 	
