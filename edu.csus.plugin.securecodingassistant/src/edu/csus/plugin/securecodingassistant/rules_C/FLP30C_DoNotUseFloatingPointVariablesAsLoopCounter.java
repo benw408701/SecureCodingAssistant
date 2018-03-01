@@ -3,7 +3,6 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 
@@ -12,19 +11,15 @@ import edu.csus.plugin.securecodingassistant.Globals;
 public class FLP30C_DoNotUseFloatingPointVariablesAsLoopCounter implements IRule_C {
 
 	private boolean ruleViolated = false;
-	private IASTNode[] childrenForLoop;
-	private String firstForLoopVar;
-	private IASTTranslationUnit ITU;
 	
 	private IASTNode nodeToVisit;
 	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		ruleViolated = false;
-		firstForLoopVar = null;
 		nodeToVisit = null;
 
-		if(node.getContainingFilename().contains("FLP30"))
+		if(node.getFileLocation().getContextInclusionStatement() == null)
 		{
 			
 		

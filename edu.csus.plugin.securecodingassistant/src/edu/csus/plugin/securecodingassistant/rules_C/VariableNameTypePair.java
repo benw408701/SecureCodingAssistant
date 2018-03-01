@@ -5,6 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 /**
@@ -205,14 +206,8 @@ public class VariableNameTypePair {
 	 */
 	private IASTNode findScope(IASTNode astN)
 	{
-		IASTNode parent = astN;
 		
-		while(!(parent instanceof IASTTranslationUnit) && !(parent instanceof IASTFunctionDeclarator))
-		{
-			parent = parent.getParent();
-		}
-		
-		return parent;
+		return Utility_C.getScope(astN);
 	}
 	
 	

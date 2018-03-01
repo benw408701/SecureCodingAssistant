@@ -17,6 +17,8 @@ import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
+import org.eclipse.cdt.core.dom.ast.IASTToken;
+import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 
 //import edu.csus.plugin.securecodingassistant.rules.NodeNumPair;
 
@@ -85,6 +87,19 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 	private ArrayList<NodeNumPair_C> ifStatement;
 	
 	/**
+	 * List of all Conditional Expressions
+	 * 
+	 */
+	private ArrayList<NodeNumPair_C> conditionalExpression;
+	
+	/**
+	 * List of all computation Expressions
+	 * 
+	 */
+	private ArrayList<NodeNumPair_C> computationExpression;
+	
+	
+	/**
 	 * List of all Binary Expressions
 	 * 
 	 */
@@ -116,6 +131,7 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 		this.shouldVisitDeclarations = true;
 		this.shouldVisitExpressions = true;
 		this.shouldVisitAmbiguousNodes = true;
+		this.shouldVisitParameterDeclarations = true;
 		
 		variableDeclarations = new ArrayList<NodeNumPair_C>();
 		functionDefintions = new ArrayList<NodeNumPair_C>();
@@ -123,6 +139,10 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 		assignmentStatements = new ArrayList<NodeNumPair_C>();
 		caseStatement = new ArrayList<NodeNumPair_C>();
 		ifStatement = new ArrayList<NodeNumPair_C>();
+		conditionalExpression = new ArrayList<NodeNumPair_C>();
+		computationExpression = new ArrayList<NodeNumPair_C>();
+		
+		
 		binaryExpression = new ArrayList<NodeNumPair_C>();
 		
 		varNamePairList = new ArrayList<VariableNameTypePair>();
@@ -132,6 +152,26 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 	}
 	
 	
+	/**
+	 * Visits all IASTStatement nodes
+	 */
+	public int visit(IASTParameterDeclaration param)
+	{
+		
+		node = param.getOriginalNode();
+		
+		if(node.getFileLocation().getContextInclusionStatement() == null)
+		{
+			
+			if(((IASTParameterDeclaration)node).getDeclSpecifier() != null && !((IASTParameterDeclaration)node).getDeclSpecifier().getRawSignature().contentEquals("void"))
+			{		
+				varNamePairList.add(new VariableNameTypePair(((IASTParameterDeclaration)node).getDeclarator(),((IASTParameterDeclaration)node).getDeclSpecifier(), node ));
+			}
+		
+		}	
+		
+		return PROCESS_CONTINUE;
+	}
 	/**
 	 * Visits all IASTStatement nodes
 	 */
@@ -155,7 +195,7 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 		return PROCESS_CONTINUE;
 	}
 	
-	
+
 	/**
 	 * Visits all IASTDeclaration nodes
 	 */
@@ -231,9 +271,50 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 				}
 			}
 			
+			/*
 			if(node instanceof IASTBinaryExpression)
 			{
 				binaryExpression.add(new NodeNumPair_C(node, ++m_nodeCounter));
+			}
+			*/
+			
+			if(node instanceof IASTBinaryExpression)
+			{
+				if((((IASTBinaryExpression) node).getOperator() == 2) ||
+						(((IASTBinaryExpression) node).getOperator() == 5) ||
+						(((IASTBinaryExpression) node).getOperator() == 3) ||
+						(((IASTBinaryExpression) node).getOperator() == 1) ||
+						(((IASTBinaryExpression) node).getOperator() == 4) ||
+						(((IASTBinaryExpression) node).getOperator() == 6) ||
+						(((IASTBinaryExpression) node).getOperator() == 7) 
+					)
+				{
+					computationExpression.add(new NodeNumPair_C(node, ++m_nodeCounter));
+			
+				}
+			}
+			else if(node instanceof IASTUnaryExpression)
+			{
+				if(	(((IASTUnaryExpression) node).getOperator() == 9) ||
+						(((IASTUnaryExpression) node).getOperator() == 1) ||
+						(((IASTUnaryExpression) node).getOperator() == 0) ||
+						(((IASTUnaryExpression) node).getOperator() == 10)
+					)
+				{
+				computationExpression.add(new NodeNumPair_C(node, ++m_nodeCounter));
+			
+				}
+			}
+			
+			if(node instanceof IASTBinaryExpression)
+			{
+				//add to conditionalExpression
+				if((((IASTBinaryExpression)node).getOperator() == 10 ) || (((IASTBinaryExpression)node).getOperator() == 11 ) ||
+						(((IASTBinaryExpression)node).getOperator() == 8 ) || (((IASTBinaryExpression)node).getOperator() == 9 ||
+								(((IASTBinaryExpression)node).getOperator() == 29 )|| (((IASTBinaryExpression)node).getOperator() == 28 )))
+				{
+					conditionalExpression.add(new NodeNumPair_C(node, ++m_nodeCounter));
+				}
 			}
 			
 		}
@@ -294,6 +375,25 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 	{
 		return ifStatement;
 	}
+	
+	/**
+	 * Gets ArrayList of conditional Statements
+	 * @return ArrayList<NodeNumPair_C>
+	 */
+	public ArrayList<NodeNumPair_C> getConditionalStatements()
+	{
+		return conditionalExpression;
+	}
+	
+	/**
+	 * Gets ArrayList of computation Statements
+	 * @return ArrayList<NodeNumPair_C>
+	 */
+	public ArrayList<NodeNumPair_C> getComputationStatements()
+	{
+		return computationExpression;
+	}
+	
 	
 	/**
 	 * Gets ArrayList of binaryExpression

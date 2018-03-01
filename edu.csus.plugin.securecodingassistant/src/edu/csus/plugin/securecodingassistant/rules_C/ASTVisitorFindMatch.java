@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.ICompositeType;
@@ -55,7 +56,7 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 		this.shouldVisitExpressions = true;
 		this.shouldVisitAmbiguousNodes = true;
 		this.shouldVisitStatements = true;
-		this.shouldVisitNames = true;
+		this.shouldVisitParameterDeclarations = true;
 		findKeyWord = keyWord;
 		findRuleName = ruleName;
 		matchFound = false;		
@@ -86,32 +87,31 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 		
 	}
 	
+	/**
+	 * Visits all IASTStatement nodes
+	 */
+	public int visit(IASTParameterDeclaration param)
+	{
+		
+		node = param.getOriginalNode();
+		
+		if(findRuleName.contentEquals("FindMatch") && (node.getFileLocation().getContextInclusionStatement() == null))
+		{
+			if(node.getRawSignature().contentEquals(findKeyWord))
+			{
+				matchFound = true;
+			
+				return PROCESS_ABORT;
+			}
+		}
+		
+		return PROCESS_CONTINUE;
+	}
+	
 	public int visit(IASTDeclaration dec)
 	{
 		node = dec.getOriginalNode();
 		
-		
-		//FLP30C Rule
-		if(findRuleName.contentEquals("FLP30C") && !(dec instanceof IASTFunctionDeclarator) && !(dec instanceof IASTFunctionDefinition) )
-		{
-			//System.out.println("decASTVisitor: " + dec.getRawSignature());
-			//System.out.println("decASTVisitor: " + dec);
-			//System.out.println("children: " + dec.getChildren()[0].getRawSignature());
-			//System.out.println("childrenlength: " + dec.getChildren().length);
-			
-			if(dec.getChildren().length > 1)
-			{
-				if(dec.getChildren()[1].getRawSignature().contentEquals(findKeyWord))
-				{
-					if(dec.getChildren()[0].getRawSignature().contains("float") || dec.getChildren()[0].getRawSignature().contains("double"))
-					{
-						matchFound = true;
-						return PROCESS_ABORT;
-					}
-		
-				}
-			}
-		}
 		
 		if(findRuleName.contentEquals("SIG31C") && !(dec instanceof IASTFunctionDeclarator) && !(dec instanceof IASTFunctionDefinition) && (findKeyWord == null))
 		{
@@ -200,7 +200,9 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 			}
 		}
 		
-		
+		/**
+		 * Check to see if function is from <string.h> or <wchar.h> library
+		 */
 		if(findRuleName.contentEquals("STR38_Include"))
 		{
 			//System.out.println("node: " + node.getRawSignature());
@@ -257,26 +259,8 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 					}
 		}
 		
-		if(findRuleName.contentEquals("CON40C_Expression") && (findKeyWord != null))
-		{
-			if(node.getRawSignature().contentEquals(findKeyWord))
-			{
-				matchFound = true;
-				return PROCESS_ABORT;
-			}
-		}
 		
-		if(findRuleName.contentEquals("CON40C_assignedAtomic"))
-		{
-			if((node.getRawSignature().startsWith(findKeyWord)) && (node.getRawSignature().contains("=")) && (node.getRawSignature().contains("atomic_")))
-			{
-				//System.out.println("WE are here");
-				matchFound = true;
-				return PROCESS_ABORT;
-			}
-		}
-		
-		if((findRuleName.contentEquals("CON40C_findDup")))
+		if((findRuleName.contentEquals("findDup")))
 		{
 			if(node.getRawSignature().contentEquals(findKeyWord))
 			{

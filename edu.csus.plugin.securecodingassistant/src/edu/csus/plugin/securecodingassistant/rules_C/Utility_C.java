@@ -1,5 +1,7 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
+import java.util.ArrayList;
+
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
@@ -53,5 +55,38 @@ public final class Utility_C {
 		}
 		
 		return flag;
+	}
+	
+	/*
+	public static boolean inExpressionTwice()
+	{
+		boolean flag = false;
+		
+		
+		return flag;
+	}
+	*/
+	
+	
+	//get varibales in scope and in expression
+	public static ArrayList<VariableNameTypePair> allVarNameType(ArrayList<VariableNameTypePair> list, IASTNode node)
+	{
+		ArrayList<VariableNameTypePair> allVars = new ArrayList<VariableNameTypePair>();
+		
+		for(VariableNameTypePair o: list)
+		{
+			if(Utility_C.getScope(o.getNode()) instanceof IASTTranslationUnit || Utility_C.getScope(o.getNode()) == Utility_C.getScope(node))
+			{
+				ASTVisitorFindMatch visitorFind = new ASTVisitorFindMatch(o.getVarName(), "FindMatch");
+				node.accept(visitorFind);
+				
+				if(visitorFind.isMatch())
+				{
+					allVars.add(o);
+				}
+			}
+		}
+		
+		return allVars;
 	}
 }

@@ -1,11 +1,9 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 
 
@@ -14,263 +12,144 @@ import edu.csus.plugin.securecodingassistant.Globals;
 public class CON40C_DoNotReferToAtomicVariableTwiceinExpression extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
-	//private IASTNode[] listOfDec;
-	private ArrayList<IASTNode> flaggedNode = new ArrayList<IASTNode>();
-	private ArrayList<IASTNode> listOfDec = new ArrayList<IASTNode>();
-	private Iterator<IASTNode> decIT;
-	
-	private ArrayList<String> listofVarName = new ArrayList<String>();
-	private ArrayList<String> listofVarType = new ArrayList<String>();
-	
-	private Iterator<String> varNameIT;
-	private Iterator<String> varTypeIT;
-	
-	private IASTTranslationUnit currITU = null;
+	private boolean isMatch = false;
+	private ArrayList<VariableNameTypePair> listofVarNameInScope = new ArrayList<VariableNameTypePair>();
 	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
+		isMatch = false;
+		listofVarNameInScope.clear();
 		
-		//check if TranslationUnit contains "atomic_"
-		//if(node.getContainingFilename().contains("CON40C") && node.getTranslationUnit().getRawSignature().contains("atomic_"))
-		if(node.getTranslationUnit().getRawSignature().contains("atomic_"))
+		//check if TranslationUnit contains include file <stdatomic.h>
+		if((node.getFileLocation().getContextInclusionStatement() == null) &&
+				node.getTranslationUnit().getRawSignature().contains("stdatomic.h"))
 		{
-			
-			
-			//System.out.println("Node: " + node.getRawSignature());
-			//System.out.println("Nodeparentproperty: " + node.getPropertyInParent().toString());
-			if(currITU == null || currITU != node.getTranslationUnit())
+				
+			IASTNode parent = node.getParent();
+			boolean isBinary = false;
+					
+			if(node instanceof IASTBinaryExpression || node instanceof IASTUnaryExpression)
 			{
-				listOfDec.clear();
-				listofVarName.clear();
-				listofVarType.clear();
-				//System.out.println("currITU NULL");
-				currITU = node.getTranslationUnit();
-				ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(null, "CON40C_FindDec");
-				
-				node.getTranslationUnit().accept(visitor);
-				
-				listOfDec = visitor.arrayListofDeclaration();
-				decIT = listOfDec.iterator();
-				
-				while(decIT.hasNext())//get the Variable type and name of each declarator
+				if(node instanceof IASTBinaryExpression)
 				{
-					IASTNode nextIT = decIT.next();	
-					//System.out.println("decIT: " + nextIT.getRawSignature());
-						String varName = this.getVarNames(nextIT);
-						String varType = this.getVarType(nextIT);
-						
-						listofVarName.add(varName);
-						listofVarType.add(varType);
-						
-						//System.out.println("varName: " + varName);
-						//System.out.println("varType: " + varType);
-						//System.out.println("");
-						
+					isBinary = true;
 				}
-				decIT = listOfDec.iterator();
-			}
-			
-			varNameIT = listofVarName.iterator();
-			varTypeIT = listofVarType.iterator();
-		
-			
-					
-			
-			if(node instanceof IASTBinaryExpression)
-			{
+				else
+				{
+					isBinary = false;
+				}
 				
 				
-					//System.out.println("Node IASTBinaryExpression: " + node.getRawSignature());
-					//System.out.println("Node PARENTIASTBinaryExpression: " + node.getParent().getRawSignature());
-					
-					
-					while(varNameIT.hasNext())
+				//get varNameTypePair Arraylist for entire TranslationUnit
+				ASTNodeProcessor_C visitNameType = new ASTNodeProcessor_C();
+				node.getTranslationUnit().accept(visitNameType);
+				
+				ASTNodeProcessor_C visitParent = new ASTNodeProcessor_C();
+				parent.accept(visitParent);
+				
+				for(NodeNumPair_C o: visitParent.getComputationStatements())
+				{
+					if(node == o.getNode())
 					{
-						String varNameITTemp = varNameIT.next();
-						String varTypeITTemp = varTypeIT.next();
+						isMatch = true;
+					}
+				}
+				
+				for(NodeNumPair_C o: visitParent.getAssignmentStatements())
+				{
+					if(node == o.getNode())
+					{
+						isMatch = true;
+					}
+				}
+				
+				
+				if(isMatch)
+				{
+					
+					if(!isBinary)
+					{
+						listofVarNameInScope = Utility_C.allVarNameType(visitNameType.getvarNamePairList(), node);
 						
-						if(node.getRawSignature().contains(varNameITTemp))
+						for(VariableNameTypePair ooo: listofVarNameInScope)
 						{
-							//System.out.println("varNameIT: " + varNameITTemp);
-							//System.out.println("varTypeIT: " + varTypeITTemp);
-							
-							ASTVisitorFindMatch visitorFindDup = new ASTVisitorFindMatch(varNameITTemp, "CON40C_findDup");
-							
-							node.accept(visitorFindDup);
-							
-							if(visitorFindDup.isDuplicateInExpression())
+							if(ooo.isAtomic() || assignedAtomic(ooo, visitNameType.getAssignmentStatements())||
+									assignedAtomic(ooo, visitNameType.getVariableDeclarations()))
 							{
-								//System.out.println("isDuplicateInExpression");
-								
-								if(varTypeITTemp.contains("atomic_"))
-								{
-									//System.out.println("Rule Vioalted!!!!");
-									if(!flaggedNode.contains(node.getParent()))
-									{
-										//System.out.println("Rule Vioalted!!!!");
-										ruleViolated = true;
-										flaggedNode.add(node);
-									}
-									//System.out.println("NodeParent: " + node.getParent().getRawSignature());
-								}
-								else
-								{
-									ASTVisitorFindMatch visitorAssignedAtomic = new ASTVisitorFindMatch(varNameITTemp, "CON40C_assignedAtomic");
-									
-									node.getTranslationUnit().accept(visitorAssignedAtomic);
-									
-									if(visitorAssignedAtomic.isMatch())
-									{
-										if(!flaggedNode.contains(node.getParent()))
-										{
-											//System.out.println("Rule Vioalted!!!!");
-											ruleViolated = true;
-											flaggedNode.add(node);
-										}
-									}
-								}
-								
+								ruleViolated = true;
+								return ruleViolated;
 							}
 						}
 						
-						}
-					
-					//System.out.println("");
-				//System.out.println("Nodeparentproperty_IASTExpression: " + node.getPropertyInParent().toString());
-			
-			}
-			
-			
-			if(node instanceof IASTUnaryExpression)
-			{
-				
-				//System.out.println("Node IASTUnaryExpression: " + node.getRawSignature());
-				
-				if((node.getRawSignature().endsWith("++")) || (node.getRawSignature().endsWith("--")))
-				{
-					//System.out.println("Node IASTUnaryExpression: " + node.getRawSignature());
-					while(varNameIT.hasNext())
+					}
+					else
 					{
-						String varNameITTemp = varNameIT.next();
-						String varTypeITTemp = varTypeIT.next();
+						listofVarNameInScope = Utility_C.allVarNameType(visitNameType.getvarNamePairList(),node);
 						
-						if(node.getRawSignature().contains(varNameITTemp))
+						for(VariableNameTypePair ooo: listofVarNameInScope)
 						{
-							//System.out.println("varNameIT: " + varNameITTemp);
-							//System.out.println("varTypeIT: " + varTypeITTemp);
-							
-							ASTVisitorFindMatch visitorFind = new ASTVisitorFindMatch(varNameITTemp, "CON40C_Expression");
-							
-							node.accept(visitorFind);
-							
-							if(visitorFind.isMatch())
+							if(ooo.isAtomic() || assignedAtomic(ooo, visitNameType.getAssignmentStatements())||
+									assignedAtomic(ooo, visitNameType.getVariableDeclarations()))
 							{
-								//System.out.println("isMatch");
+								ASTVisitorFindMatch visitorFindDup = new ASTVisitorFindMatch(ooo.getVarName(), "findDup");
 								
-								if(varTypeITTemp.contains("atomic_"))
+								node.accept(visitorFindDup);
+								if(visitorFindDup.isDuplicateInExpression())
 								{
-									//System.out.println("Rule Vioalted!!!!");
-									if(!flaggedNode.contains(node.getParent()))
-									{
-										//System.out.println("Rule Vioalted!!!!");
-										ruleViolated = true;
-										flaggedNode.add(node);
-									}
-									//System.out.println("NodeParent: " + node.getParent().getRawSignature());
+									ruleViolated = true;
+									return ruleViolated;
 								}
-								else
-								{
-									ASTVisitorFindMatch visitorAssignedAtomic2 = new ASTVisitorFindMatch(varNameITTemp, "CON40C_assignedAtomic");
-									
-									node.getTranslationUnit().accept(visitorAssignedAtomic2);
-									
-									if(visitorAssignedAtomic2.isMatch())
-									{
-										if(!flaggedNode.contains(node.getParent()))
-										{
-											//System.out.println("Rule Vioalted!!!!");
-											ruleViolated = true;
-											flaggedNode.add(node);
-										}
-									}
-								}
-								
 							}
 						}
-						
-						}
+					}
 				}
 				
-				//System.out.println("Nodeparentproperty_IASTExpression: " + node.getPropertyInParent().toString());
-			
 			}
 			
 		}
 		return ruleViolated;
 	}
 	
-	
-	public String getVarNames(IASTNode astN)
+	/**
+	 * Check to see if variable was assigned to atomic value previously
+	 * @param VariableNameTypePair varName
+	 * @param ArrayList<NodeNumPair_C>list
+	 * @return boolean
+	 */
+	private boolean assignedAtomic (VariableNameTypePair pair, ArrayList<NodeNumPair_C> list)
 	{
-		String str = "default\n";
-		if(astN.getRawSignature().contains("="))
+		for(NodeNumPair_C listElem : list)
 		{
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[0].getRawSignature() );
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[1].getChildren()[0].getRawSignature() );
-			str = astN.getChildren()[1].getChildren()[0].getRawSignature();
-			
-			if(str.contentEquals("*"))
+			if(Utility_C.getScope(listElem.getNode()) == Utility_C.getScope(pair.getNode()))
 			{
-				str = astN.getChildren()[1].getChildren()[1].getRawSignature();
-				
-				if(str.contentEquals("*"))
+				if(listElem.getNode() instanceof IASTDeclaration)
 				{
-					str = astN.getChildren()[1].getChildren()[2].getRawSignature();
+					if(listElem.getNode().getRawSignature().contains("atomic_"))
+					{
+						return true;
+					}
 				}
-				//System.out.println("**SUBSTRING: " + str);
+				else if(listElem.getNode() instanceof IASTBinaryExpression)
+				{
+					if(((IASTBinaryExpression)listElem.getNode()).getOperand2().getRawSignature().contains("atomic_"))
+					{
+						ASTVisitorFindMatch visitorFind = new ASTVisitorFindMatch(pair.getVarName(), "FindMatch");
+						((IASTBinaryExpression)listElem.getNode()).getOperand1().accept(visitorFind);
+						if(visitorFind.isMatch())
+						{
+							return true;
+						}
+					}
+				}
 			}
 		}
-		else
-		{
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[0].getRawSignature() );
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[1].getRawSignature() );
-			str = astN.getChildren()[1].getRawSignature();
-			
-			if(str.startsWith("**"))
-			{
-				str = str.substring(2);
-				//System.out.println("**SUBSTRING: " + str);
-			}
-			else if(str.startsWith("*"))
-			{
-				str = str.substring(1);
-				//System.out.println("*SUBSTRING: " + str);
-			}
-		}
-		return str;
+		
+		return false;
 	}
 	
-	public String getVarType(IASTNode astN)
-	{
-		String str = "default\n";
-		
-		if(astN.getRawSignature().contains("="))
-		{
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[0].getRawSignature() );
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[1].getChildren()[0].getRawSignature() );
-			str = astN.getChildren()[0].getRawSignature();
-		}
-		else
-		{
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[0].getRawSignature() );
-			//System.out.println("getVarNameChildren: " + astN.getChildren()[1].getRawSignature() );
-			str = astN.getChildren()[0].getRawSignature();
-		}
-		return str;
-	}
-
+	
 	@Override
 	public String getRuleText() {
 		return "CERT Website- If the same atomic variable "

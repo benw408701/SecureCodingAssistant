@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 
@@ -40,9 +42,38 @@ public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedC
 
 		ruleViolated = false;
 		
-		if(/*node.getContainingFilename().contains("STR37") && */(node.getTranslationUnit().getRawSignature().contains("ctype.h")))
+		/*
+		if(node instanceof IASTParameterDeclaration && node.getParent().getFileLocation().getContextInclusionStatement() == null )
 		{
-				//System.out.println("node: " + node.getRawSignature());
+			System.out.println("IASTParameterDeclaration: " + node.getRawSignature() );
+			//System.out.println("IASTParameterDeclaration_SCOPE: " + Utility_C.getScope(node).getRawSignature() );
+			
+			if(((IASTParameterDeclaration)node).getDeclSpecifier() != null && !((IASTParameterDeclaration)node).getDeclSpecifier().getRawSignature().contentEquals("void"))
+			{
+			System.out.println("IASTParameterDeclaration_getDeclSpecifier: " + ((IASTParameterDeclaration)node).getDeclSpecifier().getRawSignature() );
+			System.out.println("IASTParameterDeclaration_getDeclarator: " + ((IASTParameterDeclaration)node).getDeclarator().getRawSignature() );
+			}
+			//System.out.println("IASTParameterDeclarationParent: " + node.getParent().getRawSignature() + "\n");
+		}
+		
+		if(node instanceof IASTFunctionDefinition && node.getFileLocation().getContextInclusionStatement() == null)
+		{
+			//System.out.println("IASTFunctionDefinition: " + node.getRawSignature());
+			//System.out.println("Nested getDeclarator: " + ((IASTFunctionDefinition)node).getDeclarator().getRawSignature());
+			System.out.println("\ngetDeclSpecifier: " + ((IASTFunctionDefinition)node).getDeclSpecifier().getRawSignature());
+			if(((IASTFunctionDefinition)node).getDeclarator() != null)
+			{
+				System.out.println("getDeclarator: : " + ((IASTFunctionDefinition)node).getDeclarator().getRawSignature() );
+			}
+			//System.out.println("getDeclSpecifier: " + ((IASTFunctionDefinition)node).getDeclSpecifier().getRawSignature());
+		}
+		*/
+		
+		if(node.getContainingFilename().contains("STR37") && (node.getTranslationUnit().getRawSignature().contains("ctype.h"))
+				&& node.getParent().getFileLocation().getContextInclusionStatement() == null)
+		{
+			
+			//System.out.println("node: " + node.getRawSignature());
 				
 				/*
 				if(node instanceof IASTDeclaration)
@@ -50,6 +81,7 @@ public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedC
 					System.out.println("IASTDeclaration: " + node.getRawSignature());
 				}
 				*/
+				/*
 				if(currITU == null || currITU != node.getTranslationUnit())
 				{
 					listOfDec.clear();
@@ -82,37 +114,59 @@ public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedC
 					}
 					decIT = listOfDec.iterator();
 				}
-				
+				*/
 				
 				if(node instanceof IASTFunctionCallExpression)
 				{
-					//System.out.println("IASTFunctionCallExpression: " + node.getRawSignature());
+					System.out.println("IASTFunctionCallExpression: " + node.getRawSignature());
 					String functionName =  ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
-					//System.out.println("IASTFunctionCallExpressionNAME: " + functionName);
+					System.out.println("IASTFunctionCallExpressionNAME: " + functionName);
+					//System.out.println("IASTFunctionCallExpression: " + ((IASTFunctionCallExpression)node).getFunctionNameExpression());
+					
 					
 					if(functionName.contains("(") && functionName.contains(")"))
 					{
 						int positionParenthesis = functionName.indexOf("(");
 						functionName = functionName.substring(0, positionParenthesis);
-						//System.out.println("IASTFunctionCallExpressionNAME_AFTERMOD: " + functionName);
 					}
 					
 					//check if function is character-handling function
 					if(charHandlingFunctions.contains(functionName))
 					{
-						//System.out.println("Match!!");
-						
 						
 						if(node.getRawSignature().contains("unsigned") && node.getRawSignature().contains("char"))
 						{
-							//System.out.println("Rule not violated!!");
+							ruleViolated = false;
 						}
 						else if(node.getRawSignature().contains("EOF"))
 						{
-							//do nothing
+							ruleViolated = false;
 						}
 						else
 						{
+							ASTNodeProcessor_C visitor = new ASTNodeProcessor_C();
+							node.accept(visitor);
+							
+							
+							for(VariableNameTypePair ntPair: visitor.getvarNamePairList())//cant get variables within functioncall
+							{
+								System.out.println("Node: " + node.getRawSignature());
+								System.out.println("VarName:" + ntPair.getVarName());
+								System.out.println("Vartype:" + ntPair.getVarType() + "\n");
+								if(ntPair.getVarType().contains("char") && !ntPair.getVarType().contains("unsigned"))
+								{
+									ASTVisitorFindMatch visitorMatch = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
+									node.accept(visitorMatch);
+									
+									if(visitorMatch.isMatch())
+									{
+										ruleViolated = true;
+										System.out.println("RULEVIOLATED");
+									}
+								}
+							}
+							
+							/*
 							int firstIndex;
 							int secondIndex;
 							String varName;
@@ -161,7 +215,7 @@ public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedC
 								}
 							}
 							
-							
+							*/
 						}
 						
 					}

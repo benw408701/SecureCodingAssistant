@@ -1,12 +1,9 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
 import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IArrayType;
-import org.eclipse.cdt.core.dom.ast.ICompositeType;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
@@ -16,10 +13,7 @@ public class DCL38C_UseCorrectSyntaxWhenDeclaringFlexibleArrayMember implements 
 	private boolean ruleViolated;
 	private String structDec = "struct";
 	private IASTNode[] children;
-	private IASTNode[] grandChildren;
-	private int arrayLength;
-	private IASTNode[] arrayChildren;
-	private String[] digitArr = {"0","1","2","3","4", "5", "6", "7", "8", "9"};
+
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		ruleViolated = false;

@@ -9,6 +9,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.ICompositeType;
@@ -43,6 +44,7 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 		this.shouldVisitExpressions = true;
 		this.shouldVisitAmbiguousNodes = true;
 		this.shouldVisitStatements = true;
+		this.shouldVisitParameterDeclarations = true;
 		
 		
 		c_rules = rules;
@@ -69,6 +71,14 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 		
 		return PROCESS_CONTINUE;
 		
+	}
+	
+	public int visit(IASTParameterDeclaration parameterDeclaration)
+	{
+		node = parameterDeclaration.getOriginalNode();
+		
+		traverseRule(node);
+		return PROCESS_CONTINUE;
 	}
 	
 	public int visit(IASTDeclaration dec)

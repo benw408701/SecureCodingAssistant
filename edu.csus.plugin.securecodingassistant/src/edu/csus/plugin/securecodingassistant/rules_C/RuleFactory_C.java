@@ -53,8 +53,8 @@ public final class RuleFactory_C {
 		
 		//Rule 07. Characters and Strings (STR)
 		rules.add(new STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions());// rule implemented
-	//	rules.add(new STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerSizes());//rule implemented
-	//	rules.add(new STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedChar()); //rule implemented
+		rules.add(new STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerSizes());//rule implemented
+		rules.add(new STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedChar()); //rule implemented
 		
 		//Rule 08. Memory Management (MEM)
 	//	rules.add(new MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded()); //rule implemented
@@ -74,13 +74,13 @@ public final class RuleFactory_C {
 	//	rules.add(new ERR34C_DetectErrorsWhenConvertingStringToNumber()); //rule implemented
 		
 		//Rule 14. Concurrency (CON)
-	//	rules.add(new CON40C_DoNotReferToAtomicVariableTwiceinExpression()); //rule implemented
+		rules.add(new CON40C_DoNotReferToAtomicVariableTwiceinExpression()); //rule implemented
 		
 		//Rule 48. Miscellaneous (MSC)
 	//	rules.add(new MSC30C_DoNotUseRandFunctionForGeneratingPseudorandomNumbers());//rule implemented
 		
 		//Rule 50. POSIX (POS)
-	//	rules.add(new POS3C_DoNotUseVfork()); //rule implemented
+		rules.add(new POS3C_DoNotUseVfork()); //rule implemented
 				
 		return rules;
 	}

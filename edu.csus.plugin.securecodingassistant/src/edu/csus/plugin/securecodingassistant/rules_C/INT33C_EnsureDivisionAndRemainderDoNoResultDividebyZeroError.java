@@ -13,7 +13,7 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError implem
 
 	private boolean ruleViolated = false;
 	
-	private ArrayList<String> listNum = new ArrayList<String>(Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
+	private ArrayList<String> listNum = new ArrayList<String>(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
 	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
@@ -21,7 +21,7 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError implem
 		
 		ruleViolated = false;
 		
-		if(node.getContainingFilename().contains("INT33C") && (node.getFileLocation().getContextInclusionStatement() == null))
+		if((node.getFileLocation().getContextInclusionStatement() == null))
 		{
 			if((node instanceof IASTBinaryExpression) && ( (((IASTBinaryExpression) node).getOperator() == 2) || (((IASTBinaryExpression) node).getOperator() == 19)
 					|| (((IASTBinaryExpression) node).getOperator() == 20) || (((IASTBinaryExpression) node).getOperator() == 3) ) )
@@ -93,14 +93,14 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError implem
 							
 							o.getNode().accept(visitor1);
 							
-							for(NodeNumPair_C oo: visitor1.getBinaryExpressions())
+							for(NodeNumPair_C oo: visitor1.getConditionalStatements())
 							{
 								IASTNode currNode = oo.getNode();
-								
-								if((((IASTBinaryExpression)currNode).getOperator() == 10 ) || (((IASTBinaryExpression)currNode).getOperator() == 11 ) ||
-										(((IASTBinaryExpression)currNode).getOperator() == 8 ) || (((IASTBinaryExpression)currNode).getOperator() == 9 ||
-												(((IASTBinaryExpression)currNode).getOperator() == 29 )|| (((IASTBinaryExpression)currNode).getOperator() == 28 )))
-								{
+								//System.out.println("currNode: " + currNode.getRawSignature());
+								//if((((IASTBinaryExpression)currNode).getOperator() == 10 ) || (((IASTBinaryExpression)currNode).getOperator() == 11 ) ||
+								//		(((IASTBinaryExpression)currNode).getOperator() == 8 ) || (((IASTBinaryExpression)currNode).getOperator() == 9 ||
+								//				(((IASTBinaryExpression)currNode).getOperator() == 29 )|| (((IASTBinaryExpression)currNode).getOperator() == 28 )))
+								//{
 									//System.out.println("getBinaryExpressions: " + oo.getNode().getRawSignature());
 									
 									ASTVisitorFindMatch visitor_Find1 = new ASTVisitorFindMatch(operandNameLHS, "FindMatch");
@@ -115,7 +115,7 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError implem
 										return ruleViolated;
 									}
 											
-								}
+								//}
 								
 							}
 							

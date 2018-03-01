@@ -27,23 +27,21 @@ public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece impleme
 		{
 			if(node instanceof IASTBinaryExpression)
 			{
-				if((((IASTBinaryExpression) node).getOperator() == 17) ||
-						(((IASTBinaryExpression) node).getOperator() == 25) ||
-						(((IASTBinaryExpression) node).getOperator() == 27) ||
-						(((IASTBinaryExpression) node).getOperator() == 26) ||
-						(((IASTBinaryExpression) node).getOperator() == 19) ||
-						(((IASTBinaryExpression) node).getOperator() == 22) ||
-						(((IASTBinaryExpression) node).getOperator() == 20) ||
-						(((IASTBinaryExpression) node).getOperator() == 18) ||
-						(((IASTBinaryExpression) node).getOperator() == 21) ||
-						(((IASTBinaryExpression) node).getOperator() == 23) ||
-						(((IASTBinaryExpression) node).getOperator() == 24)
-						)
+				IASTNode parent = node.getParent();
+				ASTNodeProcessor_C visitAssign = new ASTNodeProcessor_C();
+				parent.accept(visitAssign);
+				
+				for(NodeNumPair_C o : visitAssign.getAssignmentStatements())
 				{
-					m_LHSNode =  ((IASTBinaryExpression)node).getOperand1();
-					m_RHSNode = ((IASTBinaryExpression)node).getOperand2();
-					
-					ruleViolated = isViolated(m_LHSNode, m_RHSNode, node, false);
+					if(node == o.getNode())
+					{
+						//System.out.println("MATCH: " + node.getRawSignature());
+						m_LHSNode =  ((IASTBinaryExpression)node).getOperand1();
+						m_RHSNode = ((IASTBinaryExpression)node).getOperand2();
+						
+						ruleViolated = isViolated(m_LHSNode, m_RHSNode, node, false);
+						break;
+					}
 				}
 			}
 			else if(node instanceof IASTDeclaration && !(node instanceof IASTFunctionDeclarator) && node.getRawSignature().endsWith(";") && (node instanceof IASTSimpleDeclaration  ))

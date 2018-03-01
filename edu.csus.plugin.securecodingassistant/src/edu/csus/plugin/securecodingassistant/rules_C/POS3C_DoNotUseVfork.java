@@ -17,10 +17,8 @@ public class POS3C_DoNotUseVfork implements IRule_C {
 		ruleViolated = false;
 		if(node instanceof IASTFunctionCallExpression)
 		{
-			
 			if(node.getRawSignature().startsWith(vfork_str))
 			{
-				//System.out.println("\nRULE VIOLATED: POS3C_DoNotUseVfork");
 				ruleViolated = true;	
 				
 			}
