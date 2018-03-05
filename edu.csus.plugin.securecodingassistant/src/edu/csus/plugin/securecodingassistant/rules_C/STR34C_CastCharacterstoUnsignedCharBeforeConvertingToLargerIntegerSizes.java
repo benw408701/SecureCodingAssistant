@@ -10,7 +10,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerSizes implements IRule_C {
+public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerSizes extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
 	private NodeNumPair_C currNode;

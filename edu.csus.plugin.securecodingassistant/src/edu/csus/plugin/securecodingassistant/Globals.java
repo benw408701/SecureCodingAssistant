@@ -107,39 +107,24 @@ public class Globals {
 		public static final String THI05_J = "Do not use Thread.stop() to terminate threads";
 	
 		//CERT Secure Coding Rules for C
-		public static final String PRE30_C = "Do not create a universal character name through concatenation";
+
 		public static final String DCL36_C = "Do not declare an identifier with conflicting linkage classifications";
 		public static final String DCL38_C = "Use the correct syntax when declaring a flexible array member";
 		public static final String DCL41_C = "Do not declare variables inside a switch statement before the "
 				+"first case label";
-		public static final String EXP30_C = "Do not depend on the order of evaluation for side effects";
 		public static final String EXP32_C = "Do not access a volatile object through a nonvolatile reference";
-		public static final String EXP33_C = "Do not read uninitialized memory";
-		public static final String EXP34_C = "Do not dereference null pointers";
-		public static final String EXP43_C = "Avoid undefined behavior when using restrict-qualified pointers";
-		public static final String INT30_C = "Ensure that unsigned integer operations do not wrap";
 		public static final String INT33_C = "Ensure that division and remainder operations do"
 				+ " not result in divide-by-zero errors";
-		public static final String INT32_C = " Ensure that operations on signed integers do not result in overflow";
-		public static final String ARR32_C = "Ensure size arguments for variable length arrays are in a valid range";
 		public static final String ARR36_C = "Do not subtract or compare two pointers that do not refer to the same array";
-		public static final String ARR38_C = "Guarantee that library functions do not form invalid pointers";
-		public static final String STR32_C = "Do not pass a non-null-terminated character sequence to a library function "
-				+"that expects a string";
 		public static final String STR34_C = "Cast characters to unsigned char before converting to larger integer sizes";
 		public static final String STR37_C = "Arguments to character-handling functions must be representable as unsigned char";
 		public static final String STR38_C = "Do not confuse narrow and wide character strings and functions";
 		public static final String MEM31_C = "Free dynamically allocated memory when no longer needed";
-		public static final String FIO30_C = "Exclude user input from format strings";
-		public static final String FIO34_C = "Distinguish between characters read from a file and EOF or WEOF";
-		public static final String FIO37_C = "Do not assume that fgets() or fgetws() returns a nonempty string when successful";
 		public static final String FIO45_C = "Avoid TOCTOU race conditions while accessing files";
-		public static final String FIO46_C = "Do not access a closed file";
+		public static final String FIO47_C = "Use valid format strings";
 		public static final String ENV33_C = "Do not call system()";
 		public static final String SIG30_C = "Call only asynchronous-safe functions within signal handlers";
 		public static final String SIG31_C = "Do not access shared objects in signal handlers";
-		public static final String ERR30_C = "Set errno to zero before calling a library function known to set errno," 
-				+ "and check errno only after the function returns a value indicating failure";
 		public static final String ERR34_C = "Detect errors when converting a string to a numbers";
 		public static final String CON40_C = "Do not refer to an atomic variable twice in an expression";
 		public static final String MSC30_C = "Do not use the rand() function for generating pseudorandom numbers";
@@ -177,35 +162,22 @@ public class Globals {
 		public static final String THI05_J = "THI05-J"; 
 		
 		//CERT Secure Coding Rules for C
-		public static final String PRE30_C = "PRE30-C";
+		
 		public static final String DCL36_C = "DCL36-C";
 		public static final String DCL38_C = "DCL38-C";
 		public static final String DCL41_C = "DCL41-C";
-		public static final String EXP30_C = "EXP30-C";
 		public static final String EXP32_C = "EXP32-C";
-		public static final String EXP33_C = "EXP33-C";
-		public static final String EXP34_C = "EXP34-C";
-		public static final String EXP43_C = "EXP43-C";
-		public static final String INT30_C = "INT30-C";
 		public static final String INT33_C = "INT33-C";
-		public static final String INT32_C = "INT32-C";
-		public static final String ARR32_C = "ARR32-C";
 		public static final String ARR36_C = "ARR36-C";
-		public static final String ARR38_C = "ARR38-C";
-		public static final String STR32_C = "STR32-C";
 		public static final String STR34_C = "STR34-C";
 		public static final String STR37_C = "STR37-C";
 		public static final String STR38_C = "STR38-C";
 		public static final String MEM31_C = "MEM31-C";
-		public static final String FIO30_C = "FIO30-C";
-		public static final String FIO34_C = "FIO34-C";
-		public static final String FIO37_C = "FIO37-C";
 		public static final String FIO45_C = "FIO45-C";
-		public static final String FIO46_C = "FIO46-C";
+		public static final String FIO47_C = "FIO47-C";
 		public static final String ENV33_C = "ENV33-C";
 		public static final String SIG30_C = "SIG30-C";
 		public static final String SIG31_C = "SIG31-C";
-		public static final String ERR30_C = "ERR30-C";
 		public static final String ERR34_C = "ERR34-C";
 		public static final String CON40_C = "CON40-C";
 		public static final String MSC30_C = "MSC30-C";
@@ -227,9 +199,7 @@ public class Globals {
 	public static HashMap<String,TreeMap<String, ASTRewrite>> RULE_SOLUTIONS = new HashMap<>();
 	public static HashMap<String, ICompilationUnit> RULE_ICOMPILATIONUNIT = new HashMap<>();
 	
-	//CDT Functions
-	public static HashMap<String, ITranslationUnit> RULE_ITRANSLATIONUNIT = new HashMap<>();
-	
+	//CDT Functions	
 	public static IASTNode insecureGlobalNode;
 	public static IResource globalResource;
 	public static ITranslationUnit globalTranslationUnit;

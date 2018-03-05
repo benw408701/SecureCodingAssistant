@@ -1,8 +1,6 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
+import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -11,123 +9,96 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded implements IRule_C {
+public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
-	private ArrayList<IASTNode> arrListOfFuncCalls = new ArrayList<IASTNode>();
-	private Iterator<IASTNode> funcIT;
+	private boolean isMemFunc = false; 
+	private NodeNumPair_C currNode;
 	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
+		isMemFunc = false;
+		currNode = null;
 		
-		if(/*node.getContainingFilename().contains("MEM31") && */  (node.getFileLocation().getContextInclusionStatement() == null))
+		if((node.getFileLocation().getContextInclusionStatement() == null))
 		{
-			//System.out.println("node: " + node.getRawSignature());
-			
-			if(node instanceof IASTFunctionCallExpression)
+			if((node instanceof IASTDeclaration && !(node instanceof IASTFunctionDefinition)) || node instanceof IASTBinaryExpression)
 			{
-				if(node.getRawSignature().contains("malloc"))
+				boolean isMatch = false;
+				ASTNodeProcessor_C visitorFunc = new ASTNodeProcessor_C();
+				Utility_C.getScope(node).accept(visitorFunc);
+				
+				for(NodeNumPair_C o: visitorFunc.getAssignmentStatements())
 				{
-					//System.out.println("IASTFunctionCallExpression MALLOC: " + node.getRawSignature());
-					arrListOfFuncCalls.clear();
-					funcIT = arrListOfFuncCalls.iterator();
-					
-					IASTNode parent = node.getParent();
-					boolean correctParent = true;
-					while(correctParent)
+					if(node == o.getNode())
 					{
-						if((parent.getRawSignature().contains("=")) && !(parent.getRawSignature().startsWith("="))) 
-						{
-							
-							//parent = parent.getParent()
-							correctParent = false;
-						}
-						else
-						{
-							parent = parent.getParent();
-						}
+						isMatch = true;
+						currNode = o;
 					}
-					
-					//System.out.println("IASTFunctionCallExpression MALLOC Parent:" + parent.getRawSignature());
-					//System.out.println("IASTFunctionCallExpression MALLOC: " + ((IASTFunctionCallExpression) node).FUNCTION_NAME.toString());
-					
-					//get the variable name of the LHS arguement of malloc call
-					String varNameLHS = null;
-					if(parent.getRawSignature().startsWith("**"))
-					{
-						//System.out.println("Child0: " + parent.getChildren()[0].getRawSignature());
-						//System.out.println("Child1: " + parent.getChildren()[1].getRawSignature());
-						//System.out.println("Child2: " + parent.getChildren()[2].getRawSignature());
-						varNameLHS = parent.getChildren()[2].getRawSignature();
-					}
-					else if(parent.getRawSignature().startsWith("*"))
-					{
-
-						//System.out.println("Child0: " + parent.getChildren()[0].getRawSignature());
-						//System.out.println("Child1: " + parent.getChildren()[1].getRawSignature());
-						varNameLHS = parent.getChildren()[1].getRawSignature();
-					}
-					else
-					{
-						//System.out.println("Child0: " + parent.getChildren()[0].getRawSignature());
-						varNameLHS = parent.getChildren()[0].getRawSignature();
-					}
-					
-					parent = node;
-					
-					while(!(parent instanceof IASTFunctionDefinition))
-					{
-						parent = parent.getParent();
-					}
-					//System.out.println("IASTFunctionDefinition MALLOC Parent:" + parent.getRawSignature());
-					
-					/*
-					if(parent instanceof IASTDeclaration)
-					{
-						System.out.println("IASTDeclaration MALLOC Parent:" + parent.getRawSignature());
-					}
-					*/
-					//System.out.println("varNameLHS: " + varNameLHS);
-					ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(null,"MEM31C_Free");
-					
-					parent.accept(visitor);
-					
-					arrListOfFuncCalls = visitor.arrayListofFunctions();
-					funcIT = arrListOfFuncCalls.iterator();
-					if(visitor.nodeParent() == null)
-					{
-						//System.out.println("RULE VIOLATED");
-						ruleViolated = true;
-					}
-					else
-					{
-						//System.out.println("nodeParentfrom Visitor: " + visitor.nodeParent().getRawSignature());
-						while(funcIT.hasNext())
-						{
-							ASTVisitorFindMatch visitor1 = new ASTVisitorFindMatch(varNameLHS, "FindMatch");
-							funcIT.next().accept(visitor1);
-						
-							if(!(visitor1.isMatch()))
-							{
-								//System.out.println("Rule_Violated");
-								ruleViolated = true;
-								//break;
-							}
-							else
-							{
-								ruleViolated = false;
-								break;
-							}
-						}
-					}
-					//System.out.println("NEW NODE ANALYSIS\n" );
 				}
-			}
+				
+				for(NodeNumPair_C o: visitorFunc.getVariableDeclarations())
+				{
+					if(node == o.getNode())
+					{
+						isMatch = true;
+						currNode = o;
+					}
+				}
+				
+				if(isMatch)
+				{
+					//checks to see if contains functioncall in a node is malloc/calloc/realloc
+					for(NodeNumPair_C o: visitorFunc.getFunctionCalls())
+					{
+						if(node.contains(o.getNode()) && (o.getNode().getRawSignature().contains("malloc") ||
+							(o.getNode().getRawSignature().contains("calloc")) || (o.getNode().getRawSignature().contains("realloc"))))
+						{
+							isMemFunc = true;
+						}
+					}
+				}
+				
+				if(isMemFunc)
+				{
+					ASTNodeProcessor_C visitorDec = new ASTNodeProcessor_C();
+					node.getTranslationUnit().accept(visitorDec);
+					
+					for(VariableNameTypePair oo: visitorDec.getvarNamePairList())
+					{
+						int equalIndex = node.getRawSignature().indexOf("=");
+						String LHSVar = node.getRawSignature().substring(0, equalIndex);
+						
+						if(LHSVar.contains(oo.getVarName()))
+						{
+							ASTNodeProcessor_C visitorMemFunc = new ASTNodeProcessor_C();
+							Utility_C.getScope(node).accept(visitorMemFunc);
+							for(NodeNumPair_C nnP : visitorMemFunc.getFunctionCalls())
+							{
+								if(nnP.getNode().getRawSignature().startsWith("free") && (currNode.getNum() < nnP.getNum()))
+								{
+									for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)nnP.getNode())))
+									{
+										if(oo.getVarName().contentEquals(str))
+										{
+											ruleViolated = false;
+											return ruleViolated;
+										}
+										else
+										{
+											ruleViolated = true;
+										}
+									}
+									
+								}
+							}
+						}
+					}
+				}
+			}	
 		}
-		
-		
 		return ruleViolated;
 	}
 

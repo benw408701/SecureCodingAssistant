@@ -99,26 +99,6 @@
       </handler>
    </extension>
    <extension
-         point="org.eclipse.cdt.core.language">
-      <language
-            class="edu.csus.plugin.securecodingassistant.compilation_C.CLanguage"
-            id="edu.csus.plugin.securecodingassistant.cLanguage"
-            name="cLanguage">
-      </language>
-      <pdomLinkageFactory
-            class="edu.csus.plugin.securecodingassistant.compilation_C.PDOMLinkageFactory1"
-            id="edu.csus.plugin.securecodingassistant.pdomLinkageFactory1">
-      </pdomLinkageFactory>
-   </extension>
-   <extension
-         id="id1"
-         name="name"
-         point="org.eclipse.cdt.core.CIndexer">
-      <run
-            class="edu.csus.plugin.securecodingassistant.compilation_C.PDOMIndexer1">
-      </run>
-   </extension>
-   <extension
          id="id1"
          name="CDTErrorParser"
          point="org.eclipse.cdt.core.ErrorParser">
@@ -129,31 +109,6 @@
          <context
                type="codan">
          </context></errorparser>
-   </extension>
-   <extension
-         point="org.eclipse.cdt.codan.core.checkers">
-      <checker
-            class="edu.csus.plugin.securecodingassistant.Checker5"
-            id="edu.csus.plugin.securecodingassistant.checker5">
-         <problem
-               category="org.eclipse.cdt.codan.core.categories.ProgrammingProblems"
-               defaultEnabled="true"
-               defaultSeverity="Warning"
-               description="Hello Problem1"
-               id="edu.csus.plugin.securecodingassistant.problem1"
-               messagePattern="Rule Violated: SDJ1"
-               name="Problem1">
-         </problem>
-         <problem
-               category="asasdasd"
-               defaultEnabled="true"
-               defaultSeverity="Warning"
-               description="asdasd"
-               id="edu.csus.plugin.securecodingassistant.problem2"
-               messagePattern="asdasd"
-               name="Problem 2">
-         </problem>
-      </checker>
    </extension>
    
 

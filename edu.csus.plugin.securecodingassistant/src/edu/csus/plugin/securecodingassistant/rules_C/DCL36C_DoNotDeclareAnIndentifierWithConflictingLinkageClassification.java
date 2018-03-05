@@ -8,7 +8,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class DCL36C_DoNotDeclareAnIndentifierWithConflictingLinkageClassification implements IRule_C {
+public class DCL36C_DoNotDeclareAnIndentifierWithConflictingLinkageClassification extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
 	

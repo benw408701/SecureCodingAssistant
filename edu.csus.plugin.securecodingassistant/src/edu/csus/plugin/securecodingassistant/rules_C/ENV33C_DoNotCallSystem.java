@@ -69,7 +69,4 @@ public class ENV33C_DoNotCallSystem extends SecureCodingRule_C {
 		
 		return "https://wiki.sei.cmu.edu/confluence/pages/viewpage.action?pageId=87152177";
 	}
-
-	
-
 }

@@ -2,28 +2,16 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class SIG30C_CallOnlyAsynchronousSafeFuntionsWithinSignalHandlers implements IRule_C {
+public class SIG30C_CallOnlyAsynchronousSafeFuntionsWithinSignalHandlers extends SecureCodingRule_C {
 
 	private boolean ruleViolated = false;
-	private ArrayList<IASTNode> arrListOfFuncCalls = new ArrayList<IASTNode>();
-	private ArrayList<IASTNode> arrListOfUserFunctions = new ArrayList<IASTNode>();
-	
-	private ArrayList<String> arrListOfHandlerNames = new ArrayList<String>();
-	
-	private Iterator<IASTNode> funcIT;
-	private Iterator<IASTNode> funcUserIT;
-	
 	private ArrayList<String> safeFunctions = new ArrayList<String>(
 				Arrays.asList("abort", "_Exit", "quick_exit", "signal", "fexecve", "posix_trace_event",
 						"sigprocmask", "_exit", "fork", "pselect", "sigqueue", "fstat", "pthread_kill", 
@@ -45,234 +33,102 @@ public class SIG30C_CallOnlyAsynchronousSafeFuntionsWithinSignalHandlers impleme
 						"fchown", "openat", "sigismember", "wait", "fchownat", "pause", "waitpid", "fcntl",
 						"pipe", "sigpause", "write", "fdatasync", "poll", "sigpending")
 			);
-	
 	private ArrayList<String> unsafeUserDefinedFunctions = new ArrayList<String>();
-	private Iterator<String> unsafeUserDefIT;
-	private ArrayList<String> arrListOfUserFunctionsNames = new ArrayList<String>();
-	
-	private Iterator<String> safeIT;
-	private Iterator<String> handlerNameIT;
-	
-	IASTTranslationUnit currITU = null;
 	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		ruleViolated = false;
+		unsafeUserDefinedFunctions.clear();
 		
-		
-		
-		if(/*node.getContainingFilename().contains("SIG30C") && */ (node.getFileLocation().getContextInclusionStatement() == null)
-				&& node.getTranslationUnit().getRawSignature().contains("signal"))
+		if((node.getFileLocation().getContextInclusionStatement() == null)
+				&& node.getTranslationUnit().getRawSignature().contains("signal.h"))
 		{
-			
-			/*
-			if(node instanceof IASTFunctionDefinition && node instanceof IASTDeclaration)
+			if(node instanceof IASTFunctionDefinition)
 			{
-				System.out.println("IASTFunctionDefinition" + node.getRawSignature());
-			}
-			*/
-			
-			if(currITU == null || currITU != node.getTranslationUnit())
-			{
-				currITU = node.getTranslationUnit();
+				ASTNodeProcessor_C visitAll = new ASTNodeProcessor_C();
+				node.getTranslationUnit().accept(visitAll);
 				
-				arrListOfHandlerNames.clear();
-				arrListOfUserFunctions.clear();
-				unsafeUserDefinedFunctions.clear();
-				arrListOfUserFunctionsNames.clear();
+				String functionName = ((IASTFunctionDefinition)node).getDeclarator().getName().getRawSignature();
 				
-				//**********************************************************************************************
-				//get all handler functions
-				ASTVisitorFindMatch visitor = new ASTVisitorFindMatch("handler", "GetFunctions");
-				
-				currITU.accept(visitor);
-				
-				arrListOfHandlerNames = visitor.arrayListofHandlerNames();
-				//**********************************************************************************************
-				
-				
-				//**********************************************************************************************
-				//getalluserdefined functions
-				ASTVisitorFindMatch visitorUserFunc = new ASTVisitorFindMatch(null, "UserDefinedFunctions");
-				currITU.accept(visitorUserFunc);
-				arrListOfUserFunctions = visitorUserFunc.arrayListofDeclaration();
-				//**********************************************************************************************
-				
-				
-				//**********************************************************************************************
-				//get names of all user defined functions
-				
-					
-					funcUserIT = arrListOfUserFunctions.iterator();
-					while(funcUserIT.hasNext())
-					{
-						IASTNode userDefFunctionNameTemp = funcUserIT.next();
-						String userDefFunctionNameTempString = ((IASTFunctionDefinition) userDefFunctionNameTemp).getDeclarator().getName().getRawSignature();
-						arrListOfUserFunctionsNames.add(userDefFunctionNameTempString);
-					}
-				
-				//************************************************************************************************
-				
-				
-				//*****************************************************************************************
-				//visit each User defined function to determin is Safe
-				funcUserIT = arrListOfUserFunctions.iterator();
-				
-				while(funcUserIT.hasNext())
+				for(NodeNumPair_C nnP: visitAll.getFunctionCalls())
 				{
-					arrListOfFuncCalls.clear();
-					ASTVisitorFindMatch visitorEachHandler = new ASTVisitorFindMatch(null, "GetFunctions");
-					IASTNode userDefFunctionTemp = funcUserIT.next();
-					String userDefFunctionTempString = ((IASTFunctionDefinition) userDefFunctionTemp).getDeclarator().getName().getRawSignature();
-					
-					userDefFunctionTemp.accept(visitorEachHandler); //visit each user defined function to see if it is safe
-				
-					arrListOfFuncCalls = visitorEachHandler.arrayListofFunctions();
-					
-					
-					funcIT = arrListOfFuncCalls.iterator();
-					while(funcIT.hasNext())
+					if(nnP.getNode().getRawSignature().startsWith("signal"))
 					{
-						IASTNode tempFuncPRE = funcIT.next();
-						String handlerFuncNamePRE = ((IASTFunctionCallExpression) tempFuncPRE).getFunctionNameExpression().getRawSignature();
-						
-						if(!(safeFunctions.contains(handlerFuncNamePRE)))
+						for(String functionParam: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)nnP.getNode())))
 						{
-							
-							unsafeUserDefinedFunctions.add(userDefFunctionTempString);
-							break;
+							if(functionName.contentEquals(functionParam))
+							{
+								unsafeUserDefinedFunctions = getUnSafeUserFunctions(visitAll);
+								String origNodeName = ((IASTFunctionDefinition)node).getDeclarator().getName().getRawSignature();
+								
+								if(unsafeUserDefinedFunctions.contains(origNodeName))
+								{
+									ruleViolated = true;
+									return ruleViolated;
+								}
+							}
 						}
-						
 					}
 				}
-				
-				//*****************************************************************************
-				
-				
-				/*
-				unsafeUserDefIT = unsafeUserDefinedFunctions.iterator();
-				
-				while(unsafeUserDefIT.hasNext())
-				{
-					//System.out.println("unsafeUserDefIT: " + unsafeUserDefIT.next());
-				}
-				
-				funcUserIT = arrListOfUserFunctions.iterator();
-				
-				
-				while(funcUserIT.hasNext())
-				{
-					//System.out.println("User functions: " + funcUserIT.next().getRawSignature());
-				}
-				*/
-				
-			}
-			
-			handlerNameIT = arrListOfHandlerNames.iterator();
-			funcUserIT = arrListOfUserFunctions.iterator();
-			
-			/*
-			while(funcUserIT.hasNext())
-			{
-				System.out.println("User functions: " + funcUserIT.next().getRawSignature() + "\n");
-			}
-			*/
-			
-			/*
-			while(handlerNameIT.hasNext())
-			{
-				System.out.println("handlers: " + handlerNameIT.next() + "\n");
-			}
-			*/
-			
-			/*
-			if((node instanceof IASTFunctionCallExpression) )
-			{
-				if(((IASTFunctionCallExpression) node).getFunctionNameExpression().getRawSignature().contentEquals("signal"))
-				{
-					System.out.println("Func NAME: " + ((IASTFunctionCallExpression) node).getFunctionNameExpression().getRawSignature());
-					
-					System.out.println("Func Arg2: " + ((IASTFunctionCallExpression) node).getArguments()[1].getRawSignature());
-					//((IASTFunctionCallExpression) node).getArguments()[1]
-				}
-			}
-			*/
-			
-			if((node instanceof IASTFunctionDefinition) && (arrListOfHandlerNames.contains(((IASTFunctionDefinition) node).getDeclarator().getName().getRawSignature())))
-			{
-				//System.out.println("Node: " + node.getRawSignature());
-				arrListOfFuncCalls.clear();
-				//System.out.println("NodegetDeclSpecifier: " + ((IASTFunctionDefinition) node).getDeclSpecifier().getRawSignature());
-				//System.out.println("Node_getDeclarator: " + ((IASTFunctionDefinition) node).getDeclarator().getName().getRawSignature());
-				//((IASTFunctionDefinition) node).getDeclarator().
-				
-				//funcCalls within the handler
-				ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(null, "GetFunctions");
-				node.accept(visitor);
-				
-				arrListOfFuncCalls = visitor.arrayListofFunctions();
-				
-				funcIT = arrListOfFuncCalls.iterator();
-				
-				while(funcIT.hasNext())
-				{
-					IASTNode tempFunc = funcIT.next();
-					String handlerFuncName = ((IASTFunctionCallExpression) tempFunc).getFunctionNameExpression().getRawSignature();
-					
-					//System.out.println("Func in Handler: " + tempFunc.getRawSignature());
-					//System.out.println("Func NAME: " + handlerFuncName);
-					
-					if(safeFunctions.contains(handlerFuncName) )
-					{
-						//System.out.println("Function is safe!!");						
-					}
-					else
-					{
-						if(!(unsafeUserDefinedFunctions.contains(handlerFuncName)) && (arrListOfUserFunctionsNames.contains(handlerFuncName)))
-						{
-							//System.out.println("Function is safe!!");
-						}
-						else
-						{
-							//System.out.println("FUnction is not safe");
-							ruleViolated = true;
-							return ruleViolated;
-						}
-						//System.out.println("FUnction is not safe");
-						/*
-						funcUserIT = arrListOfUserFunctions.iterator();
-						
-						while(funcUserIT.hasNext())
-						{
-							IASTNode tempUserFunc = funcUserIT.next();
-							System.out.println("tempUserfunc Namer: " + tempUserFunc.getRawSignature());
-							System.out.println("tempUserfunc Namer: " + ((IASTFunctionDefinition) tempUserFunc).getDeclarator().getName().getRawSignature());
-							
-						}
-						ruleViolated = true;
-						return ruleViolated;
-						*/
-					}
-					
-					//((IASTFunctionCallExpression) tempFunc).getFunctionNameExpression();
-				}
-				
-				safeIT = safeFunctions.iterator();
-				/*
-				while(safeIT.hasNext())
-				{
-					String safeFunc = safeIT.next();
-					System.out.println("SafeFunction: " + safeFunc);
-					
-					//((IASTFunctionCallExpression) tempFunc).getFunctionNameExpression();
-				}
-				*/
-			}
-			
-			
+			}	
+		}
+		return ruleViolated;
+	}
+	
+	
+	/**
+	 * Returns list of all unsafe functions in TranslationUnit
+	 * @param ASTNodeProcessor_C visitorSafe
+	 * @return ArrayList<String>
+	 */
+	private ArrayList<String> getUnSafeUserFunctions(ASTNodeProcessor_C visitorSafe)
+	{
+		ArrayList<String> listUnsafe = new ArrayList<String>();
+		ArrayList<String> initialScan = new ArrayList<String>();
+		
+		int userFunctionCount = visitorSafe.getFunctionDefinitions().size();
+		//get the name of all the user defined functions
+		for(NodeNumPair_C userFuncInitial: visitorSafe.getFunctionDefinitions())
+		{
+			String initFunc = ((IASTFunctionDefinition)userFuncInitial.getNode()).getDeclarator().getName().getRawSignature();
+			initialScan.add(initFunc);
 		}
 		
-		return ruleViolated;
+		//check if the user defined functions contain calls to any unsafeFunctions
+		for(NodeNumPair_C userFuncDefinitions: visitorSafe.getFunctionDefinitions())
+		{
+			for(NodeNumPair_C internalFunctionCall : visitorSafe.getFunctionCalls())
+			{
+				String functionCallName = ((IASTFunctionCallExpression)internalFunctionCall.getNode()).getFunctionNameExpression().getRawSignature();
+				if((!safeFunctions.contains(functionCallName) && !initialScan.contains(functionCallName) )
+						&& userFuncDefinitions.getNode().contains(internalFunctionCall.getNode()))
+				{
+					String secFunc  = ((IASTFunctionDefinition)userFuncDefinitions.getNode()).getDeclarator().getName().getRawSignature();
+					listUnsafe.add(secFunc);
+					break;
+				}
+			}
+		}
+		
+		//check if unsafe user defined functions are contained within other userdefined functions
+		for(int num = 0; num > userFunctionCount; num++)
+		{
+			for(NodeNumPair_C userFuncDefinitions: visitorSafe.getFunctionDefinitions())
+			{
+				for(NodeNumPair_C internalFunctionCall : visitorSafe.getFunctionCalls())
+				{
+					String functionCallName = ((IASTFunctionCallExpression)internalFunctionCall.getNode()).getFunctionNameExpression().getRawSignature();
+					if((listUnsafe.contains(functionCallName))
+						&& userFuncDefinitions.getNode().contains(internalFunctionCall.getNode()))
+					{
+						String secFunc  = ((IASTFunctionDefinition)userFuncDefinitions.getNode()).getDeclarator().getName().getRawSignature();
+						listUnsafe.add(secFunc);
+						
+					}
+				}
+			}
+		}
+		return listUnsafe;
 	}
 
 	@Override

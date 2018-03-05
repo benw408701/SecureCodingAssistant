@@ -1,157 +1,56 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-import org.eclipse.cdt.core.dom.ast.ExpansionOverlapsBoundaryException;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class SIG31C_DoNotAccessSharedObjectsInSignalHandlers implements IRule_C {
+public class SIG31C_DoNotAccessSharedObjectsInSignalHandlers extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
-	private IASTNode[] children;
-	private boolean unsafe;
-	private String unsafeVar;
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
-		unsafe = false;
-		unsafeVar = null;
-		
-		//if(node.getContainingFilename().contains("SIG31C"))
-		//{
-			if(node instanceof IASTFunctionDefinition && node.getRawSignature().startsWith("void handler"))
+
+		if((node.getFileLocation().getContextInclusionStatement() == null)
+				&& node.getTranslationUnit().getRawSignature().contains("signal.h"))
+		{
+			if(node instanceof IASTFunctionDefinition)
 			{
-				//System.out.println("node: " + node);
-				//System.out.println("node: " + node.getRawSignature());
-				children = node.getChildren();
+				ASTNodeProcessor_C visitAll = new ASTNodeProcessor_C();
+				node.getTranslationUnit().accept(visitAll);
 				
-				/*
-				for(IASTNode o: children)
+				String functionName = ((IASTFunctionDefinition)node).getDeclarator().getName().getRawSignature();
+				
+				for(NodeNumPair_C nnP: visitAll.getFunctionCalls())
 				{
-					System.out.println("nodeChild: " + o);
-					System.out.println("nodeChild: " + o.getRawSignature());
-					System.out.println("ParentProperty" + o.getPropertyInParent());
-				}
-				*/
-				
-				IASTTranslationUnit ITU = node.getTranslationUnit();
-			
-				
-				ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(null, "SIG31C");
-				ITU.accept(visitor);
-				
-				for(IASTNode oo: visitor.listofDeclarations())//traverse through list of declarations
-				{
-					unsafe = false;
-					if(oo == null)
+					if(nnP.getNode().getRawSignature().startsWith("signal"))
 					{
-						//System.out.println("null");
-						break;
-				
-					}
-					else
-					{
-						
-						//System.out.println("Declarations: " + oo.getRawSignature());
-						try {
-							//System.out.println("oo:: " + oo.getSyntax().toString());
-							if(!(oo.getSyntax().toString().contentEquals("atomic_int")))
-							{
-								//System.out.println("DeclarationsIF: " + oo.getRawSignature());
-								if(oo.getSyntax().toString().contentEquals("volatile"))
-								{
-									if(oo.getRawSignature().contains("sig_atomic_t"))
-									{
-										//System.out.println("DeclarationsELSEEEEEEEE121212: " + oo.getRawSignature());
-									}
-									else
-									{
-										System.out.println("UNSAFEAssign: " + oo.getRawSignature());
-										unsafe = true;
-									}
-								}
-								else
-								{
-									//System.out.println("DeclarationsIF/Else: " + oo.getRawSignature());
-									//System.out.println("UNSAFEAssign: " + oo.getRawSignature());
-									unsafe = true;
-								}
-								
-								
-							}
-							else
-							{
-								//System.out.println("DeclarationsELSEEEEEEEE: " + oo.getRawSignature());
-								
-							}
-						} catch (ExpansionOverlapsBoundaryException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						if(unsafe)
+						for(String functionParam: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)nnP.getNode())))
 						{
-							//System.out.println("Unasfe: " + oo.getRawSignature());
-							if(oo.getChildren().length > 1)
+							if(functionName.contentEquals(functionParam))
 							{
-								//System.out.println("Unasfe: " + oo.getRawSignature());
-								//System.out.println("Chid1: " + oo.getChildren()[1].getRawSignature());
-								//System.out.println("UnasfeParentProperty: " + oo.getPropertyInParent());
-								
-								if(oo.getChildren()[1].getRawSignature().contains("=") ||oo.getChildren()[1].getRawSignature().contains("["))
+								for(VariableNameTypePair vntP: Utility_C.allVarNameType(visitAll.getvarNamePairList(), node))
 								{
-									//System.out.println("ChidChild1: " + oo.getChildren()[1].getChildren()[0].getRawSignature());
-									unsafeVar = oo.getChildren()[1].getChildren()[0].getRawSignature();
-								}
-								else if(oo.getChildren()[1].getRawSignature().startsWith("*") && !(oo.getChildren()[1].getRawSignature().startsWith("**")))
-								{
-									//System.out.println("ChidChild1*: " + oo.getChildren()[1].getChildren()[1].getRawSignature());
-									unsafeVar = oo.getChildren()[1].getChildren()[1].getRawSignature();
-								}
-								else if(oo.getChildren()[1].getRawSignature().startsWith("**"))
-								{
-									//System.out.println("ChidChild1**: " + oo.getChildren()[1].getChildren()[2].getRawSignature());
-									unsafeVar = oo.getChildren()[1].getChildren()[2].getRawSignature();
-								}
-								else
-								{
-									//System.out.println("Chid1: " + oo.getChildren()[1].getRawSignature());
-									unsafeVar = oo.getChildren()[1].getRawSignature();
-								}
-								
-								//System.out.println("unsafeVar: " + unsafeVar);
-								
-																
-								
-								ASTVisitorFindMatch visitor1 = new ASTVisitorFindMatch(unsafeVar, "SIG31C");
-								node.accept(visitor1);
-								
-								if(visitor1.isMatch())
-								{
-									ruleViolated = true;
+									if(!(vntP.getNode() instanceof IASTParameterDeclaration))
+									{
+										if(!vntP.isAtomic())
+										{
+										ruleViolated = true;
+										return ruleViolated;
+										}
+									}
 								}
 							}
-							//System.out.println("Chid1: " + oo.getChildren()[0].getRawSignature());
-							//System.out.println("Chidlen: " + oo.getChildren().length);
-							
-							
 						}
-						
 					}
 				}
-				
-				//makeVisitor that returns all declarations in the AST
-				//check what variable is inside the handler
-				//check if the type is "volatile sig_atomic_t" or "atomic_int"
-				
 			}
-		//}
+		}
 		
 		return ruleViolated;
 	}

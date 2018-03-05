@@ -6,7 +6,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class POS3C_DoNotUseVfork implements IRule_C {
+public class POS3C_DoNotUseVfork extends SecureCodingRule_C {
 	
 	private String vfork_str = "vfork(";
 	private boolean ruleViolated;

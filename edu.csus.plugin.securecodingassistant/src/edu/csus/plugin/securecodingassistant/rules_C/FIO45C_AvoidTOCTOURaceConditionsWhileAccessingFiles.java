@@ -1,147 +1,131 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-import java.lang.reflect.Array;
-import java.util.TreeMap;
-
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.core.parser.util.HashTable;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
 public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureCodingRule_C {
 	
-	private String fileOpen = "fopen(";
 	private boolean ruleViolated;
-	private boolean isFuncParent;
-	private IASTNode funcParent;
-	
-	private IASTNode[] funcParents; //collection of IASTFunctionCallExpression node's IASTFunctionDefintion
-	private IASTNode[] funcCall; //collection of fopen function calls in the same IASTFunctionDefinition node
-	private IASTNode[] nodeChildren; //children of IASTFunctionCallExpression
-	private String[] fileNameNode; //name of the file being opened
-	private String[] fileOpNode; //operation conducted on file
-	 
-	
-	private int counter;
-	
-	
-	
-	public FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles()
-	{
-		counter = 0;
-		funcParents = new IASTNode[100];
-		fileNameNode = new String[100];
-		fileOpNode = new String[100];
-		nodeChildren = new IASTNode[5];
-		
-	}
-	
+	private ArrayList<String> fileFunctions = new ArrayList<String>(
+			Arrays.asList("fopen", "open", "fdopen")
+			);
+
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
-		isFuncParent = false;
+		NodeNumPair_C curr_Node = null;
+		ArrayList<String> currNodeParameter = new ArrayList<String>();
+		
+		if((node.getFileLocation().getContextInclusionStatement() == null))
+		{
 		if(node instanceof IASTFunctionCallExpression)
 		{
-			if(node.getRawSignature().contains(fileOpen))
+			String functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
+			if(fileFunctions.contains(functionName))
 			{
-				//System.out.println("\nINSIDE FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles " + "//Counter: " + counter);
+				currNodeParameter.clear();
 				
-				funcParent = node.getParent();
-				while(!isFuncParent )
+				ASTNodeProcessor_C visitScope = new ASTNodeProcessor_C();
+				Utility_C.getScope(node).accept(visitScope);
+				
+				//get current Nodes NodeNumPair_C
+				for(NodeNumPair_C o: visitScope.getFunctionCalls())
 				{
-					funcParent = funcParent.getParent();
-					if(funcParent instanceof IASTFunctionDefinition)
+					if(o.getNode() == node)
 					{
-						//System.out.println("Node: " + node.getRawSignature()
-						//		+ "  Parent:" + funcParent.getRawSignature());
-						isFuncParent = true;
+						curr_Node = o;
+						currNodeParameter = Utility_C.getFunctionParameterVarName((IASTFunctionCallExpression) node);
 					}
 				}
 				
-				nodeChildren = node.getChildren();//get nodes children
-				//System.out.println("0:" +nodeChildren[0].getRawSignature());
-				//System.out.println("1:" +nodeChildren[1].getRawSignature());
-				//System.out.println("2:" +nodeChildren[2].getRawSignature());
-				
-				if(counter == 0)
+				for(NodeNumPair_C o: visitScope.getFunctionCalls())
 				{
-					funcParents[counter] = funcParent;
-					fileNameNode[counter] = nodeChildren[1].getRawSignature();
-					fileOpNode[counter] = nodeChildren[2].getRawSignature();
-					counter++;
-				}
-				
-				else
-				{
-					
-					if(funcParents[counter - 1] == funcParent)
+					String allFileFuncScope = ((IASTFunctionCallExpression)o.getNode()).getFunctionNameExpression().getRawSignature();
+					if(fileFunctions.contains(allFileFuncScope))
 					{
-						if((nodeChildren[1].getRawSignature().compareTo(fileNameNode[counter -1])) == 0)//if they equal
+						if(o != curr_Node && o.getNum() < curr_Node.getNum())
 						{
-							//System.out.println("\nRULE VIOLATED: FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles");
-							ruleViolated = true;
-						}
-						else
-						{
-							//System.out.println("NOT EQUAL. Different files");
-							//System.out.println("nodeChildren[1].getRawSignature()"+ nodeChildren[1].getRawSignature());
-							//System.out.println("fileNameNode[counter -1]" + fileNameNode[counter -1]);
-							funcParents[counter] = funcParent;
-							fileNameNode[counter] = nodeChildren[1].getRawSignature();
-							fileOpNode[counter] = nodeChildren[2].getRawSignature();
-							counter++;
+							ArrayList<String> otherNodeParameter = new ArrayList<String>();
+							otherNodeParameter = Utility_C.getFunctionParameterVarName((IASTFunctionCallExpression) o.getNode());
+							
+							if(!functionName.contentEquals("fdopen"))
+							{
+								if(currNodeParameter.get(0).contentEquals(otherNodeParameter.get(0)))
+								{
+									if(!(otherNodeParameter.get(1).contains("wx")) && !(otherNodeParameter.get(1).contains("O_CREAT"))
+										&& !(otherNodeParameter.get(1).contains("O_EXCL")))
+									{
+										ruleViolated = true;
+										return ruleViolated;
+									}
+								
+								}
+							}
+							else
+							{
+								ASTNodeProcessor_C visitorVarName = new ASTNodeProcessor_C();
+								node.getTranslationUnit().accept(visitorVarName);
+								String fileVarName;
+								for(NodeNumPair_C assignState: visitorVarName.getAssignmentStatements())
+								{
+									if(assignState.getNode().contains(o.getNode()))
+									{
+										fileVarName = ((IASTBinaryExpression)assignState.getNode()).getOperand1().getRawSignature();
+
+										if(currNodeParameter.get(0).contentEquals(fileVarName))
+										{
+											if(!(otherNodeParameter.get(1).contains("wx")) && !(otherNodeParameter.get(1).contains("O_CREAT"))
+												&& !(otherNodeParameter.get(1).contains("O_EXCL")))
+											{
+												ruleViolated = true;
+												return ruleViolated;
+											}
+										}
+									}
+								}
+								
+								for(NodeNumPair_C decs: visitorVarName.getVariableDeclarations())
+								{
+									if(decs.getNode().contains(o.getNode()))
+									{
+										fileVarName = ((IASTSimpleDeclaration)decs.getNode()).getDeclarators()[0].getName().getRawSignature();
+										
+										if(currNodeParameter.get(0).contentEquals(fileVarName))
+										{
+											if(!(otherNodeParameter.get(1).contains("wx")) && !(otherNodeParameter.get(1).contains("O_CREAT"))
+												&& !(otherNodeParameter.get(1).contains("O_EXCL")))
+											{
+												ruleViolated = true;
+												return ruleViolated;
+											}
+										
+										}
+									}
+								}
+								
+								
+							}
 						}
 					}
-					else
-					{
-						counter = 0;
-						funcParents[counter] = funcParent;
-						fileNameNode[counter] = nodeChildren[1].getRawSignature();
-						fileOpNode[counter] = nodeChildren[2].getRawSignature();
-						counter++;
-					}
-					
 				}
-				
-				
-				/*
-				System.out.println("Node: " + node.getRawSignature()
-						+ "  \nParent:" + funcParents[counter - 1].getRawSignature()
-						+ "\nfileNameNode: " + fileNameNode[counter -1]
-						+ "\nfileOpNode: " + fileOpNode[counter -1]);
-				System.out.println("Counter: "+ counter);
-				*/
-				
-				/*
-				for(IASTNode nodeChild: node.getChildren())
-				{
-					System.out.println("NodeChildren: " + nodeChild.getRawSignature());
-					
-				}
-				*/
-				System.out.println("\n");
 			}
+		}
 		}
 		return ruleViolated;
 	}
 
 	@Override
 	public String getRuleText() {
-		return "CERT Website- A TOCTOU (time-of-check, time-of-use) race condition "
-				+"is possible when two or more concurrent processes are operating "
-				+"on a shared file system [Seacord 2013b]. \nThese TOCTOU "
-				+"conditions can be exploited when a program performs two or "
-				+"more file operations on the same file name or path name. " 
-				+"\nA program that performs two or more file operations on a "
+		return "CERT Website-A program that performs two or more file operations on a "
 				+"single file name or path name creates a race window between "
-				+"the two file operations. \nThis race window comes from the "
+				+"the two file operations. This race window comes from the "
 				+"assumption that the file name or path name refers to the "
 				+"same resource both times.";
 	}
@@ -159,8 +143,7 @@ public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureC
 	@Override
 	public String getRuleRecommendation() {
 		
-		return "Use fopen() at a signle location and use the x mode of open(). Can also use"
-				+ "POSIX's open() function with the O_CREAT and O_EXCL flags.";
+		return "Perform one one file operation on a sinlge file or open with appropriate flags.";
 	}
 
 	@Override
@@ -168,24 +151,11 @@ public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureC
 		return Globals.Markers.SECURITY_LEVEL_MEDIUM;
 	}
 
-	//@Override
-	public TreeMap<String, ASTRewrite> getSolutions_CDT(IASTNode node) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	//@Override
-	public ITranslationUnit getITranslationUnit_CDT() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String getRuleURL() {
 		
 		return "https://wiki.sei.cmu.edu/confluence/display/c/FIO45-C.+Avoid+TOCTOU+race+conditions+while+accessing+files";
 	}
-
-
 
 }

@@ -1,12 +1,8 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 /**
  * @author Victor Melnik
@@ -100,8 +96,6 @@ public class VariableNameTypePair {
 	 * @param node
 	 */
 	public VariableNameTypePair (IASTDeclarator VarName, IASTDeclSpecifier VarType, IASTNode node) {
-		//System.out.println("**********************************************************************");
-		//System.out.println("NODE: " + node.getRawSignature());
 		isPointer_T = false;
 		isArray_T = false;
 		isRestrictType = false;
@@ -116,8 +110,6 @@ public class VariableNameTypePair {
 		m_varName = getVarNameString(VarName);
 		
 		m_scope = findScope(node);
-		
-		//System.out.println("**********************************************************************\n");
 	}
 	
 	
@@ -136,12 +128,10 @@ public class VariableNameTypePair {
 		if(astN.getRawSignature().contains("**"))
 		{
 			str = astN.getChildren()[2].getRawSignature();
-			//System.out.println("**: " + str);
 			isPointer_T = true;
 		}
 		else if(astN.getRawSignature().contains("*"))
 		{
-			//System.out.println("*: " + str);
 			str = astN.getChildren()[1].getRawSignature();
 			isPointer_T = true;
 		}
@@ -155,11 +145,8 @@ public class VariableNameTypePair {
 		if(astN.getRawSignature().contains("restrict"))
 		{
 			str = astN.getChildren()[1].getRawSignature();
-			//System.out.println("RESTRICT: " + str);
 			isRestrictType = true;
 		}
-		
-		//System.out.println("VarName: " + str);
 		return str;
 	}
 	
@@ -171,18 +158,15 @@ public class VariableNameTypePair {
 	private String getVarTypeProperties(IASTDeclSpecifier astN)
 	{
 		String str = astN.getRawSignature();
-		//System.out.println("VarType: " + astN.getRawSignature());
 		
 		if(astN.isConst())
 		{
 			isConstType = true;
 		}
 		
-		
 		if(astN.isVolatile())
 		{
 			isVolatileType = true;
-			//System.out.println("VOLATILE!!!!!!!!");
 		}
 		
 		

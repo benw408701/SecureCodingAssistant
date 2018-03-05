@@ -5,7 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class MSC30C_DoNotUseRandFunctionForGeneratingPseudorandomNumbers implements IRule_C {
+public class MSC30C_DoNotUseRandFunctionForGeneratingPseudorandomNumbers extends SecureCodingRule_C {
 
 	private String rand = "rand()";
 	private boolean ruleViolated;

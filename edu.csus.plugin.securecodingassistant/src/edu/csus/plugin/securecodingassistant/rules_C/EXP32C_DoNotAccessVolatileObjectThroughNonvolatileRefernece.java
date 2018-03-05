@@ -11,7 +11,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece implements IRule_C {
+public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
 	private IASTNode m_LHSNode;
@@ -21,7 +21,6 @@ public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece impleme
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
-		
 		
 		if((node.getFileLocation().getContextInclusionStatement() == null))
 		{
@@ -35,7 +34,6 @@ public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece impleme
 				{
 					if(node == o.getNode())
 					{
-						//System.out.println("MATCH: " + node.getRawSignature());
 						m_LHSNode =  ((IASTBinaryExpression)node).getOperand1();
 						m_RHSNode = ((IASTBinaryExpression)node).getOperand2();
 						

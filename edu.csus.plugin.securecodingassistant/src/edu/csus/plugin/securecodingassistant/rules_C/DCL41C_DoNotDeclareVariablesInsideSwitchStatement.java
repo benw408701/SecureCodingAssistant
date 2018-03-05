@@ -6,7 +6,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class DCL41C_DoNotDeclareVariablesInsideSwitchStatement implements IRule_C {
+public class DCL41C_DoNotDeclareVariablesInsideSwitchStatement extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
 	

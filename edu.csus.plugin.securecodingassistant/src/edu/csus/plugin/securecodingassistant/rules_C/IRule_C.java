@@ -1,17 +1,8 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-import java.util.TreeMap;
-
-//import org.eclipse.jdt.core.dom.ASTNode;
-//import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-
 import edu.csus.plugin.securecodingassistant.Globals;
-import edu.csus.plugin.securecodingassistant.rules.IRule;
 
 
 /**
@@ -27,7 +18,6 @@ public interface IRule_C {
 	 * @param node The node to be evaluated
 	 * @return true if the rule was violated, false otherwise
 	 */
-	//public boolean violated(ASTNode node);
 	
 	//CDT violate method
 	public boolean violate_CDT(IASTNode node);
@@ -70,9 +60,6 @@ public interface IRule_C {
 	 * @return The URL of the rule from the CERT website
 	 */
 	public String getRuleURL();
-	
-	
-	//CDT TreeMap function
 
 	public ITranslationUnit getITranslationUnit();
 

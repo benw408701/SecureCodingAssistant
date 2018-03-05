@@ -1,40 +1,26 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-
 /**
  * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.
  * This can be used to get a list of methods that are in the same block as another for instance.
- * @author Ben White
- * @see org.eclipse.jdt.core.dom.ASTNode
- * @see IRule
+ * @author Victor Melnik
+ * @see org.eclipse.cdt.core.dom.ast.IASTNode
+ * @see IRule_C
  */
 import java.util.ArrayList;
-
-
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.IASTToken;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
-
-//import edu.csus.plugin.securecodingassistant.rules.NodeNumPair;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
-import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
-import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
@@ -212,6 +198,8 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 			else if(!(node instanceof IASTFunctionDeclarator) && node.getRawSignature().endsWith(";") && (node instanceof IASTSimpleDeclaration  ))
 			{
 				
+				if(!node.getRawSignature().startsWith("enum"))
+				{
 				variableDeclarations.add(new NodeNumPair_C(node, ++m_nodeCounter));
 				
 				IASTDeclSpecifier decSpecifier = ((IASTSimpleDeclaration)node).getDeclSpecifier();
@@ -228,6 +216,7 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 						
 					}
 					
+				}
 				}
 				
 			}
@@ -271,12 +260,12 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 				}
 			}
 			
-			/*
+			
 			if(node instanceof IASTBinaryExpression)
 			{
 				binaryExpression.add(new NodeNumPair_C(node, ++m_nodeCounter));
 			}
-			*/
+			
 			
 			if(node instanceof IASTBinaryExpression)
 			{

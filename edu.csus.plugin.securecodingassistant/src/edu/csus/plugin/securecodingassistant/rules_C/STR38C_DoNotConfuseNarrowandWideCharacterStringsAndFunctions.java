@@ -6,7 +6,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions implements IRule_C {
+public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
 	private String functionName;
@@ -23,6 +23,7 @@ public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions implem
 				
 				if(node instanceof IASTFunctionCallExpression)
 				{
+					
 					ASTNodeProcessor_C visitDec = new ASTNodeProcessor_C();
 					node.getTranslationUnit().accept(visitDec);
 					
@@ -37,8 +38,13 @@ public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions implem
 						{
 							if(btPair.getVarType().contains("wchar_t"))
 							{
-								ruleViolated = true;
-								return ruleViolated;
+								for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
+								{
+									if(btPair.getVarName().contentEquals(str))
+									{
+										ruleViolated = true;
+									}
+								}
 							}
 						}
 						
@@ -49,8 +55,13 @@ public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions implem
 						{
 							if(!(btPair.getVarType().contains("wchar_t")) && (btPair.getVarType().contains("char")))
 							{
-								ruleViolated = true;
-								return ruleViolated;
+								for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
+								{
+									if(btPair.getVarName().contentEquals(str))
+									{
+										ruleViolated = true;
+									}
+								}
 							}
 						}
 					}

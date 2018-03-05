@@ -8,7 +8,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
-public class FLP30C_DoNotUseFloatingPointVariablesAsLoopCounter implements IRule_C {
+public class FLP30C_DoNotUseFloatingPointVariablesAsLoopCounter extends SecureCodingRule_C {
 
 	private boolean ruleViolated = false;
 	
