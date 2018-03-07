@@ -53,7 +53,7 @@ public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece extends
 				
 						if(!(o instanceof IASTFunctionDeclarator))
 						{
-							if(!(decSpec.startsWith("struct")) && !(decSpec.startsWith("union")))
+							if(!(decSpec.startsWith("struct")) && !(decSpec.startsWith("union")) && !(decSpec.startsWith("typedef")))
 							{
 								int lastIndex = o.getChildren().length;
 								

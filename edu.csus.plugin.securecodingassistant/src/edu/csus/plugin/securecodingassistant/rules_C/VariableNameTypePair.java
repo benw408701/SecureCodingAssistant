@@ -2,6 +2,7 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFieldDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 /**
@@ -159,6 +160,7 @@ public class VariableNameTypePair {
 	{
 		String str = astN.getRawSignature();
 		
+		
 		if(astN.isConst())
 		{
 			isConstType = true;
@@ -168,7 +170,6 @@ public class VariableNameTypePair {
 		{
 			isVolatileType = true;
 		}
-		
 		
 		if(astN.getRawSignature().contains("atomic"))
 		{
@@ -182,6 +183,15 @@ public class VariableNameTypePair {
 		
 		return str;
 	}
+	
+	/*
+	private boolean isStructElement(ASTNode astN)
+	{
+		boolean isElement = false;
+		
+		while()
+	}
+	*/
 	
 	/**
 	 * Return scope for given variable

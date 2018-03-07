@@ -50,19 +50,34 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 					{
 						return false;
 					}
+					else if(RHS.getRawSignature().startsWith("sizeof"))
+					{
+						return false;
+					}
 					
 					for(VariableNameTypePair ntPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), LHS))
 					{
 						if((ntPair.getVarType().contains("long")) || (ntPair.getVarType().contains("int")) || (ntPair.getVarType().contains("short")) )
 						{
-							for(VariableNameTypePair ntPairRHS: Utility_C.allVarNameType(visitDec.getvarNamePairList(), RHS))
+							ASTVisitorFindMatch visitLHSBin = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
+							LHS.accept(visitLHSBin);
+							
+							if(visitLHSBin.isMatch() && LHS.getRawSignature().startsWith(ntPair.getVarName()))
 							{
-								if((ntPairRHS.getVarType().contains("char")) && !(ntPairRHS.getVarType().contains("unsigned")))
+								for(VariableNameTypePair ntPairRHS: Utility_C.allVarNameType(visitDec.getvarNamePairList(), RHS))
 								{
-									if(!(RHS.getRawSignature().contains("unsigned")) || !(RHS.getRawSignature().contains("char")))
+									ASTVisitorFindMatch visitRHSBin = new ASTVisitorFindMatch(ntPairRHS.getVarName(), "FindMatch");
+									RHS.accept(visitRHSBin);
+									if(visitRHSBin.isMatch())
 									{
-										ruleViolated = true;
-										return ruleViolated;
+									if((ntPairRHS.getVarType().contains("char")) && !(ntPairRHS.getVarType().contains("unsigned")))
+									{
+										if(!(RHS.getRawSignature().contains("unsigned")) || !(RHS.getRawSignature().contains("char")))
+										{
+											ruleViolated = true;
+											return ruleViolated;
+										}
+									}
 									}
 								}
 							}
@@ -75,12 +90,18 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 					
 					for(VariableNameTypePair ntPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), subscriptExpressionArg))
 					{
-						if((ntPair.getVarType().contains("char")) && !(ntPair.getVarType().contains("unsigned")))
+						ASTVisitorFindMatch subArray = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
+						subscriptExpressionArg.accept(subArray);
+						
+						if(subArray.isMatch() && !subscriptExpressionArg.getRawSignature().contains("sizeof"))
 						{
-							if(!(subscriptExpressionArg.getRawSignature().contains("unsigned")) || !(subscriptExpressionArg.getRawSignature().contains("char")))
+							if((ntPair.getVarType().contains("char")) && !(ntPair.getVarType().contains("unsigned")))
 							{
-								ruleViolated = true;
-								return ruleViolated;
+								if(!(subscriptExpressionArg.getRawSignature().contains("unsigned")) || !(subscriptExpressionArg.getRawSignature().contains("char")))
+								{
+									ruleViolated = true;
+									return ruleViolated;
+								}
 							}
 						}
 					}
@@ -99,9 +120,12 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 						return false;
 					}
 					
-					if(node instanceof IASTSimpleDeclaration && !(node.getRawSignature().startsWith("enum")))
+					if(node instanceof IASTSimpleDeclaration && !(node.getRawSignature().startsWith("enum")) && !(node.getRawSignature().startsWith("struct"))
+							&& !(node.getRawSignature().startsWith("typedef")))
 					{
 						IASTNode declSpecifier = ((IASTSimpleDeclaration)node).getDeclSpecifier();
+						
+						
 						
 						if(((IASTSimpleDeclaration)node).getDeclarators()[0].getInitializer() != null && ((declSpecifier.getRawSignature().contains("int")) ||
 								(declSpecifier.getRawSignature().contains("long")) || (declSpecifier.getRawSignature().contains("short"))))
@@ -110,6 +134,7 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 							
 							for(NodeNumPair_C nnPair: visitDec.getFunctionCalls())
 							{
+								
 								if(initializerRHS.contains(nnPair.getNode()))
 								{
 									return false;
@@ -118,12 +143,22 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 							
 							for(VariableNameTypePair ntPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), initializerRHS))
 							{
-								if((ntPair.getVarType().contains("char")) && !(ntPair.getVarType().contains("unsigned")))
+								ASTVisitorFindMatch visitRHSDec = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
+								initializerRHS.accept(visitRHSDec);
+								
+								if(visitRHSDec.isMatch())
 								{
-									if(!(initializerRHS.getRawSignature().contains("unsigned")) || !(initializerRHS.getRawSignature().contains("char")))
+									if(initializerRHS.getRawSignature().contains("sizeof"))
 									{
-										ruleViolated = true;
-										return ruleViolated;
+										return false;
+									}
+									if((ntPair.getVarType().contains("char")) && !(ntPair.getVarType().contains("unsigned")))
+									{
+										if(!(initializerRHS.getRawSignature().contains("unsigned")) || !(initializerRHS.getRawSignature().contains("char")))
+										{
+											ruleViolated = true;
+											return ruleViolated;
+										}
 									}
 								}
 							}

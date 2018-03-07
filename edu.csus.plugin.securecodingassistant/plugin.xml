@@ -99,16 +99,13 @@
       </handler>
    </extension>
    <extension
-         id="id1"
+         id="CDTErrorParser"
          name="CDTErrorParser"
          point="org.eclipse.cdt.core.ErrorParser">
       <errorparser
             class="edu.csus.plugin.securecodingassistant.markerresolution_C.SecureCodingAssistantCDTErrorParser"
             id="edu.csus.plugin.securecodingassistant"
-            name="CDTErrorParser">
-         <context
-               type="codan">
-         </context></errorparser>
+            name="CDTErrorParser"></errorparser>
    </extension>
    
 

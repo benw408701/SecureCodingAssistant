@@ -20,7 +20,7 @@ public class DCL38C_UseCorrectSyntaxWhenDeclaringFlexibleArrayMember extends Sec
 			
 			if(node instanceof IASTDeclaration)
 			{
-				if(node.getRawSignature().startsWith(structDec) && (node.getFileLocation().getContextInclusionStatement() == null))
+				if(node.getRawSignature().startsWith(structDec) && !node.getRawSignature().startsWith("typedef") && (node.getFileLocation().getContextInclusionStatement() == null))
 				{		
 					children = node.getChildren(); //get child to get node of type IASTCompositeTypeSpecifier from IASTDeclaration
 					

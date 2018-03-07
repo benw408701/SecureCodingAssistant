@@ -28,9 +28,15 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError extend
 				IASTNode operandLHS = ((IASTBinaryExpression)node).getOperand2();
 				String operandNameLHS = operandLHS.getRawSignature();
 				
-				if(operandLHS.getRawSignature().equals("0"))
+				
+				if(operandLHS.getRawSignature().equals("0") )
 				{
 					ruleViolated = true;
+					return ruleViolated;
+				}
+				else if(operandLHS.getRawSignature().contains("sizeof"))
+				{
+					ruleViolated = false;
 					return ruleViolated;
 				}
 				else

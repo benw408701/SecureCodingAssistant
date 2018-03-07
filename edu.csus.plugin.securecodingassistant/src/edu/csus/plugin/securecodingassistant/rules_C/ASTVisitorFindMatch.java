@@ -49,7 +49,6 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 		node = stam.getOriginalNode();
 		
 		
-		
 		return PROCESS_CONTINUE;
 			
 		
@@ -138,6 +137,7 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 	public int visit(IASTName name) 
 	{
 		node = name.getOriginalNode();
+		
 		if(findRuleName.contentEquals("FindMatch") && (node.getFileLocation().getContextInclusionStatement() == null))
 		{
 			if(node.getRawSignature().contentEquals(findKeyWord))

@@ -89,6 +89,7 @@ public class SecureCodingAssistantCDTErrorParser implements IErrorParser {
 			 eoParser.generateMarker(resource, insecureNode.getViolatedNode().getFileLocation().getStartingLineNumber(), markerOutput, severity, "Secure Coding Marker");
 			 System.out.println("Rule violated: " + insecureNode.getViolatedRule().getRuleID()+ ": " + insecureNode.getViolatedRule().getRuleName());
 		 }
+		 System.out.println("Its running");
 		 System.out.println("\n\n");
 		 eoParser.shutdown(); //shutdown parser after 1 iteration
 		return false;

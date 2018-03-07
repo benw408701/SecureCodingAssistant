@@ -17,161 +17,207 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 					"vsprintf", "fscanf", "sscanf", "scanf"
 					));
 	
+	//private boolean isBracket;
+	private boolean isAsterisk;
+	private boolean isReference;
+	
 	@Override
 	public boolean violate_CDT(IASTNode node) {
 		
 		ruleViolated = false;
+		boolean isBracket = false;
+		boolean isAsterisk = false;
+		boolean isReference = false;
 		ArrayList<String> funcParams = new ArrayList<String>();
 		
-		if((node.getFileLocation().getContextInclusionStatement() == null))
+		if((node.getFileLocation().getContextInclusionStatement() == null)/* && node.getContainingFilename().contains("MSC30")*/)
 		{
+		
 			if(node instanceof IASTFunctionCallExpression)
 			{
 				String functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
 				if(formattedIOFunctions.contains(functionName))
 				{
+					if(!node.getRawSignature().contains("\""))
+					{
+						System.out.println();
+						return false;
+					}
 					funcParams = Utility_C.getFunctionParameterVarNamePrintf((IASTFunctionCallExpression) node);
+					//funcParams = getFunctionParameterVarNamePrintf((IASTFunctionCallExpression) node);
 					ASTNodeProcessor_C visitor = new ASTNodeProcessor_C();
 					node.getTranslationUnit().accept(visitor);
+					if(funcParams.size() == 1)
+					{
+						System.out.println();
+						return false;
+					}
 					String firstParameter = funcParams.get(0);
 					funcParams.remove(0);
+					
+					
+					if(!firstParameter.contains("\""))
+					{
+						firstParameter = funcParams.get(0);
+						funcParams.remove(0);
+					}
 					
 					String tempFirst = firstParameter;
 					int numberFormatChars = firstParameter.length() - (tempFirst.replace("%", "").length());
 					
-					if(numberFormatChars != funcParams.size())
+					
+					if((numberFormatChars != funcParams.size()))
 					{
-						if(functionName.contentEquals("fscanf") | functionName.contentEquals("sscanf") || functionName.contentEquals("scanf"))
-						{
-							firstParameter = funcParams.get(1);
-							funcParams.remove(1);
-						}
-						else
-						{
-							return true;
-						}
+						System.out.println();
+						return true;
 					}
+					else if((funcParams.size() < 1) )
+					{
+						return false;
+					}
+					
 					
 					for(String strPost: funcParams)
 					{
+						isReference = false;
+						isAsterisk = false;
+						if(strPost.contains("&"))
+						{
+							isReference = true;
+							strPost = strPost.replace("&", "");
+						}
+						
+						if(strPost.contains("*"))
+						{
+							isAsterisk = true;
+							strPost = strPost.replaceAll("\\*","");
+						}
+						
+						
 						for(VariableNameTypePair vntP: Utility_C.allVarNameType(visitor.getvarNamePairList(), node))
 						{
-							if(vntP.getVarName().contentEquals(strPost))
+							if((vntP.getVarName().contentEquals(strPost)) || (strPost.startsWith(".") && strPost.contains(vntP.getVarName())))
 							{
 								int indexOf = firstParameter.indexOf("%");
 								//get index of % and print string
 								
 								firstParameter = firstParameter.substring(indexOf + 1);
-						
-								if((vntP.getVarType().contains("unsigned")|| vntP.getVarType().contains("uintmax_t")) && !vntP.getVarType().contains("char"))
+								
+								
+								if(firstParameter.startsWith("hho") || firstParameter.startsWith("hhu") || firstParameter.startsWith("hhx") || firstParameter.startsWith("hhX"))
 								{
-									if(!firstParameter.startsWith("o") && !firstParameter.startsWith("u") && !firstParameter.startsWith("x") &&
-											!firstParameter.startsWith("X"))
+									if((!vntP.getVarType().contains("char")) && (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("double") || vntP.getVarType().contains("float") || vntP.getVarType().contains("long double"))
+								else if(firstParameter.startsWith("ho") || firstParameter.startsWith("hu") || firstParameter.startsWith("hx") || firstParameter.startsWith("hX"))
 								{
-									if(!firstParameter.startsWith("f") && !firstParameter.startsWith("F") && !firstParameter.startsWith("e") &&
-											!firstParameter.startsWith("E") && !firstParameter.startsWith("g") && !firstParameter.startsWith("G") &&
-											!firstParameter.startsWith("a") && !firstParameter.startsWith("A"))
+									if((!vntP.getVarType().contains("short")) && (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if (vntP.getVarType().contains("char") && (vntP.isPointer() || vntP.isArray()))
+								else if(firstParameter.startsWith("lo") || firstParameter.startsWith("lu") || firstParameter.startsWith("lx") || firstParameter.startsWith("lX")
+										|| firstParameter.startsWith("llo") || firstParameter.startsWith("llu") || firstParameter.startsWith("llx") || firstParameter.startsWith("llX"))
 								{
-									if(!firstParameter.startsWith("s") && !firstParameter.startsWith("S"))
+									if((!vntP.getVarType().contains("long")) && (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if (vntP.getVarType().contains("void") && vntP.isPointer())
+								else if(firstParameter.startsWith("o") || firstParameter.startsWith("u") || firstParameter.startsWith("x") || firstParameter.startsWith("X"))
 								{
-									if(!firstParameter.startsWith("n") )
+									if(((!vntP.getVarType().contains("int")) && (!vntP.getVarType().contains("short")) && (!vntP.getVarType().contains("char"))
+											&& (!vntP.getVarType().contains("unsigned"))) || ( (!vntP.getVarType().contains("uintmax_t")) && (!vntP.getVarType().contains("size_t"))
+											&& (!vntP.getVarType().contains("ptrdiff_t"))))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("size_t")|| vntP.getVarType().contains("ptrdiff_t"))
+								else if(firstParameter.startsWith("hhd") || firstParameter.startsWith("hhi") )
 								{
-									if(!firstParameter.startsWith("o") && !firstParameter.startsWith("u") && !firstParameter.startsWith("x") &&
-											!firstParameter.startsWith("X") && !firstParameter.startsWith("d") && !firstParameter.startsWith("i"))
+									if((!vntP.getVarType().contains("char")) && (vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("wint_t"))
+								else if(firstParameter.startsWith("hd") || firstParameter.startsWith("hi") )
 								{
-									if(!firstParameter.startsWith("c") && !firstParameter.startsWith("C"))
+									if((!vntP.getVarType().contains("short")) )
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("char") && vntP.getVarType().contains("unsigned"))
+								else if(firstParameter.startsWith("ld") || firstParameter.startsWith("lld") || firstParameter.startsWith("li") || firstParameter.startsWith("lli"))
 								{
-									if(!firstParameter.startsWith("c") && !firstParameter.startsWith("C") && !firstParameter.startsWith("o") && 
-											!firstParameter.startsWith("u") && !firstParameter.startsWith("x") && !firstParameter.startsWith("X"))
+									if((!vntP.getVarType().contains("long")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("char") && vntP.getVarType().contains("signed"))
+								//int
+								else if(firstParameter.startsWith("d") || firstParameter.startsWith("i"))
 								{
-									if(!firstParameter.startsWith("c") && !firstParameter.startsWith("C") && !firstParameter.startsWith("d") && 
-											!firstParameter.startsWith("i"))
+									if((!vntP.getVarType().contains("int")) && (!vntP.getVarType().contains("intmax_t")) && (!vntP.getVarType().contains("size_t"))
+											&& (!vntP.getVarType().contains("ptrdiff_t")) && (!vntP.getVarType().contains("short")) && (!vntP.getVarType().contains("char"))
+											&& (!vntP.getVarType().contains("_t")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("size_t")|| vntP.getVarType().contains("ptrdiff_t"))
+								else if(firstParameter.startsWith("Lf") || firstParameter.startsWith("LF") || firstParameter.startsWith("Le") || firstParameter.startsWith("LE")
+										|| firstParameter.startsWith("Lg") || firstParameter.startsWith("LG") || firstParameter.startsWith("La") || firstParameter.startsWith("LA"))
 								{
-									if(!firstParameter.startsWith("o") && !firstParameter.startsWith("u") && !firstParameter.startsWith("x") &&
-											!firstParameter.startsWith("X") && !firstParameter.startsWith("d") && !firstParameter.startsWith("i"))
+									if((!vntP.getVarType().contains("long")) && (!vntP.getVarType().contains("double")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if((vntP.getVarType().contains("short")|| vntP.getVarType().contains("long")|| vntP.getVarType().contains("intmax_t"))
-										&& !vntP.isPointer())
+								else if(firstParameter.startsWith("f") || firstParameter.startsWith("F") || firstParameter.startsWith("e") || firstParameter.startsWith("E")
+										|| firstParameter.startsWith("g") || firstParameter.startsWith("G") || firstParameter.startsWith("a") || firstParameter.startsWith("A"))
 								{
-									if(!firstParameter.startsWith("d") && !firstParameter.startsWith("i"))
+									if((!vntP.getVarType().contains("float")) && (!vntP.getVarType().contains("double")))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if((vntP.getVarType().contains("short")|| vntP.getVarType().contains("long")|| vntP.getVarType().contains("intmax_t")
-										) && vntP.isPointer())
+								else if(firstParameter.startsWith("c") || firstParameter.startsWith("lc") )
 								{
-									if(!firstParameter.startsWith("n"))
+									if(!((vntP.getVarType().contains("int")) || (vntP.getVarType().contains("wint_t")) || ((vntP.getVarType().contains("char"))
+											&& (!vntP.getVarType().contains("unsigned")))))
 									{
 										ruleViolated = true;
 									}
 								}
-								else if(vntP.getVarType().contains("int"))
+								else if(firstParameter.startsWith("s") || firstParameter.startsWith("ls"))
 								{
-									if(vntP.isPointer())
-									{
-										if(!firstParameter.startsWith("n"))
-										{
-											ruleViolated = true;
-										}
-									}
-									else if(!firstParameter.startsWith("d") && !firstParameter.startsWith("c") && !firstParameter.startsWith("i") )
+									if((!vntP.getVarType().contains("char")) && ((!vntP.isPointer() || !vntP.isArray())))
 									{
 										ruleViolated = true;
 									}
 								}
+								else if(firstParameter.startsWith("p") )
+								{
+									if(!(isReference || (vntP.isPointer())))
+									{
+										ruleViolated = true;
+									}
+								}
+								
 							}
 						}
 					}
+					
 				}
 			}
 		}
 		return ruleViolated;
 	}
 
+	
+	
+	
 	@Override
 	public String getRuleText() {
 		

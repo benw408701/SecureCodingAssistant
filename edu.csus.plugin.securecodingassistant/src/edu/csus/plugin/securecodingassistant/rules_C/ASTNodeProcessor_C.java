@@ -24,6 +24,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFieldDeclarator;
 
 /**
  * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.
@@ -209,7 +210,7 @@ public class ASTNodeProcessor_C extends ASTVisitor{
 				{
 					if(!(o instanceof IASTFunctionDeclarator))
 					{
-						if(!(decSpec.startsWith("struct")) && !(decSpec.startsWith("union")))
+						if(!(decSpec.startsWith("struct")) && !(decSpec.startsWith("union")) && !(decSpec.startsWith("typedef")))
 						{
 							varNamePairList.add(new VariableNameTypePair(o,decSpecifier, node ));
 						}

@@ -2,6 +2,7 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.model.ITranslationUnit;
@@ -49,7 +50,10 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 							
 							if(vntP.isArray())
 							{
+								if(!LHS.getRawSignature().contains("sizeof") && !(LHS instanceof IASTFunctionCallExpression))
+								{
 								LHSArrayRef = LHSVarName;
+								}
 							}
 							else if(vntP.isPointer())
 							{
@@ -57,7 +61,15 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 							}
 							else
 							{
-								LHSArrayRef = "null";
+								
+								if(LHS.getRawSignature().contains("&"))
+								{
+									LHSArrayRef = "refOther";
+								}
+								else
+								{
+									LHSArrayRef = "null";
+								}
 							}
 						}
 						
@@ -67,7 +79,10 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 							
 							if(vntP.isArray())
 							{
-								RHSArrayRef = RHSVarName;
+								if(!RHS.getRawSignature().contains("sizeof") && !(RHS instanceof IASTFunctionCallExpression))
+								{
+									RHSArrayRef = RHSVarName;
+								}
 							}
 							else if(vntP.isPointer())
 							{
@@ -75,18 +90,26 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 							}
 							else
 							{
-								RHSArrayRef = "null";
+								if(RHS.getRawSignature().contains("&"))
+								{
+									RHSArrayRef = "refOther";
+								}
+								else
+								{
+									RHSArrayRef = "null";
+								}
 							}
 						}
 					}
 					
+					
 					if(LHSArrayRef.contains("null") && !RHSArrayRef.contains("null"))
 					{
-						ruleViolated = true;
+						ruleViolated = false;
 					}
 					else if(!LHSArrayRef.contains("null") && RHSArrayRef.contains("null"))
 					{
-						ruleViolated = true;
+						ruleViolated = false;;
 					}
 					else if (!LHSArrayRef.contentEquals(RHSArrayRef))
 					{

@@ -73,11 +73,13 @@ public final class Utility_C {
 		
 		for(VariableNameTypePair o: list)
 		{
-			if(Utility_C.getScope(o.getNode()) instanceof IASTTranslationUnit || Utility_C.getScope(o.getNode()) == Utility_C.getScope(node))
+			if(Utility_C.getScope(o.getNode()) == node.getTranslationUnit() || Utility_C.getScope(o.getNode()) == Utility_C.getScope(node))
 			{
+				/*
+				System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 				ASTVisitorFindMatch visitorFind = new ASTVisitorFindMatch(o.getVarName(), "FindMatch");
 				node.accept(visitorFind);
-				
+				System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 				if(visitorFind.isMatch())
 				{
 					allVars.add(o);
@@ -87,6 +89,9 @@ public final class Utility_C {
 				{
 					allVars.add(o);
 				}
+				*/
+				
+				allVars.add(o);
 			}
 		}
 		
@@ -177,6 +182,7 @@ public final class Utility_C {
 		ArrayList<String> list = new ArrayList<String>();
 		
 		String functionCallString = funcCall.getRawSignature();
+		
 		functionCallString = functionCallString.replaceAll("%%", "");
 		functionCallString = functionCallString.replaceAll("\\\\\"", "");
 		
@@ -186,6 +192,7 @@ public final class Utility_C {
 		String firstThird, secondThird, thirdThird = null;
 		
 		firstThird = functionCallString.substring(0, firstQuoteIndex + 1);
+		//System.out.println("IASTFunctionCallExpressionIASTFunctionCallExpression: " + funcCall.getRawSignature() );
 		secondThird = functionCallString.substring(firstQuoteIndex + 1, secondQuoteIndex);
 		thirdThird = functionCallString.substring(secondQuoteIndex, lastIndex + 1);
 		
@@ -200,12 +207,13 @@ public final class Utility_C {
 		secondThird = secondThird.replace("#", "");
 		secondThird = secondThird.replace("'", "");
 		//remove qualifiers
-		secondThird = secondThird.replace("h", "");
-		secondThird = secondThird.replace("l", "");
+		
+		//secondThird = secondThird.replace("h", "");
+		//secondThird = secondThird.replace("l", "");
 		secondThird = secondThird.replace("j", "");
 		secondThird = secondThird.replace("z", "");
 		secondThird = secondThird.replace("t", "");
-		secondThird = secondThird.replace("L", "");
+		//secondThird = secondThird.replace("L", "");
 		
 		for(int counter = 0; counter <10; counter++)
 		{
@@ -228,8 +236,8 @@ public final class Utility_C {
 				parameters = parameters.substring(commaIndex + 1, paramLen);
 				
 				extractedParam = extractedParam.replaceAll("\\s+","");
-				extractedParam = extractedParam.replaceAll("\\*","");
-				extractedParam = extractedParam.replaceAll("&","");
+				//extractedParam = extractedParam.replaceAll("\\*","");
+				//extractedParam = extractedParam.replaceAll("&","");
 				
 				if(extractedParam.contains("["))
 				{
@@ -249,8 +257,8 @@ public final class Utility_C {
 			else
 			{
 				parameters = parameters.replaceAll("\\s+","");
-				parameters = parameters.replaceAll("\\*","");
-				parameters = parameters.replaceAll("&","");
+				//parameters = parameters.replaceAll("\\*","");
+				//parameters = parameters.replaceAll("&","");
 				
 				if(parameters.contains("["))
 				{

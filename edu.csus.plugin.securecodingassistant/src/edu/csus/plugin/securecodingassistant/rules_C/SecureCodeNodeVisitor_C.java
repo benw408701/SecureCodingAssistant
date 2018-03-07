@@ -58,8 +58,11 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 	public int visit(IASTDeclaration dec)
 	{
 		node = dec.getOriginalNode();
-		traverseRule(node);
 		
+		if(!node.getRawSignature().startsWith("typdef"))
+		{
+			traverseRule(node);
+		}
 		//continues traversing the astTree
 		return PROCESS_CONTINUE;
 	}
