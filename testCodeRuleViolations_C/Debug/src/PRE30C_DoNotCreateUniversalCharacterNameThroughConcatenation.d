@@ -1,0 +1,2 @@
+src/PRE30C_DoNotCreateUniversalCharacterNameThroughConcatenation.o: \
+ ../src/PRE30C_DoNotCreateUniversalCharacterNameThroughConcatenation.c
