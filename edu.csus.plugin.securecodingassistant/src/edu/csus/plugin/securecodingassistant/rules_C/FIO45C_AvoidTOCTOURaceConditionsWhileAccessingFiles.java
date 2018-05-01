@@ -4,16 +4,53 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
+import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: FIO45-C. Avoid TOCTOU race conditions while accessing
+ * files
+ * </p>
+ * <p>
+ * A TOCTOU (time-of-check, time-of-use) race condition is possible when two or
+ *  more concurrent processes are operating on a shared file system 
+ *  [Seacord 2013b]. Typically, the first access is a check to verify some
+ *  attribute of the file, followed by a call to use the file. An attacker
+ *  can alter the file between the two accesses, or replace the file with a 
+ *  symbolic or hard link to a different file. These TOCTOU conditions can be 
+ *  exploited when a program performs two or more file operations on the same 
+ *  file name or path name.
+ *   
+ * </p>
+ * 
+ * <p>
+ * A program that performs two or more file operations on a single file name 
+ * or path name creates a race window between the two file operations. This 
+ * race window comes from the assumption that the file name or path name refers 
+ * to the same resource both times. If an attacker can modify the file, remove 
+ * it, or replace it with a different file, then this assumption will not hold.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/FIO45-C.+Avoid+TOCTOU+
+ * race+conditions+while+accessing+files">FIO45-C</a>
+ *
+ */
+
 public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureCodingRule_C {
 	
 	private boolean ruleViolated;
 	private ArrayList<String> fileFunctions = new ArrayList<String>(
-			Arrays.asList("fopen", "open", "fdopen")
+			Arrays.asList("fopen", "open", "fdopen", "OPEN", "ACCESS", "STAT", 
+					"stat", "fstat", "FSTAT", "access")
 			);
 
 	@Override
@@ -24,7 +61,8 @@ public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureC
 		ArrayList<String> currNodeParameter = new ArrayList<String>();
 		
 		if((node.getFileLocation().getContextInclusionStatement() == null))
-		{
+		{	
+			
 		if(node instanceof IASTFunctionCallExpression)
 		{
 			String functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
@@ -45,6 +83,16 @@ public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureC
 					}
 				}
 				
+				IASTIfStatement ifStm = null;
+				for(NodeNumPair_C oo: visitScope.getIfStatements())
+				{
+					if(oo.getNode().contains(node))
+					{
+						ifStm =((IASTIfStatement)oo.getNode());
+						break;
+					}
+				}
+				
 				for(NodeNumPair_C o: visitScope.getFunctionCalls())
 				{
 					String allFileFuncScope = ((IASTFunctionCallExpression)o.getNode()).getFunctionNameExpression().getRawSignature();
@@ -54,6 +102,23 @@ public class FIO45C_AvoidTOCTOURaceConditionsWhileAccessingFiles extends SecureC
 						{
 							ArrayList<String> otherNodeParameter = new ArrayList<String>();
 							otherNodeParameter = Utility_C.getFunctionParameterVarName((IASTFunctionCallExpression) o.getNode());
+							
+							//check to see if both file operations are not in the same ifstatment body
+							if(ifStm == null)
+							{
+								//do nothing
+							}
+							else if(ifStm.contains(o.getNode()))
+							{
+								if(ifStm.getElseClause() == null)
+								{
+									//do nothing
+								}
+								else if(ifStm.getElseClause().contains(node) && !ifStm.getElseClause().contains(o.getNode()))
+								{
+									return false;
+								}
+							}
 							
 							if(!functionName.contentEquals("fdopen"))
 							{

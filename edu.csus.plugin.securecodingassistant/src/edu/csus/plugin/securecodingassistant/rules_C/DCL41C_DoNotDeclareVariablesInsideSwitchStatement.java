@@ -6,6 +6,27 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: DCL41-C. Do not declare variables inside a switch
+ * statement before the first case label
+ * </p>
+ * <p>
+ * If a programmer declares variables, initializes them before the first case 
+ * statement, and then tries to use them inside any of the case statements, 
+ * those variables will have scope inside the switch block but will not be 
+ * initialized and will consequently contain indeterminate values.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/DCL41-C.+Do+not+declare+
+ * variables+inside+a+switch+statement+before+the+first+case+label">DCL41-C</a>
+ *
+ */
 public class DCL41C_DoNotDeclareVariablesInsideSwitchStatement extends SecureCodingRule_C {
 
 	private boolean ruleViolated;

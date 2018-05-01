@@ -10,6 +10,35 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: STR34-C. Cast characters to unsigned char before converting
+ * to larger integer sizes
+ * </p>
+ * <p>
+ * Signed character data must be converted to unsigned char before being 
+ * assigned or converted to a larger signed type. This rule applies to both 
+ * signed char and (plain) char characters on implementations where char is 
+ * defined to have the same range, representation, and behaviors as signed char.
+ * </p>
+ * 
+ * <p>
+ * However, this rule is applicable only in cases where the character data 
+ * may contain values that can be interpreted as negative numbers. For example, 
+ * if the char type is represented by a two's complement 8-bit value, any 
+ * character value greater than +127 is interpreted as a negative value.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/STR34-C.+Cast+characters+
+ * to+unsigned+char+before+converting+to+larger+integer+sizes">STR34-C</a>
+ *
+ */
+
 public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerSizes extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
@@ -20,8 +49,8 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 		ruleViolated = false;
 		currNode = null;
 		
-		if(node.getFileLocation().getContextInclusionStatement() == null)
-		{
+		if(node.getFileLocation().getContextInclusionStatement() == null )
+		{			
 			if(node.getTranslationUnit().getRawSignature().contains("char"))
 			{
 				
@@ -57,11 +86,12 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 					
 					for(VariableNameTypePair ntPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), LHS))
 					{
-						if((ntPair.getVarType().contains("long")) || (ntPair.getVarType().contains("int")) || (ntPair.getVarType().contains("short")) )
+						if((ntPair.getVarType().contains("long ")) || (ntPair.getVarType().contains("int ")) || (ntPair.getVarType().contains("short "))
+								|| (ntPair.getVarType().contains("size_t ")))
 						{
 							ASTVisitorFindMatch visitLHSBin = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
 							LHS.accept(visitLHSBin);
-							
+														
 							if(visitLHSBin.isMatch() && LHS.getRawSignature().startsWith(ntPair.getVarName()))
 							{
 								for(VariableNameTypePair ntPairRHS: Utility_C.allVarNameType(visitDec.getvarNamePairList(), RHS))
@@ -93,7 +123,7 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 						ASTVisitorFindMatch subArray = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
 						subscriptExpressionArg.accept(subArray);
 						
-						if(subArray.isMatch() && !subscriptExpressionArg.getRawSignature().contains("sizeof"))
+						if(subArray.isMatch() && !subscriptExpressionArg.getRawSignature().contains("sizeof") && !subscriptExpressionArg.getRawSignature().contains("strlen"))
 						{
 							if((ntPair.getVarType().contains("char")) && !(ntPair.getVarType().contains("unsigned")))
 							{
@@ -121,17 +151,19 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 					}
 					
 					if(node instanceof IASTSimpleDeclaration && !(node.getRawSignature().startsWith("enum")) && !(node.getRawSignature().startsWith("struct"))
-							&& !(node.getRawSignature().startsWith("typedef")))
+							&& !(node.getRawSignature().startsWith("typedef")) && !(node.getRawSignature().startsWith("union")))
 					{
 						IASTNode declSpecifier = ((IASTSimpleDeclaration)node).getDeclSpecifier();
 						
 						
 						
-						if(((IASTSimpleDeclaration)node).getDeclarators()[0].getInitializer() != null && ((declSpecifier.getRawSignature().contains("int")) ||
-								(declSpecifier.getRawSignature().contains("long")) || (declSpecifier.getRawSignature().contains("short"))))
+						if(((IASTSimpleDeclaration)node).getDeclarators()[0].getInitializer() != null && ((declSpecifier.getRawSignature().contains("int ")) ||
+								(declSpecifier.getRawSignature().contains("long ")) || (declSpecifier.getRawSignature().contains("short "))
+								|| (declSpecifier.getRawSignature().contains("size_t "))))
 						{
 							IASTNode initializerRHS =((IASTSimpleDeclaration)node).getDeclarators()[0].getInitializer();
 							
+							//Return false if RHS is a functionCall
 							for(NodeNumPair_C nnPair: visitDec.getFunctionCalls())
 							{
 								
@@ -145,6 +177,8 @@ public class STR34C_CastCharacterstoUnsignedCharBeforeConvertingToLargerIntegerS
 							{
 								ASTVisitorFindMatch visitRHSDec = new ASTVisitorFindMatch(ntPair.getVarName(), "FindMatch");
 								initializerRHS.accept(visitRHSDec);
+								
+								
 								
 								if(visitRHSDec.isMatch())
 								{

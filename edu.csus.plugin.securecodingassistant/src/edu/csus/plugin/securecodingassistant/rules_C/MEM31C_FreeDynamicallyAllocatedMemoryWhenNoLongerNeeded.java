@@ -10,6 +10,27 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: MEM31-C. Free dynamically allocated memory when no longer
+ * needed
+ * </p>
+ * <p>
+ * Before the lifetime of the last pointer that stores the return value of a 
+ * call to a standard memory allocation function has ended, it must be matched 
+ * by a call to free() with that pointer value.
+ * 
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/MEM31-C.+Free+
+ * dynamically+allocated+memory+when+no+longer+needed">MEM31-C</a>
+ *
+ */
+
 public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
@@ -22,11 +43,10 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 		ruleViolated = false;
 		isMemFunc = false;
 		currNode = null;
-		//IASTNode LHSNode = null;
 		String LHSVar = "";
 		
 		if((node.getFileLocation().getContextInclusionStatement() == null))
-		{
+		{			
 			if((node instanceof IASTDeclaration && !(node instanceof IASTFunctionDefinition)) || node instanceof IASTBinaryExpression)
 			{
 				boolean isMatch = false;
@@ -56,8 +76,8 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 					//checks to see if contains functioncall in a node is malloc/calloc/realloc
 					for(NodeNumPair_C o: visitorFunc.getFunctionCalls())
 					{
-						if(node.contains(o.getNode()) && (o.getNode().getRawSignature().contains("malloc") ||
-							(o.getNode().getRawSignature().contains("calloc")) || (o.getNode().getRawSignature().contains("realloc"))))
+						if(node.contains(o.getNode()) && (o.getNode().getRawSignature().contains("malloc(") ||
+							(o.getNode().getRawSignature().contains("calloc(")) || (o.getNode().getRawSignature().contains("realloc("))))
 						{
 							isMemFunc = true;
 						}
@@ -73,7 +93,6 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 					if(node instanceof IASTBinaryExpression)
 					{
 						LHSVar = ((IASTBinaryExpression)node).getOperand1().getRawSignature();
-						//LHSVar = LHSVar.replaceAll("\\\\*", "");
 					}
 					else
 					{
@@ -99,8 +118,6 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 					}
 					LHSVar = LHSVar.replaceAll("\\*", "");
 					LHSVar = LHSVar.replace(" ", "");
-					//System.out.println("FileName: " + node.getContainingFilename() );
-					//System.out.println("LHSVar: " + LHSVar + "\n");
 					
 					ASTNodeProcessor_C visitorMemFunc = new ASTNodeProcessor_C();
 					Utility_C.getScope(node).accept(visitorMemFunc);
@@ -109,8 +126,6 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 						if(nnP.getNode().getRawSignature().startsWith("free") && (currNode.getNum() < nnP.getNum()))
 						{
 							freeCount++;
-							//System.out.println("FileName: " + node.getContainingFilename() );
-							//System.out.println("LHSVar: " + LHSVar );
 							for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)nnP.getNode())))
 							{
 								boolean emptyStr = false;
@@ -118,14 +133,10 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 								{
 									str = ((IASTFunctionCallExpression)nnP.getNode()).getRawSignature();
 									int tempIndex = str.indexOf("(");
-									//System.out.println("EMPTY_STRING_pre: " + str);
 									str = str.substring(tempIndex + 1);
 									emptyStr = true;
-									//System.out.println("EMPTY_STRING_post: " + str);
 								}
-								
-								//System.out.println("str: " + str );
-								
+															
 								if(str.contentEquals(LHSVar))
 								{
 									ruleViolated = false;
@@ -140,51 +151,9 @@ public class MEM31C_FreeDynamicallyAllocatedMemoryWhenNoLongerNeeded extends Sec
 								{
 									ruleViolated = true;
 								}
-							}
-							//System.out.println("\n");
-							
+							}							
 						}
 					}
-					
-					/*
-					for(VariableNameTypePair oo: visitorDec.getvarNamePairList())
-					{
-						
-						if(LHSVar.contains(oo.getVarName()))
-						{
-							ASTNodeProcessor_C visitorMemFunc = new ASTNodeProcessor_C();
-							Utility_C.getScope(node).accept(visitorMemFunc);
-							for(NodeNumPair_C nnP : visitorMemFunc.getFunctionCalls())
-							{
-								if(nnP.getNode().getRawSignature().startsWith("free") && (currNode.getNum() < nnP.getNum()))
-								{
-									System.out.println("FileName: " + node.getContainingFilename() );
-									System.out.println("LHSVar: " + LHSVar );
-									for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)nnP.getNode())))
-									{
-										//System.out.println("str: " + str );
-										if(oo.getVarName().contentEquals(str))
-										{
-											ruleViolated = false;
-											return ruleViolated;
-										}
-										else if(str.contains(LHSVar))
-										{
-											ruleViolated = false;
-											return ruleViolated;
-										}
-										else
-										{
-											ruleViolated = true;
-										}
-									}
-									System.out.println("\n");
-									
-								}
-							}
-						}
-					}
-					*/
 					if(freeCount == 0)
 					{
 						ruleViolated = true;

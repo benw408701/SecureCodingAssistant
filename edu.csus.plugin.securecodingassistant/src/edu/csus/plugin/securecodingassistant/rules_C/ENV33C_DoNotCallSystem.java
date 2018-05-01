@@ -6,6 +6,46 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: ENV33-C. Do not call system()
+ * </p>
+ * <p>
+ * The C Standard system() function executes a specified command by invoking
+ *  an implementation-defined command processor, such as a UNIX shell or 
+ *  CMD.EXE in Microsoft Windows. The POSIX popen() and Windows _popen() 
+ *  functions also invoke a command processor but create a pipe between 
+ *  the calling program and the executed command, returning a pointer to 
+ *  a stream that can be used to either read from or write to the pipe 
+ *  [IEEE Std 1003.1:2013]. 
+ * </p>
+ * 
+ * <p>
+ * Use of the system() function can result in exploitable vulnerabilities, in
+ *  the worst case allowing execution of arbitrary system commands. Situations
+ *   in which calls to system() have high risk include the following: 
+ *
+ *	When passing an unsanitized or improperly sanitized command string 
+ *		originating from a tainted source
+ *	If a command is specified without a path name and the command processor
+ *		path name resolution mechanism is accessible to an attacker
+ *	If a relative path to an executable is specified and control over the
+ * 		current working directory is accessible to an attacker
+ *	If the specified executable program can be spoofed by an attacker
+ *	Do not invoke a command processor via system() or equivalent functions
+ * 		to execute a command. 
+ * </p>
+ *  
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/pages/viewpage.action?
+ * pageId=87152177">ENV33-C</a>
+ *
+ */
+
 public class ENV33C_DoNotCallSystem extends SecureCodingRule_C {
 
 	
@@ -17,7 +57,8 @@ public class ENV33C_DoNotCallSystem extends SecureCodingRule_C {
 		ruleViolated = false;
 		if(node instanceof IASTFunctionCallExpression)
 		{
-			if(node.getRawSignature().contains(system_str))
+			if(node.getRawSignature().contains(system_str) || 
+					node.getRawSignature().contains("SYSTEM("))
 			{
 				ruleViolated = true;	
 				

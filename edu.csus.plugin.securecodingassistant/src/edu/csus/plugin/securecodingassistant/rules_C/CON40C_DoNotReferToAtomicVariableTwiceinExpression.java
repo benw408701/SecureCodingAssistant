@@ -9,6 +9,51 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: CON40-C. Do not refer to an atomic variable twice in 
+ * an expression
+ * </p>
+ * <p>
+ * A consistent locking policy guarantees that multiple threads cannot 
+ * simultaneously access or modify shared data. Atomic variables eliminate the
+ *  need for locks by guaranteeing thread safety when certain operations are 
+ *  performed on them. The thread-safe operations on atomic variables are 
+ *  specified in the C Standard, subclauses 7.17.7 and 7.17.8 
+ *  [ISO/IEC 9899:2011]. While atomic operations can be combined, combined
+ *   operations do not provide the thread safety provided by individual 
+ *   atomic operations.
+ * </p>
+ * 
+ * <p>
+ * Every time an atomic variable appears on the left side of an assignment 
+ * operator, including a compound assignment operator such as *=, an atomic 
+ * write is performed on the variable. The use of the increment (++) or 
+ * decrement (--) operators on an atomic variable constitutes an atomic 
+ * read-and-write operation and is consequently thread-safe. Any reference of
+ *  an atomic variable anywhere else in an expression indicates a distinct 
+ *  atomic read on the variable.
+ * 
+ * </p>
+ * 
+ * <p>
+ * If the same atomic variable appears twice in an expression, then two atomic
+ *  reads, or an atomic read and an atomic write, are required. Such a pair of
+ *   atomic operations is not thread-safe, as another thread can modify the 
+ *   atomic variable between the two operations. Consequently, an atomic 
+ *   variable must not be referenced twice in the same expression.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/CON40-C.+Do+not+refer+to
+ * +an+atomic+variable+twice+in+an+expression">CON40-C</a>
+ *
+ */
+
 public class CON40C_DoNotReferToAtomicVariableTwiceinExpression extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
@@ -25,8 +70,7 @@ public class CON40C_DoNotReferToAtomicVariableTwiceinExpression extends SecureCo
 		//check if TranslationUnit contains include file <stdatomic.h>
 		if((node.getFileLocation().getContextInclusionStatement() == null) &&
 				node.getTranslationUnit().getRawSignature().contains("stdatomic.h"))
-		{
-				
+		{	
 			IASTNode parent = node.getParent();
 			boolean isBinary = false;
 					
@@ -68,7 +112,6 @@ public class CON40C_DoNotReferToAtomicVariableTwiceinExpression extends SecureCo
 				
 				if(isMatch)
 				{
-					
 					if(!isBinary)
 					{
 						listofVarNameInScope = Utility_C.allVarNameType(visitNameType.getvarNamePairList(), node);
@@ -118,7 +161,7 @@ public class CON40C_DoNotReferToAtomicVariableTwiceinExpression extends SecureCo
 	 * @param ArrayList<NodeNumPair_C>list
 	 * @return boolean
 	 */
-	private boolean assignedAtomic (VariableNameTypePair pair, ArrayList<NodeNumPair_C> list)
+	private boolean assignedAtomic(VariableNameTypePair pair, ArrayList<NodeNumPair_C> list)
 	{
 		for(NodeNumPair_C listElem : list)
 		{

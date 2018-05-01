@@ -9,6 +9,37 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: STR37-C. Arguements to character-handling fuctions
+ * must be representable as a unsigned char
+ * </p>
+ * <p>
+ * According to the C Standard, 7.4 [ISO/IEC 9899:2011],
+ * The header <ctype.h> declares several functions useful for classifying and 
+ * mapping characters. In all cases the argument is an int, the value of 
+ * which shall be representable as an unsigned char or shall equal the value 
+ * of the macro EOF. If the argument has any other value, the behavior is 
+ * undefined.
+ * </p>
+ * 
+ * <p>
+ * This rule is applicable only to code that runs on platforms where the char 
+ * data type is defined to have the same range, representation, and behavior 
+ * as signed char.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/STR37-C.+Arguments+to+
+ * character-handling+functions+must+be+representable+as+an+unsigned+
+ * char">STR37-C</a>
+ *
+ */
+
 public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedChar extends SecureCodingRule_C {
 
 	private boolean ruleViolated = false;
@@ -25,9 +56,9 @@ public class STR37C_ArgumentsToCharacterHandlingFunctionRepresentableAsUnSignedC
 
 		ruleViolated = false;
 		
-		if((node.getTranslationUnit().getRawSignature().contains("ctype.h")) && node.getParent().getFileLocation().getContextInclusionStatement() == null)
-		{
-				if(node instanceof IASTFunctionCallExpression)
+		if((node.getTranslationUnit().getRawSignature().contains("ctype.h")) && node.getFileLocation().getContextInclusionStatement() == null)
+		{			
+			if(node instanceof IASTFunctionCallExpression)
 				{
 					String functionName =  ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
 					

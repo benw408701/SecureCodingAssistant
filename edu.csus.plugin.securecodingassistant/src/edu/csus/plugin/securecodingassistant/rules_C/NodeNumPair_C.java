@@ -5,7 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 /**
  * @author Victor Melnik
  * 
- * @see NodeNumPair.java (@author Ben White)
+ * @see NodeNumPair.java ( @author Ben White)
  * @see org.eclipse.cdt.core.dom.ast.IASTNode
  * @see IRule_C
  */

@@ -105,7 +105,7 @@
       <errorparser
             class="edu.csus.plugin.securecodingassistant.markerresolution_C.SecureCodingAssistantCDTErrorParser"
             id="edu.csus.plugin.securecodingassistant"
-            name="CDTErrorParser"></errorparser>
+            name="SecureCodingAssistantCDTErrorParser"></errorparser>
    </extension>
    
 

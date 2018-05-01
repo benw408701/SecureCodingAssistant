@@ -9,6 +9,42 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: INT33-C. Ensure that division and remainder operations
+ * do not result in divide-by-zero errors.
+ * </p>
+ * <p>
+ * Ensure that division and remainder operations do not result in 
+ * divide-by-zero errors.
+ * </p>
+ * 
+ * <p>
+ * The result of the / operator is the quotient from the division of the 
+ * first arithmetic operand by the second arithmetic operand. Division 
+ * operations are susceptible to divide-by-zero errors. Overflow can also 
+ * occur during two's complement signed integer division when the dividend 
+ * is equal to the minimum (most negative) value for the signed integer type 
+ * and the divisor is equal to -1. (See INT32-C. Ensure that operations on 
+ * signed integers do not result in overflow.)
+ * </p>
+ * 
+ * <p>
+ * The remainder operator provides the remainder when two operands of integer 
+ * type are divided. 
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+
+ * division+and+remainder+operations+do+not+result+in+divide-by-zero+
+ * errors">INT33-C</a>
+ *
+ */
+
 public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError extends SecureCodingRule_C {
 
 	private boolean ruleViolated = false;
@@ -22,13 +58,15 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError extend
 		
 		if((node.getFileLocation().getContextInclusionStatement() == null))
 		{
-			if((node instanceof IASTBinaryExpression) && ( (((IASTBinaryExpression) node).getOperator() == 2) || (((IASTBinaryExpression) node).getOperator() == 19)
+			
+			if(node instanceof IASTBinaryExpression)
+			{
+			if(( (((IASTBinaryExpression) node).getOperator() == 2) || (((IASTBinaryExpression) node).getOperator() == 19)
 					|| (((IASTBinaryExpression) node).getOperator() == 20) || (((IASTBinaryExpression) node).getOperator() == 3) ) )
 			{
 				IASTNode operandLHS = ((IASTBinaryExpression)node).getOperand2();
 				String operandNameLHS = operandLHS.getRawSignature();
-				
-				
+								
 				if(operandLHS.getRawSignature().equals("0") )
 				{
 					ruleViolated = true;
@@ -100,6 +138,7 @@ public class INT33C_EnsureDivisionAndRemainderDoNoResultDividebyZeroError extend
 					}
 					ruleViolated = true;
 				}
+			}
 			}
 
 		}

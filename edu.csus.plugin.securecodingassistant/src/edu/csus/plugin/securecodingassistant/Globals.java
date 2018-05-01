@@ -17,7 +17,7 @@ import edu.csus.plugin.securecodingassistant.markerresolution_C.InsecureCodeSegm
 
 /**
  * Global variables used in Secure Coding Assistant
- * @author Ben White
+ * @author Ben White, Chen Li, Victor Melnik
  * 
  *
  */

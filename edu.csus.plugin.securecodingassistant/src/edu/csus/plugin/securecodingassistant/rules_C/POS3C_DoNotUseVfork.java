@@ -6,6 +6,52 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: POS33-C. Do not use vfork()
+ * </p>
+ * <p>
+ * Using the vfork function introduces many portability and security issues. 
+ * There are many cases in which undefined and implementation-specific 
+ * behavior can occur, leading to a denial-of-service vulnerability.
+ * </p>
+ * 
+ * <p>
+ * According to the vfork man page,
+ * The vfork() function has the same effect as fork(), except that the 
+ * behavior is undefined if the process created by vfork() either modifies 
+ * any data other than a variable of type pid_t used to store the return 
+ * value from vfork(), or returns from the function in which vfork() was 
+ * called, or calls any other function before successfully calling _exit() 
+ * or one of the exec family of functions.
+ * </p>
+ * 
+ * <p>
+ * Furthermore, older versions of Linux are vulnerable to a race condition, 
+ * occurring when a privileged process calls vfork(), and then the child 
+ * process lowers its privileges and calls execve(). The child process is 
+ * executed with the unprivileged user's UID before it calls execve().
+ * </p>
+ * 
+ * <p>
+ * Because of the implementation of the vfork() function, the parent process 
+ * is suspended while the child process executes. If a user sends a signal 
+ * to the child process, delaying its execution, the parent process (which 
+ * is privileged) is also blocked. This means that an unprivileged process 
+ * can cause a privileged process to halt, which is a privilege inversion 
+ * resulting in a denial of service.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/pages/viewpage.action?
+ * pageId=87152373">POS33-C</a>
+ *
+ */
+
 public class POS3C_DoNotUseVfork extends SecureCodingRule_C {
 	
 	private String vfork_str = "vfork(";

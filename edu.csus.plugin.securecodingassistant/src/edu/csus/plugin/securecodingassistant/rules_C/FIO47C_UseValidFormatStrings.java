@@ -9,6 +9,43 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: FIO47-C. Use valid format strings
+ * </p>
+ * <p>
+ * The formatted output functions (fprintf() and related functions) convert, 
+ * format, and print their arguments under control of a format string. The C 
+ * Standard, 7.21.6.1, paragraph 3 [ISO/IEC 9899:2011], specifies:
+ *   The format shall be a multibyte character sequence, beginning and 
+ *   ending in its initial shift state. The format is composed of zero or 
+ *   more directives: ordinary multibyte characters (not %), which are 
+ *   copied unchanged to the output stream; and conversion specifications, 
+ *   each of which results in fetching zero or more subsequent arguments, 
+ *   converting them, if applicable, according to the corresponding conversion
+ *   specifier, and then writing the result to the output stream.
+ * </p>
+ * 
+ * <p>
+ * Common mistakes in creating format strings include
+ *		Providing an incorrect number of arguments for the format string
+ *		Using invalid conversion specifiers
+ *		Using a flag character that is incompatible with the conversion specifier
+ *		Using a length modifier that is incompatible with the conversion specifier
+ *		Mismatching the argument type and conversion specifier
+ *		Using an argument of type other than int for width or precision
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/FIO47-C.+Use+valid
+ * +format+strings">FIO47-C</a>
+ *
+ */
+
 public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
@@ -30,9 +67,9 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 		boolean isReference = false;
 		ArrayList<String> funcParams = new ArrayList<String>();
 		
-		if((node.getFileLocation().getContextInclusionStatement() == null)/* && node.getContainingFilename().contains("MSC30")*/)
-		{
-		
+		if((node.getFileLocation().getContextInclusionStatement() == null))
+		{	
+			
 			if(node instanceof IASTFunctionCallExpression)
 			{
 				String functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
@@ -40,16 +77,13 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 				{
 					if(!node.getRawSignature().contains("\""))
 					{
-						System.out.println();
 						return false;
 					}
 					funcParams = Utility_C.getFunctionParameterVarNamePrintf((IASTFunctionCallExpression) node);
-					//funcParams = getFunctionParameterVarNamePrintf((IASTFunctionCallExpression) node);
 					ASTNodeProcessor_C visitor = new ASTNodeProcessor_C();
 					node.getTranslationUnit().accept(visitor);
-					if(funcParams.size() == 1)
+					if(funcParams.size() <= 1)
 					{
-						System.out.println();
 						return false;
 					}
 					String firstParameter = funcParams.get(0);
@@ -68,7 +102,6 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 					
 					if((numberFormatChars != funcParams.size()))
 					{
-						System.out.println();
 						return true;
 					}
 					else if((funcParams.size() < 1) )
@@ -93,7 +126,10 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 							strPost = strPost.replaceAll("\\*","");
 						}
 						
-						
+						/**
+						 * Check printf is using correct specifier per variable
+						 * type.
+						 */
 						for(VariableNameTypePair vntP: Utility_C.allVarNameType(visitor.getvarNamePairList(), node))
 						{
 							if((vntP.getVarName().contentEquals(strPost)) || (strPost.startsWith(".") && strPost.contains(vntP.getVarName())))
@@ -106,14 +142,14 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 								
 								if(firstParameter.startsWith("hho") || firstParameter.startsWith("hhu") || firstParameter.startsWith("hhx") || firstParameter.startsWith("hhX"))
 								{
-									if((!vntP.getVarType().contains("char")) && (!vntP.getVarType().contains("unsigned")))
+									if((!vntP.getVarType().contains("char")) || (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
 								}
 								else if(firstParameter.startsWith("ho") || firstParameter.startsWith("hu") || firstParameter.startsWith("hx") || firstParameter.startsWith("hX"))
 								{
-									if((!vntP.getVarType().contains("short")) && (!vntP.getVarType().contains("unsigned")))
+									if((!vntP.getVarType().contains("short")) || (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
@@ -121,7 +157,7 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 								else if(firstParameter.startsWith("lo") || firstParameter.startsWith("lu") || firstParameter.startsWith("lx") || firstParameter.startsWith("lX")
 										|| firstParameter.startsWith("llo") || firstParameter.startsWith("llu") || firstParameter.startsWith("llx") || firstParameter.startsWith("llX"))
 								{
-									if((!vntP.getVarType().contains("long")) && (!vntP.getVarType().contains("unsigned")))
+									if((!vntP.getVarType().contains("long")) || (!vntP.getVarType().contains("unsigned")))
 									{
 										ruleViolated = true;
 									}
@@ -129,7 +165,7 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 								else if(firstParameter.startsWith("o") || firstParameter.startsWith("u") || firstParameter.startsWith("x") || firstParameter.startsWith("X"))
 								{
 									if(((!vntP.getVarType().contains("int")) && (!vntP.getVarType().contains("short")) && (!vntP.getVarType().contains("char"))
-											&& (!vntP.getVarType().contains("unsigned"))) || ( (!vntP.getVarType().contains("uintmax_t")) && (!vntP.getVarType().contains("size_t"))
+											|| (!vntP.getVarType().contains("unsigned"))) && ( (!vntP.getVarType().contains("uintmax_t")) && (!vntP.getVarType().contains("size_t"))
 											&& (!vntP.getVarType().contains("ptrdiff_t"))))
 									{
 										ruleViolated = true;
@@ -192,7 +228,11 @@ public class FIO47C_UseValidFormatStrings extends SecureCodingRule_C {
 								}
 								else if(firstParameter.startsWith("s") || firstParameter.startsWith("ls"))
 								{
-									if((!vntP.getVarType().contains("char")) && ((!vntP.isPointer() || !vntP.isArray())))
+									if(vntP.getVarType().contains("va_list"))
+									{
+										ruleViolated = false;
+									}
+									else if((!vntP.getVarType().contains("char")) && ((!vntP.isPointer() || !vntP.isArray())))
 									{
 										ruleViolated = true;
 									}

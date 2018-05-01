@@ -9,10 +9,18 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.model.ITranslationUnit;
+
 import edu.csus.plugin.securecodingassistant.Globals;
 import edu.csus.plugin.securecodingassistant.markerresolution_C.InsecureCodeSegment_C;
 
-
+/**
+ * ASTVisitor that traverse each IASTNode and checks to see if any rule
+ * violations occur
+ * 
+ * @author Victor Melnik
+ * @see SecureCodingAssistantCDTErrorParser
+ * @see IRule_C
+ */
 public class SecureCodeNodeVisitor_C extends ASTVisitor{
 
 	private IASTNode node;
@@ -31,7 +39,7 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 		this.shouldVisitExpressions = true;
 		this.shouldVisitAmbiguousNodes = true;
 		this.shouldVisitStatements = true;
-		this.shouldVisitParameterDeclarations = true;
+		this.shouldVisitParameterDeclarations = true;		
 		
 		c_rules = rules;
 		localITU = ITU;
@@ -78,7 +86,10 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 	}
 	
 	
-	
+	/**
+	 * Check to see if node violates any rules
+	 * @param checkNode
+	 */
 	public void traverseRule(IASTNode checkNode)
 	{
 		for (IRule_C rule : c_rules)
@@ -86,8 +97,11 @@ public class SecureCodeNodeVisitor_C extends ASTVisitor{
 			if(rule.violate_CDT(checkNode))
 			{
 				Globals.insecureGlobalNode = checkNode;
-				Globals.cdt_InsecureCodeSegments.add(new InsecureCodeSegment_C(checkNode,rule, localITU));
+				Globals.cdt_InsecureCodeSegments.add(
+						new InsecureCodeSegment_C(checkNode,rule, localITU));
 			}
 		}
 	}
+	
+
 }

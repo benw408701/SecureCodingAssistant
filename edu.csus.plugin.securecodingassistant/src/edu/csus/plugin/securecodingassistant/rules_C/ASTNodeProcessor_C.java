@@ -1,12 +1,5 @@
 package edu.csus.plugin.securecodingassistant.rules_C;
 
-/**
- * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.
- * This can be used to get a list of methods that are in the same block as another for instance.
- * @author Victor Melnik
- * @see org.eclipse.cdt.core.dom.ast.IASTNode
- * @see IRule_C
- */
 import java.util.ArrayList;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
@@ -24,7 +17,6 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFieldDeclarator;
 
 /**
  * A custom <code>ASTVisitor</code> that is used by rules to parse an abstract syntax tree.

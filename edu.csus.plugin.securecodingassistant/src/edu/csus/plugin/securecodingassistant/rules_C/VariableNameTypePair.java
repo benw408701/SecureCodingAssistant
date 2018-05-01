@@ -2,13 +2,15 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFieldDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.c.ICASTCompositeTypeSpecifier;
 
 /**
+ * Creates a collection of all the variables within
+ * a translation unit.
+ * 
  * @author Victor Melnik
  * 
- * @see VariableNameTypePair.java (@author Victor Melnik)
  * @see ASTNodeProcessor_C
  */
 
@@ -92,6 +94,13 @@ public class VariableNameTypePair {
 	private boolean isStaticType;
 	
 	/**
+	 * Check if Variable is element in Struct or Union
+	 * 
+	 */
+	
+	private boolean isElement;
+	
+	/**
 	 * Construct new NameTypeNode pair for a Variable declaration
 	 * 
 	 * @param node
@@ -110,7 +119,9 @@ public class VariableNameTypePair {
 		m_varType = getVarTypeProperties(VarType);
 		m_varName = getVarNameString(VarName);
 		
+		isElement(node);
 		m_scope = findScope(node);
+		
 	}
 	
 	
@@ -184,14 +195,27 @@ public class VariableNameTypePair {
 		return str;
 	}
 	
-	/*
-	private boolean isStructElement(ASTNode astN)
+	
+	/**
+	 * Returns true if variable is element in structure or union
+	 * @param IASTNode astN
+	 * @return boolean
+	 */
+	private void isElement(IASTNode astN)
 	{
-		boolean isElement = false;
 		
-		while()
+		if(astN.getParent() instanceof ICASTCompositeTypeSpecifier)
+		{
+			//System.out.println("ICASTCompositeTypeSpecifierICASTCompositeTypeSpecifier: ");
+			isElement = true;
+			
+		}
+		else 
+		{
+			isElement = false;
+		}
 	}
-	*/
+	
 	
 	/**
 	 * Return scope for given variable
@@ -258,6 +282,16 @@ public class VariableNameTypePair {
 	public boolean isPointer()
 	{
 		return isPointer_T;
+	}
+	
+	
+	/**
+	 * Returns if variable is a element in struct/union
+	 * @return boolean
+	 */
+	public boolean isElement()
+	{
+		return isElement;
 	}
 	
 	/**

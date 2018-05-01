@@ -11,6 +11,32 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: EXP32-C. Do not access a volatile object through a 
+ * nonvolatile reference
+ * </p>
+ * <p>
+ * An object that has volatile-qualified type may be modified in ways unknown
+ *  to the implementation or have other unknown side effects. Referencing a
+ *   volatile object by using a non-volatile lvalue is undefined behavior. 
+ *   The C Standard, 6.7.3 [ISO/IEC 9899:2011], states: 
+ *   	If an attempt is made to refer to an object defined with a 
+ *   	volatile-qualified type through use of an lvalue with 
+ *   	non-volatile-qualified type, the behavior is undefined.
+ *   
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/EXP32-C.+Do+not+access
+ * +a+volatile+object+through+a+nonvolatile+reference">EXP32-C</a>
+ *
+ */
+
 public class EXP32C_DoNotAccessVolatileObjectThroughNonvolatileRefernece extends SecureCodingRule_C {
 
 	private boolean ruleViolated;

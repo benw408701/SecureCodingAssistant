@@ -6,6 +6,37 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: STR38-C. Do not confuse narrow and wide character strings
+ * and functions
+ * </p>
+ * <p>
+ * Passing narrow string arguments to wide string functions or wide string 
+ * arguments to narrow string functions can lead to unexpected and undefined 
+ * behavior. Scaling problems are likely because of the difference in size 
+ * between wide and narrow characters. (See ARR39-C. Do not add or subtract 
+ * a scaled integer to a pointer.) Because wide strings are terminated by a 
+ * null wide character and can contain null bytes, determining the length is 
+ * also problematic.
+ * </p>
+ * 
+ * <p>
+ * Because wchar_t and char are distinct types, many compilers will produce 
+ * a warning diagnostic if an inappropriate function is used. (See MSC00-C. 
+ * Compile cleanly at high warning levels.)
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/STR38-C.+Do+not+
+ * confuse+narrow+and+wide+character+strings+and+functions">STR38-C</a>
+ *
+ */
+
 public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions extends SecureCodingRule_C {
 
 	private boolean ruleViolated;
@@ -17,56 +48,59 @@ public class STR38C_DoNotConfuseNarrowandWideCharacterStringsAndFunctions extend
 		ruleViolated = false;
 		functionName = null;
 		
-		
-			if(node.getTranslationUnit().getRawSignature().contains("wchar.h") || node.getTranslationUnit().getRawSignature().contains("wchar_t"))
-			{
+		if((node.getTranslationUnit().getRawSignature().contains("wchar.h") || 
+			node.getTranslationUnit().getRawSignature().contains("wchar_t"))
+			&& node.getFileLocation().getContextInclusionStatement() == null)
+		{
 				
-				if(node instanceof IASTFunctionCallExpression)
+				
+			if(node instanceof IASTFunctionCallExpression)
+			{
+					
+				ASTNodeProcessor_C visitDec = new ASTNodeProcessor_C();
+				node.getTranslationUnit().accept(visitDec);
+					
+				functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
+					
+				ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(functionName, "STR38_Include");
+				node.getTranslationUnit().accept(visitor);
+					
+				if(visitor.isStringFunction())
 				{
-					
-					ASTNodeProcessor_C visitDec = new ASTNodeProcessor_C();
-					node.getTranslationUnit().accept(visitDec);
-					
-					functionName = ((IASTFunctionCallExpression)node).getFunctionNameExpression().getRawSignature();
-					
-					ASTVisitorFindMatch visitor = new ASTVisitorFindMatch(functionName, "STR38_Include");
-					node.getTranslationUnit().accept(visitor);
-					
-					if(visitor.isStringFunction())
+					for(VariableNameTypePair btPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), node) )
 					{
-						for(VariableNameTypePair btPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), node) )
+						if(btPair.getVarType().contains("wchar_t"))
 						{
-							if(btPair.getVarType().contains("wchar_t"))
+							for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
 							{
-								for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
+								if(btPair.getVarName().contentEquals(str))
 								{
-									if(btPair.getVarName().contentEquals(str))
-									{
-										ruleViolated = true;
-									}
+									ruleViolated = true;
 								}
 							}
 						}
-						
 					}
-					else if(visitor.isWideStringFunction())
+						
+				}
+				else if(visitor.isWideStringFunction())
+				{
+					for(VariableNameTypePair btPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), node) )
 					{
-						for(VariableNameTypePair btPair: Utility_C.allVarNameType(visitDec.getvarNamePairList(), node) )
+						if(!(btPair.getVarType().contains("wchar_t")) 
+								&& (btPair.getVarType().contains("char")))
 						{
-							if(!(btPair.getVarType().contains("wchar_t")) && (btPair.getVarType().contains("char")))
+							for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
 							{
-								for(String str: Utility_C.getFunctionParameterVarName(((IASTFunctionCallExpression)node)))
+								if(btPair.getVarName().contentEquals(str))
 								{
-									if(btPair.getVarName().contentEquals(str))
-									{
-										ruleViolated = true;
-									}
+									ruleViolated = true;
 								}
 							}
 						}
 					}
 				}
 			}
+		}
 		return ruleViolated;
 	}
 

@@ -9,6 +9,43 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import edu.csus.plugin.securecodingassistant.Globals;
 
+/**
+ * <b><i>The text and/or code below is from the CERT website:
+ * <a target="_blank"href="https://wiki.sei.cmu.edu/confluence/display/seccode">
+ * https://wiki.sei.cmu.edu/confluence/display/seccode </a></i></b>
+ * <p>
+ * C Secure Coding Rule: ARR36-C. Do not subtract or compare two pointers that do
+ * not refere to the same array.
+ * </p>
+ * <p>
+ * CERT Website: When two pointers are subtracted, both must point to elements of the same array 
+ * object or just one past the last element of the array object (C Standard, 6.5.6 
+ * [ISO/IEC 9899:2011]); the result is the difference of the subscripts of the two 
+ * array elements. Otherwise, the operation is undefined behavior.
+ * </p>
+ * 
+ * <p>
+ * Similarly, comparing pointers using the relational operators <, <=, >=, and > 
+ * gives the positions of the pointers relative to each other. Subtracting or 
+ * comparing pointers that do not refer to the same array is undefined behavior.
+ * 
+ * </p>
+ * 
+ * <p>
+ * Comparing pointers using the equality operators == and != has well-defined 
+ * semantics regardless of whether or not either of the pointers is null, points
+ *  into the same object, or points one past the last element of an array object
+ *   or function.
+ * </p>
+ * 
+ * @author Victor Melnik (Plugin Logic), CERT (Rule Definition)
+ * @see C Secure Coding Rule define by CERT: <a target="_blank" 
+ * href="https://wiki.sei.cmu.edu/confluence/display/c/ARR36-C.+
+ * Do+not+subtract+or+compare+two+pointers+that+do+not+refer+to+
+ * the+same+array">ARR36-C</a>
+ *
+ */
+
 public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray extends SecureCodingRule_C {
 
 	private boolean ruleViolated = false;
@@ -19,7 +56,6 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 		
 		if((node.getFileLocation().getContextInclusionStatement() == null))
 		{
-		
 			if(node instanceof IASTBinaryExpression)
 			{
 				int operatorNum = ((IASTBinaryExpression)node).getOperator();
@@ -151,7 +187,8 @@ public class ARR36C_DoNotSubtractorCompareTwoPointersThatDoNotReferToSameArray e
 		{
 			if(dec.getNum() < currNode.getNum())
 			{
-				if(!dec.getNode().getRawSignature().contains("struct") && !dec.getNode().getRawSignature().contains("union"))
+				if(!dec.getNode().getRawSignature().contains("struct") && 
+						!dec.getNode().getRawSignature().contains("union"))
 				{
 				
 				String currVarName = ((IASTSimpleDeclaration)dec.getNode()).getDeclarators()[0].getName().getRawSignature();

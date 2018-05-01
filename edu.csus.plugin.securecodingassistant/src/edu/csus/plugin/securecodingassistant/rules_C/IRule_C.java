@@ -9,6 +9,9 @@ import edu.csus.plugin.securecodingassistant.Globals;
  * Extending IRule interface for C Secure Coding Rules. 
  * 
  * @author Victor Melnik
+ * 
+ * Design borrowed from @author Benjamin White
+ * @see IRule
  *
  */
 public interface IRule_C {

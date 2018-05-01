@@ -24,6 +24,23 @@ import edu.csus.plugin.securecodingassistant.rules_C.RuleFactory_C;
 import edu.csus.plugin.securecodingassistant.rules_C.SecureCodeNodeVisitor_C;
 import edu.csus.plugin.securecodingassistant.markerresolution_C.InsecureCodeSegment_C;
 
+/**
+ * SecureCodingAssistantCDTErrorParser extends the org.eclipse.cdt.core.ErrorParser extension point.
+ * This allows for the interaction with the C compilation processes, when build is invoked.
+ * SecureCodingAssistantCDTErrorParser gets the current workspace, extracts all of the open projects,
+ * and traverses each ITranslationUnit in the open projects. ITranslationUnits are traverse using the
+ * SecureCodeNodeVisitor_C and creates a list of InsecureCodeSegments_C. 
+ * Finally, SecureCodingAssistantCDTErrorParser generates a marker for each InsecureCodeSegment_C and
+ * displays it in the workspace.
+ * 
+ * @author Victor Melnik
+ *
+ *@see SecureCodeNodeVisitor_C
+ *@see InsecureCodeSegment_C
+ *@see Globals
+ *@see IRule_C
+ *@see RuleFactory_C
+ */
 public class SecureCodingAssistantCDTErrorParser implements IErrorParser {
 
 	private IResource resource;
@@ -31,9 +48,7 @@ public class SecureCodingAssistantCDTErrorParser implements IErrorParser {
 	private ICContainer[] CContainer;
 	private ITranslationUnit[] tuArray;
 	private IASTTranslationUnit ASTTrans1;
-
 	private ArrayList<IRule_C> c_rules;
-	
 	private String markerOutput;
 	private Iterator<InsecureCodeSegment_C> iterateInsecure;
 	private InsecureCodeSegment_C insecureNode;
@@ -41,30 +56,47 @@ public class SecureCodingAssistantCDTErrorParser implements IErrorParser {
 	private String ruleLevel;
 	private int ruleLevelNum;
 	
+	private boolean runOnce = true;
+	private ErrorParserManager currParser = null;
+	
 	public SecureCodingAssistantCDTErrorParser() {
 		
 	}
-
+	
+	/**
+	 *  Method processLine is overridden to generate markers from
+	 *  InsecureCodeSegements_C
+	 */
 	@Override
 	public boolean processLine(String line, ErrorParserManager eoParser) {
 	
 		Globals.cdt_InsecureCodeSegments.clear();
 		
+		/**
+		 * Ensure that SecureCodeNodeVisitor_C only runs once per build command
+		 **/
+		if(eoParser != currParser)
+		{
+			currParser = eoParser;
+			runOnce = true;
+		}
+		
 		//Function that traverse all of the ITranslationUn it ASTTrees
+		if(runOnce)
+		{
 		try {
 			this.run();
 		} catch (CModelException e) {
 			e.printStackTrace();
 		}
 		
+		
 		 iterateInsecure = Globals.cdt_InsecureCodeSegments.iterator();
 		 
 		 while(iterateInsecure.hasNext())
 		 {
 			 insecureNode = iterateInsecure.next();
-			 
 			 ruleLevelNum = insecureNode.getViolatedRule().securityLevel();
-			 
 			 switch(ruleLevelNum) {
 			 
 			 	case 1: ruleLevel = "LOW";
@@ -86,51 +118,73 @@ public class SecureCodingAssistantCDTErrorParser implements IErrorParser {
 					 + "\n\nRule Solution: " + insecureNode.getViolatedRule().getRuleRecommendation();
 			 resource = insecureNode.getviolatedITU().getResource();
 			 
-			 eoParser.generateMarker(resource, insecureNode.getViolatedNode().getFileLocation().getStartingLineNumber(), markerOutput, severity, "Secure Coding Marker");
-			 System.out.println("Rule violated: " + insecureNode.getViolatedRule().getRuleID()+ ": " + insecureNode.getViolatedRule().getRuleName());
+			 eoParser.generateMarker(resource, insecureNode.getViolatedNode().getFileLocation().getStartingLineNumber(),
+					 markerOutput, severity, "Secure Coding Marker");
+			 System.out.println("Rule violated: " + insecureNode.getViolatedRule().getRuleID()+ ": " + 
+					 insecureNode.getViolatedRule().getRuleName());
 		 }
 		 System.out.println("Its running");
 		 System.out.println("\n\n");
-		 eoParser.shutdown(); //shutdown parser after 1 iteration
+		}
 		return false;
 	}
 	
+	/**
+	 * Interacts with the current IWorkspace to traverse all IASTNodes
+	 * in every ITranslationUnit in all open ICProjects
+	 * 
+	 * @throws CModelException
+	 */
 	public void run() throws CModelException
 	{
+		runOnce = false;
+		
 		IWorkspace w = ResourcesPlugin.getWorkspace();
 		
-		IWorkspaceRoot cRoot = w.getRoot(); //grabs the C root workspace
+		/**
+		 * Get IWorkspaceRoot and ICModel
+		 */
+		IWorkspaceRoot cRoot = w.getRoot(); 
 		ICModel cmodel = CoreModel.create(cRoot);
 		
 		Globals.globalResource = cRoot;
-		CProject = cmodel.getCProjects();
 		
-				for (ICProject o : CProject){
-					CContainer = o.getAllSourceRoots();
+		/**
+		 * Get all open ICProjects and traverse all of the open projects.
+		 */
+		CProject = cmodel.getCProjects();
+		for (ICProject o : CProject){
+			CContainer = o.getAllSourceRoots();
 					
-					for(ICContainer i : CContainer)
-					{
-						tuArray = i.getTranslationUnits();
-						c_rules = RuleFactory_C.getAllCERTRules();
+			for(ICContainer i : CContainer)
+			{
+				tuArray = i.getTranslationUnits();
+				c_rules = RuleFactory_C.getAllCERTRules();
 				
-						//iterate through each ITranslationUnit
-						for(ITranslationUnit trans1 : tuArray)
-						{
+				/**
+				* Iteract through each ITranslationUNit in an open project
+				*/
+				for(ITranslationUnit trans1 : tuArray)
+				{
+					System.out.println("FIle: " + trans1.getFile().getName());
 					Globals.globalTranslationUnit = trans1;
 				
-							try {
-								ASTTrans1 = trans1.getAST();
-							} catch (CoreException e) {
-								e.printStackTrace();
-								System.out.println("Inside core exception");
-							}
-								
-							//Visiting AST Tree
-							SecureCodeNodeVisitor_C visitor1 = new SecureCodeNodeVisitor_C(c_rules, trans1);
-							ASTTrans1.accept(visitor1) ;
+					try {
+						ASTTrans1 = trans1.getAST();
+						} catch (CoreException e) {
+							e.printStackTrace();
+							System.out.println("Inside core exception");
 						}
-					}
+							
+					/**
+					* Invoke SecureCodeNodeVisitor_C to check if rule violations occure for
+					* any IASTNode
+					*/
+					SecureCodeNodeVisitor_C visitor1 = new SecureCodeNodeVisitor_C(c_rules, trans1);
+					ASTTrans1.accept(visitor1) ;
 				}
+			}
+		}
 	}
 
 }

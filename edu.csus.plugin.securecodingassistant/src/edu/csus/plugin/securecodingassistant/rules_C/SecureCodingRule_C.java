@@ -3,6 +3,15 @@ package edu.csus.plugin.securecodingassistant.rules_C;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
+/**
+ * Abstract class that implements IRule_C interface
+ * 
+ * @author Victor Melnik
+ *@see IRule_C
+ *
+ *Design borrowed from @author Benjamin White
+ *@see SecureCodingRule
+ */
 public abstract class SecureCodingRule_C implements IRule_C {
 	
 	@Override

@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 /**
- * Collection of utility methods used by the Secure Coding Assistant Rules for C
+ * Collection of utility methods used by the 
+ * Secure Coding Assistant Rules for C
  * @author Victor Melnik
+ *
  *
  */
 public final class Utility_C {
@@ -75,22 +76,6 @@ public final class Utility_C {
 		{
 			if(Utility_C.getScope(o.getNode()) == node.getTranslationUnit() || Utility_C.getScope(o.getNode()) == Utility_C.getScope(node))
 			{
-				/*
-				System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-				ASTVisitorFindMatch visitorFind = new ASTVisitorFindMatch(o.getVarName(), "FindMatch");
-				node.accept(visitorFind);
-				System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-				if(visitorFind.isMatch())
-				{
-					allVars.add(o);
-				}
-				
-				if(o.getNode() instanceof IASTParameterDeclaration)
-				{
-					allVars.add(o);
-				}
-				*/
-				
 				allVars.add(o);
 			}
 		}
@@ -191,8 +176,12 @@ public final class Utility_C {
 		int lastIndex = functionCallString.length() - 1;
 		String firstThird, secondThird, thirdThird = null;
 		
+		if((firstQuoteIndex < 0) || (secondQuoteIndex < 0) || (lastIndex < 0))
+		{
+			return list;
+		}
+		
 		firstThird = functionCallString.substring(0, firstQuoteIndex + 1);
-		//System.out.println("IASTFunctionCallExpressionIASTFunctionCallExpression: " + funcCall.getRawSignature() );
 		secondThird = functionCallString.substring(firstQuoteIndex + 1, secondQuoteIndex);
 		thirdThird = functionCallString.substring(secondQuoteIndex, lastIndex + 1);
 		
@@ -236,8 +225,6 @@ public final class Utility_C {
 				parameters = parameters.substring(commaIndex + 1, paramLen);
 				
 				extractedParam = extractedParam.replaceAll("\\s+","");
-				//extractedParam = extractedParam.replaceAll("\\*","");
-				//extractedParam = extractedParam.replaceAll("&","");
 				
 				if(extractedParam.contains("["))
 				{
@@ -257,8 +244,6 @@ public final class Utility_C {
 			else
 			{
 				parameters = parameters.replaceAll("\\s+","");
-				//parameters = parameters.replaceAll("\\*","");
-				//parameters = parameters.replaceAll("&","");
 				
 				if(parameters.contains("["))
 				{

@@ -8,6 +8,13 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 
+/**
+ * ASTVisitor used to find matching variable names in a given node.
+ * This help with rule detection logic.
+ * @author Victor Melnik
+ *
+ *@see IRule_C
+ */
 public class ASTVisitorFindMatch extends ASTVisitor{
 
 	private boolean matchFound = false;
@@ -93,7 +100,7 @@ public class ASTVisitorFindMatch extends ASTVisitor{
 					return PROCESS_ABORT;
 				}
 				else if(node.getFileLocation().getContextInclusionStatement().getRawSignature().contentEquals("#include <wchar.h>")
-						&& (node.getRawSignature().contains(findKeyWord)))
+						&& (node.getRawSignature().contains("("+findKeyWord)))
 				{
 					isWideStringFunc = true;
 					return PROCESS_ABORT;
