@@ -18,13 +18,13 @@ The following additional project documentation is available at this time
 
 * [Product Demo](https://youtu.be/-4MC8jB_qwk)
 
-* [Benjamin White, Jun Dai, Cui Zhang, "Secure Coding Assistant: Enforcing Secure Coding Practices Using the Eclipse Development Environment". Proceedings of National Cyber Summit (NCS), Huntsville, AL, Jun 8-9, 2016.](http://bwprojects.org/SecureCodingPlugin/NCS16_paper_5.pdf)
+* [Benjamin White, Jun Dai, Cui Zhang, "Secure Coding Assistant: Enforcing Secure Coding Practices Using the Eclipse Development Environment". Proceedings of National Cyber Summit (NCS), Huntsville, AL, Jun 8-9, 2016.](docs/NCS16_paper_5.pdf)
 
-* [Chen Li, Benjamin White, Jun Dai, Cui Zhang. 2017. "Enhancing Secure Coding Assistant With Error Correction and Contract Programming". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 6-8, 2017.](http://bwprojects.org/SecureCodingPlugin/NCS2017_vfinal.pdf)
+* [Chen Li, Benjamin White, Jun Dai, Cui Zhang. 2017. "Enhancing Secure Coding Assistant With Error Correction and Contract Programming". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 6-8, 2017.](docs/NCS2017_vfinal.pdf)
 
 * [Benjamin White, Jun Dai, Cui Zhang, "An Early Detection Tool in Eclipse to Enforce Secure Coding Practices". International Journal of Information Privacy, Security and Integrity (IJIPSI), Inderscience, 2018. ](https://www.inderscienceonline.com/doi/abs/10.1504/IJIPSI.2018.096142)
 
-* Victor Melnik, Jun Dai, Cui Zhang, Benjamin White, "Enforcing Secure Coding Rules for the C Programing Language Using the Eclipse Development Environment". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 4-6, 2019.
+* [Victor Melnik, Jun Dai, Cui Zhang, Benjamin White, "Enforcing Secure Coding Rules for the C Programing Language Using the Eclipse Development Environment". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 4-6, 2019.](docs/ncs19.pdf)
 
 * Wenhui Liang, Cui Zhang, Jun Dai, “Enhancing Secure Coding Assistant System with Design by Contract and Programming Logic”. Submitted to National Cyber Summit (NCS) 2021.
 
