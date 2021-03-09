@@ -8,6 +8,9 @@ If you are planning on downloading the source code you will want to use Eclipse 
 ### Version 2
 Version 2 development branch now available with work from Chen Li supporting "Design by Contract" and quick-correction feature on detected rules violations.
 
+### Version 3
+Version 3 (coming soon) enables both detection of secure coding rule violations and detection of program logic errors by using a combination of Design by Contract and Programming Logic.
+
 ### Project Documentation
 The following additional project documentation is available at this time
 
@@ -20,6 +23,10 @@ The following additional project documentation is available at this time
 * [Chen Li, Benjamin White, Jun Dai, Cui Zhang. 2017. "Enhancing Secure Coding Assistant With Error Correction and Contract Programming". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 6-8, 2017.](http://bwprojects.org/SecureCodingPlugin/NCS2017_vfinal.pdf)
 
 * [Benjamin White, Jun Dai, Cui Zhang, "An Early Detection Tool in Eclipse to Enforce Secure Coding Practices". International Journal of Information Privacy, Security and Integrity (IJIPSI), Inderscience, 2018. ](https://www.inderscienceonline.com/doi/abs/10.1504/IJIPSI.2018.096142)
+
+* Victor Melnik, Jun Dai, Cui Zhang, Benjamin White, "Enforcing Secure Coding Rules for the C Programing Language Using the Eclipse Development Environment". Proceeding of National Cyber Summit (NCS), Huntsville, AL, Jun 4-6, 2019.
+
+* Wenhui Liang, Cui Zhang, Jun Dai, “Enhancing Secure Coding Assistant System with Design by Contract and Programming Logic”. Submitted to National Cyber Summit (NCS) 2021.
 
 ### Contact Information
 Ben White, ben_white@att.net
